@@ -46,6 +46,12 @@ def _c33_flag(name):
   return os.environ.get(name, '1') != '0'
 
 
+# restraint_rmsd keys as printed: 'dist' mixes DFIX and DANG (1-2 and 1-3), so it is no
+# bond rmsd in the Phenix sense
+GEO_LABEL = {'dist': 'DFIX/DANG', 'angle': 'angle'}
+CHIRALITY_LISTING_MAX_ATOMS = 500  # the .oxl CIP listing is skipped above this
+
+
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     #'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
@@ -530,7 +536,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         elif method in ('CGLS-J', 'MLF', 'MLI'):
           # 'auto' is how a phil choice spells "pick on what fits"
           mode = OV.GetParam('snum.refinement.cgls.mode')
-          if mode == 'auto':
+          # set explicitly (SetParam or the settings box), the phil choice comes back
+          # as libtbx.Auto, not 'auto', and cgls raised "unrecognised mode"
+          import libtbx
+          if mode == 'auto' or mode is libtbx.Auto:
             mode = None
           self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
@@ -616,6 +625,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if not fcf_only:
           self.show_summary()
           self.show_comprehensive_summary(log=self.log)
+          self.print_cycle_history(log=self.log)
           stopwatch.run(self.write_oxl)
         else:
           return
@@ -772,6 +782,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not fcf_only:
         self.show_summary()
         self.show_comprehensive_summary(log=self.log)
+        self.print_cycle_history(log=self.log)
       else:
         return
       stopwatch.start("CIF")
@@ -1097,6 +1108,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
      pass
 
+
+  def print_cycle_history(self, log=None):
+    """ The run's cycles in one table (R1, wR2, GooF, R_free, restraint rmsd), like the
+    stage table Phenix prints at the end; written to the .log. """
+    rows = getattr(self.normal_eqns, 'cycle_history', None)
+    if not rows or log is None:
+      return
+    def f(v, fmt):
+      return fmt % v if v is not None else "-"
+    print("\nCycle history:", file=log)
+    print("  cycle      R1     wR2    GooF  R_free  restr.GooF  DFIX/DANG rmsd (n) angle rmsd (n)",
+          file=log)
+    for r in rows:
+      d, a = r.get('dist'), r.get('angle')
+      print("  %5d  %6s  %6s  %6s  %6s  %10s  %-17s  %s" % (
+        r['cycle'], f(r['r1'], "%.4f"), f(r['wr2'], "%.4f"), f(r['goof'], "%.3f"),
+        f(r['r_free'], "%.4f"), f(r['restrained_goof'], "%.3f"),
+        "%.4f (%d)" % d if d else "-", "%.3f (%d)" % a if a else "-"), file=log)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
@@ -2807,6 +2836,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.wR2(),
       self.normal_eqns.goof()
     ))
+    try:
+      geo = self.normal_eqns.restraint_rmsd()
+    except Exception:
+      geo = {}
+    if geo:
+      print_l.append("  +  Geometry: %s" % ", ".join(
+        "%s rmsd %.4f%s over %d" % (k, geo[k][0], " A" if k == 'dist' else " deg", geo[k][1])
+        for k in ('dist', 'angle') if k in geo))
 
     # The solvers describe themselves; for the scipy ones that includes which
     # minimiser was used, how many evaluations of the objective it took and,
@@ -2975,6 +3012,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
           " ".join("%.4f" % float(x) for x in weight)))
       return '\n'.join(out)
     def chirality():
+      # CIP descriptors for every stereocentre cost 43 s of a 180 s refine 2 on a
+      # 1364-atom protein (30OR) and are not read there; listed up to this size
+      n = self.xray_structure().scatterers().size()
+      if n > CHIRALITY_LISTING_MAX_ATOMS:
+        return ("not listed: %d atoms (above %d); rsa() gives them on request"
+                % (n, CHIRALITY_LISTING_MAX_ATOMS))
       lines = [l.strip() for l in olex.f("rsa()").split('\n') if ':' in l]
       return '\n'.join(lines) or "no chiral atoms"
     def principal_u():

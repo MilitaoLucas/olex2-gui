@@ -98,6 +98,10 @@ def normal_equation_class(*args, **kwds):
       line = StringIO()
       self.show_cycle_summary(log=line)
       (sys.stdout if self.log is None else self.log).write(line.getvalue())
+      try:
+        self.record_cycle()
+      except Exception as e:
+        print("cycle history: %s" % e)
       self.show_sorted_shifts(max_items=10, log=self.log)
       # the worst 10 of each type; the .oxl lists every restraint once, at the end
       self.restraints_manager.show_sorted(
@@ -215,6 +219,12 @@ def normal_equation_class(*args, **kwds):
             params += (r_free*100,)
             self.step_info['_refine_ls_R_factor_R_free'] = r_free
             self.step_info['_refine_ls_number_reflns_R_free'] = n_free
+        # DAMP shortened this cycle's step: say so on the cycle's own row (report_damp)
+        damp = getattr(self.iterations_object, 'last_damp', None)
+        if damp is not None:
+          self.iterations_object.last_damp = None
+          header += "  DAMP %.3g%%"
+          params += (100*damp[0],)
         print(header %params, file=log)
 
       else:
@@ -236,8 +246,74 @@ def normal_equation_class(*args, **kwds):
           max_shift_u[1].label,
         ), file=log)
 
+    def restraint_rmsd(self):
+      """ {'dist': (rmsd A, n), 'angle': (rmsd deg, n)} of the DFIX/DANG and angle
+      restraints at the current model, the geometry figures Phenix prints per stage. """
+      rm = self.restraints_manager
+      out = {}
+      if rm is None:
+        return out
+      from cctbx import geometry_restraints
+      uc, sc = self.xray_structure.unit_cell(), self.xray_structure.sites_cart()
+      for key, proxies, fn in (('dist', rm.bond_proxies, geometry_restraints.bond_deltas),
+                               ('angle', rm.angle_proxies, geometry_restraints.angle_deltas)):
+        if proxies is not None and proxies.size():
+          try:
+            d = fn(unit_cell=uc, sites_cart=sc, proxies=proxies)
+            out[key] = (math.sqrt(flex.mean(d*d)), d.size())
+          except Exception:
+            pass
+      return out
+
+    def record_cycle(self):
+      """ One row of the per-run history (cycle_history), also written to the .log. """
+      row = dict(cycle=self.n_current_cycle,
+                 r1=self.step_info.get('_refine_ls_R_factor_gt'),
+                 wr2=self.step_info.get('_refine_ls_wR_factor_ref'),
+                 goof=self.step_info.get('_refine_ls_goodness_of_fit_ref'),
+                 r_free=self.step_info.get('_refine_ls_R_factor_R_free'))
+      try:
+        row['restrained_goof'] = self.restrained_goof()
+      except Exception:
+        row['restrained_goof'] = None
+      row.update(self.restraint_rmsd())
+      if not hasattr(self, 'cycle_history'):
+        self.cycle_history = []
+      self.cycle_history.append(row)
+      if self.log is not None and self.log is not sys.stdout:
+        geo = ", ".join("%s rmsd %.4f (%d)" % ({'dist': 'DFIX/DANG'}.get(k, k), row[k][0], row[k][1])
+                        for k in ('dist', 'angle') if k in row)
+        print("  cycle %d geometry: %s%s" % (
+          row['cycle'], geo or "no distance/angle restraints",
+          ", restrained GooF %.3f" % row['restrained_goof'] if row['restrained_goof'] else ""),
+          file=self.log)
+
     def max_shift_site(self):
+      """ The largest site shift over atoms that are not riding H.
+
+      A riding H moves with its pivot by construction, and at disorder
+      boundaries (30OR proline CH2) riders flip between mirror positions every
+      cycle, 1.7 A, which made the column and the summary say "not converged"
+      about atoms the data do not refine. The .log list keeps every atom.
+      """
+      riding = self._riding_site_indices()
+      for item in self.iter_shifts_sites(max_items=None, skip=riding):
+        return item
       return next(self.iter_shifts_sites(max_items=1))
+
+    def _riding_site_indices(self):
+      riding = getattr(self, '_riding_sites', None)
+      if riding is None:
+        riding = set()
+        try:
+          from smtbx.refinement.constraints.geometrical.hydrogens import hydrogens
+          for c in (getattr(self.refinement, 'constraints', None) or []):
+            if isinstance(c, hydrogens):
+              riding.update(c.constrained_site_indices)
+        except Exception:
+          pass
+        self._riding_sites = riding
+      return riding
 
     def max_shift_u(self):
       return next(self.iter_shifts_u(max_items=1))
@@ -247,12 +323,14 @@ def normal_equation_class(*args, **kwds):
       return next(self.iter_shifts_u(max_items=1))
 
 
-    def iter_shifts_sites(self, max_items=None):
+    def iter_shifts_sites(self, max_items=None, skip=None):
       scatterers = self.xray_structure.scatterers()
       sites_shifts = self.xray_structure.sites_cart() -\
                   self.xray_structure_pre_cycle.sites_cart()
       distances = sites_shifts.norms()
       i_distances_sorted = flex.sort_permutation(data=distances, reverse=True)
+      if skip:
+        i_distances_sorted = flex.size_t([i for i in i_distances_sorted if i not in skip])
       if max_items is not None:
         i_distances_sorted = i_distances_sorted[:max_items]
       for i_seq in iter(i_distances_sorted):
@@ -508,7 +586,19 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     if limit_shift_over_su is not None and abs(self.max_ls_shift_over_su) > limit_shift_over_su:
       shift_scale = limit_shift_over_su/self.max_ls_shift_over_su
       x *= abs(shift_scale)
+      self.report_damp(abs(shift_scale), abs(self.max_ls_shift_over_su), self.max_shift_for)
     return False
+
+  def report_damp(self, scale, largest, label):
+    """ Say that DAMP shortened this cycle's step, by how much and for which parameter.
+
+    A DAMP-limited step was invisible: on a protein every cycle of a run can be
+    shortened by one parameter (a freely refined H U_iso, say) and R1 then barely
+    moves, which reads as a refinement that does not converge.
+    """
+    # kept for the cycle's row (show_cycle_summary prints and clears it); the shift/su
+    # column of that row names the parameter
+    self.last_damp = (scale, largest, label)
 
   def reset_shifts(self):
     self.max_ls_shift_over_su = None
@@ -606,10 +696,25 @@ class cgls_iterations(iterations_with_shift_analysis, cgls.cgls_iterations):
     if su is None or su.size() != step.size():
       return step
     shifts_over_su = step/su
-    largest = flex.max(flex.abs(shifts_over_su))
+    abs_s = flex.abs(shifts_over_su)
+    largest = flex.max(abs_s)
     if largest > self.max_shift_over_esd:
       step = step*(self.max_shift_over_esd/largest)
+      self.report_damp(self.max_shift_over_esd/largest, largest,
+                       self._parameter_label(flex.max_index(abs_s)))
     return step
+
+  def _parameter_label(self, i):
+    """ Atom.parameter label of independent parameter i, as the shift/su column shows it. """
+    try:
+      r = self.non_linear_ls.actual.reparametrisation
+      J = r.jacobian_transpose_matching_grad_fc().transpose()
+      if i < J.n_cols:
+        for e in J.col(i):
+          return r.component_annotations[e[0]]
+    except Exception:
+      pass
+    return "parameter #%d" % i
 
   def shifts_to_analyse(self):
     """ The shifts this cycle applied, which conjugate gradients produced
@@ -662,8 +767,11 @@ class cgls_iterations(iterations_with_shift_analysis, cgls.cgls_iterations):
     mode = getattr(self, 'chosen_mode', None)
     if mode is None:
       return "conjugate gradient least squares"
-    return ("conjugate gradient least squares, %s"
-            % described.get(mode, mode))
+    # smtbx records why (e.g. "design matrix 14470 MB (double precision) against a
+    # budget of 2000 MB"); without it a protein silently took the slow normal-matrix path
+    reason = getattr(self, 'mode_reason', None)
+    return ("conjugate gradient least squares, %s%s"
+            % (described.get(mode, mode), " (%s)" % reason if reason else ""))
 
 
 class scipy_iterations(iterations_with_shift_analysis,

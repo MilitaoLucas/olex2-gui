@@ -452,6 +452,24 @@ class reflections(object):
     return rv
 
 
+def _restraint_labels(structure, i_seqs):
+  """Atom labels for a restraint's i_seqs (flat or nested lists), for messages."""
+  scatterers = structure.scatterers()
+  def flat(x):
+    for y in (x or ()):
+      if isinstance(y, (list, tuple)):
+        yield from flat(y)
+      else:
+        yield y
+  out = []
+  for i in flat(i_seqs):
+    try:
+      out.append(scatterers[i].label)
+    except Exception:
+      out.append("#%s" % (i,))
+  return " ".join(out) or "(no atoms)"
+
+
 class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None,
@@ -498,11 +516,19 @@ class create_cctbx_xray_structure(object):
           len(builder.structure.scatterers())-1,
           uiso_owner['id'], uiso_owner['k'])
     if restraints_iter is not None:
+      n_failed = 0
       for restraint_type, kwds in restraints_iter:
         try:
           builder.process_restraint(restraint_type, **kwds)
-        except:
-          print('Your version of cctbx is too old for the restraint %s'%restraint_type)
+        except Exception as e:
+          # was a bare except printing "cctbx too old": any error dropped the restraint unnamed
+          n_failed += 1
+          print("Restraint %s on %s was not built: %s: %s" % (
+            restraint_type, _restraint_labels(builder.structure, kwds.get('i_seqs')),
+            type(e).__name__, e))
+      if n_failed:
+        print("WARNING: %d restraint(s) could not be built and are NOT in this refinement"
+              % n_failed)
     if same_iter is not None:
       for restraint_type, kwds in same_iter:
         builder.process_restraint(restraint_type, **kwds)

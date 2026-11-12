@@ -398,6 +398,8 @@ class OlexRefinementModel(object):
     #     raise Exception("Cyclic constraint located for: %s and %s" \
     #        %(self._atoms[k]['label'], self._atoms[v]['label']))
 
+    # what the filters below leave out, reported once at the end (was debug-only or silent)
+    n_geom_skipped, n_geom_trimmed, n_adp_atoms_dropped = 0, 0, 0
     for shelxl_restraint in self.restraint_types:
       restraints = self.model.get(shelxl_restraint, ())
       restrained_set = set()
@@ -421,6 +423,7 @@ class OlexRefinementModel(object):
             break
           else:
             new_i_seqs = [x for x in i_seqs if x not in restrained_set and x not in fixed_adp]
+            n_adp_atoms_dropped += len(i_seqs) - len(new_i_seqs)
             if not new_i_seqs:
               continue
             restrained_set.update(new_i_seqs)
@@ -448,11 +451,13 @@ class OlexRefinementModel(object):
             st += restrain_def[0]
             ac -= restrain_def[0]
           if len(filtered_atoms) < restrain_def[0] * restrain_def[1]:
+            n_geom_skipped += 1
             if OV.IsDebugging():
               print("Skipping geometrical restraint (all atoms have fixed coordinates): %s %s" %(
                 restraint_type, " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
             continue
           elif distilled_atoms:
+            n_geom_trimmed += 1
             if OV.IsDebugging():
               print("Skipping %s in: %s %s" %(
                 " ".join([self._atoms[i[0]]['label'] for i in distilled_atoms]),
@@ -583,6 +588,11 @@ class OlexRefinementModel(object):
               )
         else:
           yield restraint_type, kwds
+
+    if n_geom_skipped or n_geom_trimmed or n_adp_atoms_dropped:
+      print("Restraints left out: %d geometric restraint(s) on fixed atoms only, %d trimmed of fixed"
+            " atom groups, %d atom(s) dropped from repeated ADP restraints of one type"
+            " (details with debugging on)" % (n_geom_skipped, n_geom_trimmed, n_adp_atoms_dropped))
 
   def same_iterator(self):
     groups = self.model.get('same', None)

@@ -857,6 +857,12 @@ class hooft_analysis(absolute_structure.hooft_analysis):
         fc = fc.common_set(fo2)
       scale = 1
     else:
+      if (self.olex2_adaptor.hklf_code < 5 and
+          not self.reflections.f_sq_obs_filtered.anomalous_flag()):
+        # the same answer as below, decided before F_calc over every reflection is
+        # computed for nothing (30OR: 16 s of a 180 s refine 2)
+        print("No Bijvoet pairs")
+        return
       fo2, fc = self.olex2_adaptor.get_fo_sq_fc()
       weights = self.olex2_adaptor.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
@@ -4694,6 +4700,17 @@ def get_table_contribution(xray_structure, table_file_name):
   scatterers = xray_structure.scatterers()
   fallback = [scatterers[i].label
               for i in contribution.scatterers_not_in_table()]
+  try:
+    # the other direction: records naming no atom of this model mean the table was made for
+    # another model (renamed/moved atoms), even when every atom found some record
+    extra = list(contribution.records_not_in_structure())
+  except Exception:
+    extra = []
+  if extra:
+    print("WARNING: %s holds %d record(s) that match no atom of this model (e.g. %s):"
+          " it was made for a different model (atoms renamed, deleted or moved);"
+          " re-sync the table's labels or regenerate it." % (
+            os.path.basename(table_file_name), len(extra), ", ".join(extra[:5])))
   if fallback:
     _report_table_fallback(table_file_name, fallback, scatterers.size())
     # Not cached. The spherical half of a partially tabulated contribution

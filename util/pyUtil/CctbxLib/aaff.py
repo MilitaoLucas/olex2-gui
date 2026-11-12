@@ -45,6 +45,49 @@ def _table_identifies_by_id(table_file_name):
   return False
 
 
+def _write_ids(table_file_name, internal_to_tsc, internal_scatterer_ids):
+  """ Write the model's current scatterer ids into an id-keyed table's columns.
+
+  internal_to_tsc maps a model atom to the column describing it, so the
+  file-ordered list is built by scattering into it, not by indexing the
+  model's ids with a column number. Those two agree only when the file
+  and the model happen to be in the same order, which is not the usual
+  case: a table is written in whatever order produced it, and a
+  generator that treats some atoms separately emits them last.
+  Composing this the wrong way round writes each atom's id onto some
+  other atom's column, and since it is then saved, every later run
+  reads a table whose columns describe the wrong atoms.
+  Raises ValueError rather than write a table whose columns would be wrong.
+  """
+  scatterers_id_file_order = [None] * len(internal_to_tsc)
+  for model_index, column in enumerate(internal_to_tsc):
+    if column is None or not (0 <= column < len(scatterers_id_file_order)):
+      raise ValueError(
+        "scatterer %d maps to column %r, which is not a column of this "
+        "table" % (model_index, column))
+    if scatterers_id_file_order[column] is not None:
+      raise ValueError(
+        "two scatterers both map to column %d; refusing to write a table "
+        "whose columns would describe the wrong atoms" % column)
+    scatterers_id_file_order[column] = internal_scatterer_ids[model_index]
+  if any(entry is None for entry in scatterers_id_file_order):
+    raise ValueError(
+      "no scatterer maps to column(s) %s; refusing to write a partly "
+      "described table"
+      % [i for i, e in enumerate(scatterers_id_file_order) if e is None])
+  # Only refresh a table that already identifies its columns by id. A
+  # label table needs no refreshing -- a label does not go stale when the
+  # atom moves -- and converting one to ids would throw away the only
+  # thing that still matches after a rename.
+  if _table_identifies_by_id(table_file_name):
+    update_scatterers_in_file(table_file_name, scatterers_id_file_order)
+    # Record the new hash but do not save here: the shift analysis
+    # still needs self.cctbx, and a save can reload the model underneath
+    # it. Cycles after this one are covered by the .ins written during
+    # setup; the last one is flushed once the loop is done.
+    nsa2_refresh_file_hash(table_file_name, flush=False)
+
+
 def get_current_scatter_ids(model):
     xray_structure = cctbx_controller.create_cctbx_xray_structure(
       [model._cell["a"][0], model._cell["b"][0], model._cell["c"][0], model._cell["alpha"][0], model._cell["beta"][0], model._cell["gamma"][0]],
@@ -347,6 +390,29 @@ Refinement aborted."""
         file_entries = read_scatterers(table_file_name)
         internal_to_tsc = resolve_scatterer_mapping(
           file_entries, model_labels, internal_scatterer_ids, get_unit_cell(old_model))
+        # Columns matched by position (atoms moved since the table was written,
+        # up to 2 A) must carry the atoms' current ids before the refinement:
+        # the C++ reader matches ids within 0.5 A, so an atom moved 0.5-2 A was
+        # accepted here and then had "no density" there (30OR, a water moved
+        # 0.8 A: the run stopped). The post-run write below stays.
+        # ids carry the atom's site; a .ins rounds sites, so every id differs a
+        # little from the table's. Stale means moved beyond the C++ reader's
+        # 0.5 A (0.4 A kept as margin), measured from the sites in the ids.
+        from cctbx.xray import ext as xray_ext
+        uc = get_unit_cell(old_model)
+        def moved(a, b):
+          try:
+            return uc.mod_short_distance(xray_ext.scatterer_id_big(a).get_crd(),
+                                         xray_ext.scatterer_id_big(b).get_crd()) > 0.4
+          except Exception:
+            return False
+        stale = sum(1 for i, c in enumerate(internal_to_tsc)
+                    if c is not None and c < len(file_entries)
+                    and moved(file_entries[c], internal_scatterer_ids[i]))
+        if stale and _table_identifies_by_id(table_file_name):
+          _write_ids(table_file_name, internal_to_tsc, internal_scatterer_ids)
+          print("Table ids refreshed before the run for %d column(s) matched by position"
+                % stale)
       except (ValueError, ScattererResolutionError) as e:
         # the header says which cell, space group and hkl the table was made for: the likely reason
         try:
@@ -447,43 +513,7 @@ all calculation parameters are properly recorded."""
       new_model=OlexRefinementModel()
       
       try:# Now write the new scatterer IDs to the TSC/TSCB file, so they describe where the refinement left the atoms
-        internal_scatterer_ids = get_current_scatter_ids(new_model)
-        # internal_to_tsc maps a model atom to the column describing it, so the
-        # file-ordered list is built by scattering into it, not by indexing the
-        # model's ids with a column number. Those two agree only when the file
-        # and the model happen to be in the same order, which is not the usual
-        # case: a table is written in whatever order produced it, and a
-        # generator that treats some atoms separately emits them last.
-        # Composing this the wrong way round writes each atom's id onto some
-        # other atom's column, and since it is then saved, every later run
-        # reads a table whose columns describe the wrong atoms.
-        scatterers_id_file_order = [None] * len(internal_to_tsc)
-        for model_index, column in enumerate(internal_to_tsc):
-          if column is None or not (0 <= column < len(scatterers_id_file_order)):
-            raise ValueError(
-              "scatterer %d maps to column %r, which is not a column of this "
-              "table" % (model_index, column))
-          if scatterers_id_file_order[column] is not None:
-            raise ValueError(
-              "two scatterers both map to column %d; refusing to write a table "
-              "whose columns would describe the wrong atoms" % column)
-          scatterers_id_file_order[column] = internal_scatterer_ids[model_index]
-        if any(entry is None for entry in scatterers_id_file_order):
-          raise ValueError(
-            "no scatterer maps to column(s) %s; refusing to write a partly "
-            "described table"
-            % [i for i, e in enumerate(scatterers_id_file_order) if e is None])
-        # Only refresh a table that already identifies its columns by id. A
-        # label table needs no refreshing -- a label does not go stale when the
-        # atom moves -- and converting one to ids would throw away the only
-        # thing that still matches after a rename.
-        if _table_identifies_by_id(table_file_name):
-          update_scatterers_in_file(table_file_name, scatterers_id_file_order)
-          # Record the new hash but do not save here: the shift analysis below
-          # still needs self.cctbx, and a save can reload the model underneath
-          # it. Cycles after this one are covered by the .ins written during
-          # setup; the last one is flushed once the loop is done.
-          nsa2_refresh_file_hash(table_file_name, flush=False)
+        _write_ids(table_file_name, internal_to_tsc, get_current_scatter_ids(new_model))
       except ValueError as e:
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")

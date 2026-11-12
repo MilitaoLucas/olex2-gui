@@ -167,8 +167,9 @@ def calculate(self, threshold, params, max_reflections, output_to):
   if self.f_mask is None:
     f_mask_data = MaskData(flex.complex_double())
   else:
+    # the constructor wants the mask's own Miller indices (least_squares_twinning.h)
     f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
-      self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
+      self.observations.fo_sq.anomalous_flag(), self.f_mask.indices(), self.f_mask.data())
 
   fc_correction = self.reparametrisation.fc_correction
   if fc_correction is None:
