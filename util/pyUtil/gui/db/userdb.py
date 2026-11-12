@@ -5,6 +5,7 @@ import olx
 from olexFunctions import OV
 
 class UsersDB:
+  CLEAR = 'clear'   # Manage(): the user chose 'nobody' for the role
   site_items = ('name', 'department', 'address', 'city', 'country', 'postcode')
   person_items = ('firstname', 'middlename', 'lastname', 'email', 'phone', 'orchid_id', 'add_author')
   bool_items = {'add_author': True}
@@ -19,14 +20,15 @@ class UsersDB:
   def setMessage(self, txt=""):
     OV.SetControlLabel(self.ctrl("message"), txt)
 
-  def Manage(self):
+  def Manage(self, clear_label=None):
+    """The picked person (OK), CLEAR (clear_label button) or None."""
     w, h = 760, 760
     x, y = gui.GetBoxPosition(w, h)
     # built in the style of the Help window (form.py), written to OlexFS;
     # it replaces etc/gui/tools/users-db.htm
     from . import form
     page = "%s.htm" % self.pop_name
-    OV.write_to_olex(page, form.users_page())
+    OV.write_to_olex(page, form.users_page(clear_label=clear_label))
     olx.Popup(self.pop_name, page, s=True, b="tc", t="Manage users and sites",
            w=w, h=h, x=x, y=y)
     OV.SetPopBorder(self.pop_name, 0)
@@ -36,6 +38,8 @@ class UsersDB:
     res = OV.ShowModal(self.pop_name)
     if res == "1":
       return self.person
+    if res == "2" and clear_label:
+      return self.CLEAR
     return None
 
   def getSiteList(self):

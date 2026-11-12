@@ -35,8 +35,16 @@ class publication:
     if person_id:
       person = userdb.db.getPerson(int(person_id))
     else:
-      person = userdb.db.Manage()
+      role = param.rsplit('.', 1)[-1] if param else None
+      person = userdb.db.Manage(clear_label="Remove %s" % role if role else None)
       new=True
+    if person == userdb.db.CLEAR:
+      OV.SetControlValue(box, '?')
+      OV.SetParam(param, None)
+      if param == 'snum.report.operator':
+        from gui import login
+        login.stop_auto_operator()
+      return None
     if person:
       rv = person.get_display_name()
       if new:
@@ -110,6 +118,8 @@ class publication:
     return True
 
   def OnAddNameToAuthorList(self, box_name,person_id=None):
+    if box_name in (None, '', 'None') and str(person_id).strip() in ('', 'None', '?'):
+      return   # nobody picked or the role was removed: nothing to add
     value = self.OnPersonChange(box_name, person_id=person_id)
     if self.AddNameToAuthorList(value):
       OV.UpdateHtml()

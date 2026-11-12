@@ -117,6 +117,15 @@ class LoginTest(unittest.TestCase):
   def test_no_user_no_changes(self):
     self.assertEqual(logic.operator_changes(None, '', None, ''), {})
 
+  def test_cif_without_model_is_external(self):
+    self.assertEqual(logic.external_cif_names(['abc', 'abc_sq'], ['abc.cif', 'abc.fcf']),
+                     ['abc', 'abc_sq'])
+    self.assertEqual(logic.external_cif_names(['abc', None], ['abc.cif']), ['abc'])
+
+  def test_cif_with_model_is_not_external(self):
+    self.assertEqual(logic.external_cif_names(['abc', 'blk'], ['abc.cif', 'ABC.RES']), [])
+    self.assertEqual(logic.external_cif_names(['abc', 'blk'], ['abc.cif', 'blk.ins']), [])
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -58,6 +58,13 @@ class FormTest(unittest.TestCase):
     for name in ('UpdateSite', 'AddSite', 'DeleteSite', 'UpdatePerson', 'AddPerson', 'DeletePerson'):
       self.assertEqual(html.count('name="%s"' % name), 1, name)
     self.assertIn("html.EndModal('~popup_name~', 1)", html)
+    self.assertNotIn('name="Clear"', html)
+
+  def test_users_page_for_a_role_can_clear_it(self):
+    html = form.users_page(self.P, clear_label='Remove operator')
+    self.assertEqual(html.count('name="Clear"'), 1)
+    self.assertIn('value="Remove operator"', html)
+    self.assertIn("html.EndModal('~popup_name~', 2)", html)
 
 
 if __name__ == '__main__':

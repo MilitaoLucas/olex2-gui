@@ -15,17 +15,21 @@ except ImportError:   # tests: imported without the package
 LABEL_WIDTH = '30%'
 
 
-def page(title, body, p, intro=''):
-  intro = ('<tr><td><font color="%s">%s</font></td></tr>' % (p['muted'], intro)
+def page(title, body, p, intro='', header_right=''):
+  """header_right: controls on the title line, right-aligned (e.g. a chooser)."""
+  span = ' colspan="2"' if header_right else ''
+  intro = ('<tr><td%s><font color="%s">%s</font></td></tr>' % (span, p['muted'], intro)
            if intro else '')
+  right = ('<td align="right" valign="center">%s</td>' % header_right) if header_right else ''
   return (
     '<html>\n<body bgcolor="%(bg)s" link="%(highlight)s">\n'
     '<font face="$GetVar(HtmlFontName)" color="%(font)s">\n'
     '<table border="0" cellpadding="6" cellspacing="0" width="100%%">\n'
-    '<tr><td><font size="5" color="%(title)s"><b>' % p + title + '&nbsp;</b></font></td></tr>\n'
+    '<tr><td valign="center"><font size="5" color="%(title)s"><b>' % p + title
+    + '&nbsp;</b></font></td>' + right + '</tr>\n'
     + intro + '\n'
-    '<tr><td><font color="%s"><b><input type="label" name="message" width="100%%"></b>'
-    '</font></td></tr>\n</table>\n' % p['highlight']
+    '<tr><td%s><font color="%s"><b><input type="label" name="message" width="100%%"></b>'
+    '</font></td></tr>\n</table>\n' % (span, p['highlight'])
     + body +
     '\n</font>\n</body>\n</html>\n')
 
@@ -83,9 +87,9 @@ def listbox(name, items, p, height, onselect):
                % (name, height, items, _colours(p), onselect), p)
 
 
-def checkbox(name, p):
-  return ('<input type="checkbox" name="%s" bgcolor="%s" fgcolor="%s" height="20">'
-          % (name, p['panel'], p['font']))
+def checkbox(name, p, checked=False):
+  return ('<input type="checkbox" name="%s" %sbgcolor="%s" fgcolor="%s" height="20">'
+          % (name, 'checked="true" ' if checked else '', p['panel'], p['font']))
 
 
 def button(value, onclick, p, name='', primary=False, width=90):
@@ -154,7 +158,9 @@ def _list_and_details(list_title, list_html, details_title, rows, button_row, p)
           '<td width="64%%" valign="top">%s</td></tr></table>\n' % (left, right))
 
 
-def users_page(p=None):
+def users_page(p=None, clear_label=None):
+  """clear_label: opened to pick a structure's person (Operator, Submitter),
+  a button with this label sets that role to nobody (EndModal 2)."""
   p = p or style.current()
   sites = _list_and_details(
     "Sites", listbox('Sites', 'spy.gui.db.getSiteList()', p, 180,
@@ -173,7 +179,9 @@ def users_page(p=None):
              button("Add as new", 'spy.gui.db.addPerson()', p, name='AddPerson', primary=True),
              button("Delete", 'spy.gui.db.deletePerson()', p, name='DeletePerson')]), p)
   body = (sites + spacer() + people + spacer() +
-          buttons([], [button("OK", "html.EndModal('~popup_name~', 1)", p, primary=True)]))
+          buttons([button(clear_label, "html.EndModal('~popup_name~', 2)", p, name='Clear', width=140)]
+                  if clear_label else [],
+                  [button("OK", "html.EndModal('~popup_name~', 1)", p, primary=True)]))
   return page("Users and sites", body, p, intro=(
     "Pick a site to see its people. 'Add as new' adds what is in the boxes; "
     "a new person goes to the site picked on the left."))

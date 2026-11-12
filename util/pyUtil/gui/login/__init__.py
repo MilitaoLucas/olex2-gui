@@ -6,7 +6,10 @@ Without TimerPlus nobody is asked. Someone already in the database under
 another email picks themselves from the list; that email is then written to
 their entry. After saving the form, and after every refinement, a structure
 without an operator gets the logged-in user as operator ('Solved by') and CIF
-contact author.
+contact author. Not for a structure that started from a CIF from elsewhere
+(opened with no .ins/.res next to it): its operator is someone else, so it is
+left to the user. The same after the operator was removed by hand.
+spy.gui.login.assign_operator() fills it in by hand.
 
 spy.gui.login.show() opens the form again.
 """
@@ -131,7 +134,7 @@ def save():
   SaveUserParams()
   olx.html.EndModal(POP, 1)
   try:
-    if olx.IsFileLoaded() == 'true':
+    if olx.IsFileLoaded() == 'true' and not no_auto_operator():
       assign_operator()
   except Exception:
     _report("setting the operator")
@@ -160,11 +163,57 @@ def assign_operator():
     print("Operator and contact author: %s" % user[1])
 
 
+def _mark_path(name):
+  return os.path.join(OV.StrDir(), name + logic.NO_AUTO_MARK)
+
+
+def _names():
+  return {n for n in (OV.FileName(), OV.ModelSrc()) if n}
+
+
+def no_auto_operator():
+  """True if the current structure's operator is not filled in automatically."""
+  if not OV.StrDir():
+    return False
+  return any(os.path.exists(_mark_path(n)) for n in _names())
+
+
+def _write_marks(names, reason):
+  """Mark names; returns the newly marked ones."""
+  new = [n for n in names if not os.path.exists(_mark_path(n))]
+  if new:
+    os.makedirs(OV.StrDir(), exist_ok=True)
+  for n in new:
+    with open(_mark_path(n), 'w', encoding='utf-8') as f:
+      f.write("%s: %s, so the operator is not filled in automatically.\n" % (n, reason))
+  return new
+
+
+def stop_auto_operator():
+  """The operator was removed by hand: do not fill it in again."""
+  if OV.StrDir():
+    _write_marks(_names(), "the operator was removed by hand")
+
+
+def _on_file_change(arg):
+  """Mark a CIF opened without an .ins/.res of the same name next to it."""
+  try:
+    if olx.IsFileLoaded() != 'true' or olx.IsFileType('cif') != 'true' or not OV.StrDir():
+      return
+    names = [OV.FileName(), olx.xf.DataName(olx.xf.CurrentData())]
+    names = logic.external_cif_names(names, os.listdir(OV.FilePath()))
+    if not _write_marks(names, "it came from a CIF from elsewhere"):
+      return
+    print("CIF from elsewhere: operator and contact author are not set automatically.")
+  except Exception:
+    _report("checking where the CIF came from")
+
+
 class _RefineListener:
   def onEnd(self, caller):
     try:
       from RunPrg import RunRefinementPrg
-      if isinstance(caller, RunRefinementPrg):
+      if isinstance(caller, RunRefinementPrg) and not no_auto_operator():
         assign_operator()
     except Exception:
       _report("setting the operator")
@@ -178,6 +227,10 @@ def _register():
     LM.register_listener(_RefineListener().onEnd, 'onEnd')
   except Exception:
     _report("registering the refinement listener")
+  try:
+    olx.FileChangeListeners.append(_on_file_change)
+  except AttributeError:
+    olx.FileChangeListeners = [_on_file_change]
   if OV.HasGUI():
     olx.Schedule(2, 'spy.gui.login.check()')
 

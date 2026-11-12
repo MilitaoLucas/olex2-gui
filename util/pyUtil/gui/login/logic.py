@@ -144,3 +144,23 @@ def operator_changes(user_id, user_name, operator, contact_name):
   if is_empty(contact_name) and user_name:
     changes['contact'] = user_name
   return changes
+
+
+# <StrDir>/<name>.no_auto_operator: the operator of structure <name> is not
+# filled in automatically (a CIF from elsewhere, or the operator was removed)
+NO_AUTO_MARK = '.no_auto_operator'
+
+
+def external_cif_names(names, folder_files):
+  """A CIF opened where no .ins or .res of the same name exists came from
+  elsewhere: its operator is someone else, so it must not be filled in
+  automatically. names: the CIF's file name and data block name (a .res
+  written from the CIF is named after the block); folder_files: the file
+  names in the CIF's folder. Returns the names to mark, or [] for a CIF of a
+  structure that was worked on here."""
+  names = sorted({n for n in names if n})
+  present = {f.lower() for f in folder_files}
+  for n in names:
+    if (n + '.ins').lower() in present or (n + '.res').lower() in present:
+      return []
+  return names
