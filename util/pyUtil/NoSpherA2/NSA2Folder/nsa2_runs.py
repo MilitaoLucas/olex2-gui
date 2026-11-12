@@ -29,8 +29,6 @@ BACKUP_ENDINGS = (".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn
 TABLE_ENDINGS = (".tshb", ".tscb", ".tsc")
 WFN_ENDINGS = (".gbw", ".xtb", ".wfx", ".wfn", ".molden", ".fchk", ".owf.fchk", ".ffn")
 _STAMP = "%Y-%m-%d_%H-%M-%S"
-# runs further apart than this (seconds) belong to different refinements
-GROUP_GAP = 60
 
 # programs whose method and basis set mean something; the others (pTB, xTB,
 # DiSCaMB, Thakkar, ELMOdb, SALTED ...) have their own fixed model, while the
@@ -134,6 +132,19 @@ def read_wfnlog(path):
     pass
   if m:
     info["energy"] = m.group(1)
+  if "energy" not in info:
+    # pySCF: "converged SCF energy = -1234.5"; xTB: "| TOTAL ENERGY  -45.6 Eh |"
+    m = None
+    for m in re.finditer(r"(?:converged SCF energy\s*=|TOTAL ENERGY)\s+(-?\d+\.\d+)", text):
+      pass
+    if m:
+      info["energy"] = m.group(1)
+  # pTB is not self-consistent and prints no total energy, only the HOMO-LUMO gap
+  m = None
+  for m in re.finditer(r"gaps \(1st,2nd, eV\)\s*:\s*(-?[\d.]+)", text):
+    pass
+  if m:
+    info["gap"] = m.group(1)
   return info
 
 
@@ -221,9 +232,12 @@ def _make_run(folder, name, label, when):
   if not uses_basis(run["program"]):
     run["method"] = run["basis_name"] = ""
   run["energy"] = loginfo.get("energy", "")
+  run["gap"] = loginfo.get("gap", "")
   run["qmmm"] = header.get("ORCA_USE_CRYSTAL_QMMM", "") == "True"
   run["relativistic"] = header.get("Relativistic", "") == "True"
-  run["solvation"] = header.get("ORCA_Solvation", "")
+  # the solvent only acts in ORCA without embedding; elsewhere the header
+  # still records the GUI's choice
+  run["solvation"] = header.get("ORCA_Solvation", "") if run["program"] == "ORCA" and not run["qmmm"] else ""
   # disorder: one wavefunction per part; the first part's log is read
   run["parts"] = _parts(folder, name)
   run["fp"] = _fingerprint(folder, name)
@@ -320,21 +334,100 @@ def active_index(runs, struct_dir, name):
 
 def _signature(run):
   return (run["program"], run["method"], run["basis_name"], run["charge"],
-          run["multiplicity"], run["qmmm"], run["relativistic"])
+          run["multiplicity"], run["qmmm"], run["relativistic"], run["solvation"],
+          run["parts"])
 
 
-def group(runs, gap=GROUP_GAP):
-  """Split runs (oldest first) into refinements: a new group starts after a
-  pause longer than `gap` seconds or when the settings change."""
+def _comparable(run):
+  """Runs whose total energies can be compared: the same model of the same
+  electrons -- everything of the signature but the multiplicity, so that the
+  spin states of one level of theory are told apart by their energies."""
+  return (run["program"], run["method"], run["basis_name"], run["charge"],
+          run["qmmm"], run["relativistic"], run["solvation"], run["parts"])
+
+
+def group(runs, gap=None):
+  """Split runs (oldest first) into series: a new series starts when the
+  settings change -- an iterative refinement, however long it takes, and
+  refinements repeated with the same settings stay one series. With `gap`
+  (seconds), a pause longer than that starts a new one, too."""
   groups = []
   prev = None
   for r in runs:
-    if (prev is None or (r["time"] - prev["time"]).total_seconds() > gap
-        or _signature(r) != _signature(prev)):
+    if (prev is None or _signature(r) != _signature(prev)
+        or (gap is not None and (r["time"] - prev["time"]).total_seconds() > gap)):
       groups.append([])
     groups[-1].append(r)
     prev = r
   return groups
+
+
+HARTREE_KJ = 2625.4996
+
+
+def _float(value):
+  try:
+    return float(value)
+  except (TypeError, ValueError):
+    return None
+
+
+def _changes(prev, run):
+  """What the user changed from the series before (prev) to this one, as
+  short items ("m=2", "def2-TZVP"); the whole setting when the program
+  changed or there is no series before -- charge and multiplicity first, a
+  chip has room for little more."""
+  q_m = ["q=%s" % (run["charge"] or "?"), "m=%s" % (run["multiplicity"] or "?")]
+  if prev is None or prev["program"] != run["program"]:
+    level = "/".join(x for x in (run["method"], run["basis_name"]) if x)
+    return q_m + ([level] if level else [])
+  out = []
+  for key in ("method", "basis_name"):
+    if run[key] != prev[key]:
+      out.append(run[key] or "-")
+  if run["charge"] != prev["charge"]:
+    out.append(q_m[0])
+  if run["multiplicity"] != prev["multiplicity"]:
+    out.append(q_m[1])
+  if run["qmmm"] != prev["qmmm"]:
+    out.append("QM/MM" if run["qmmm"] else "no QM/MM")
+  if run["relativistic"] != prev["relativistic"]:
+    out.append("relat." if run["relativistic"] else "non-relat.")
+  if run["solvation"] != prev["solvation"]:
+    out.append(run["solvation"] or "no solvent")
+  if run["parts"] != prev["parts"]:
+    out.append("%d parts" % run["parts"])
+  return out or ["same settings"]
+
+
+def describe(groups):
+  """One dict per series (groups from group()): its runs, what changed from
+  the series before, its final energy (Eh, of its last run that has one) or
+  pTB gap (eV), and -- among the series of the same comparable model -- the
+  energy above the lowest (kJ/mol) and whether it is the lowest."""
+  out = []
+  prev = None
+  for g in groups:
+    last = g[-1]
+    energies = [_float(r["energy"]) for r in g if _float(r["energy"]) is not None]
+    gaps = [_float(r["gap"]) for r in g if _float(r["gap"]) is not None]
+    out.append(dict(runs=g, run=last, changes=_changes(prev, last),
+                    energy=energies[-1] if energies else None,
+                    gap=gaps[-1] if gaps else None,
+                    delta_kj=None, lowest=False))
+    prev = last
+  by_model = {}
+  for s in out:
+    if s["energy"] is not None:
+      by_model.setdefault(_comparable(s["run"]), []).append(s)
+  for same in by_model.values():
+    if len(same) < 2:
+      continue
+    low = min(s["energy"] for s in same)
+    for s in same:
+      s["delta_kj"] = (s["energy"] - low) * HARTREE_KJ
+      s["lowest"] = s["energy"] == low
+  return out
 
 
 def _top_files(struct_dir, name):

@@ -49,9 +49,20 @@ block does not appear, that is the place to look.
 - `olex2/Wfn_job/backup_N` is the job folder of run N (input geometry,
   ORCA .inp / pTB .log). Not used here yet.
 - One history entry per wavefunction calculation: a refinement with 5
-  iterations makes 5 entries. Refinements are told apart by a pause of more
-  than 60 s or a change of settings; chips flow across the columns and carry
-  `R<refinement>.<cycle>`.
+  iterations makes 5 entries. They are grouped into *series* (`group()`):
+  consecutive runs with the same settings (program, method/basis, charge,
+  multiplicity, QM/MM, relativistic, solvent, parts), however long the
+  pauses -- an iterative refinement, or one repeated, is one series.
+- Top row: one chip per series (program xN / what changed from the series
+  before, e.g. `m=2`; q/m and level of theory when the program changed /
+  energy). Click: switches to the series' latest run (unless one of its runs
+  is in use already) and shows its runs in a second row (notch on the opened
+  chip); a run chip switches to that run (`use_run`).
+- Energy (`describe()`): the series' last run's final energy. Series of the
+  same program, method, basis, charge, QM/MM, relativistic, solvent and parts
+  are compared (so spin states of one level of theory): the lowest gets a dot
+  and "lowest E", the others "+x kJ/mol". pTB writes no total energy (shows
+  its HOMO-LUMO gap); SALTED leaves no log ("no energy").
 - Settings come from the table's `NSA2_*` header lines, and from the .wfnlog
   when the table has none (older tables) or when the log knows better.
   Method and basis are hidden for programs that do not use them (pTB etc.);
@@ -65,8 +76,18 @@ block does not appear, that is the place to look.
    Anything else is moved as NoSpherA2 would (folder named by the table's
    mtime).
 2. The chosen run's files are copied in with their times kept.
-3. `nsa2_adopt_tsc_file(<name>.tscb, normalise=False)` selects the table, and
-   `Calculate` ("Update Table") is switched off so the next refinement uses it.
+3. As choosing the file under "Source of tsc" (`change_tsc_generator`):
+   `source` is set to the table, the other generators' flags reset, and
+   `nsa2_adopt_tsc_file(<name>.tscb, normalise=False)` takes it up with its
+   history run as origin. NoSpherA2 Options is opened on it.
+4. Only the table, log and wavefunction are switched, never the model: the
+   next refinement refines the current model against that table. The table
+   header records the H model it was computed for (`NSA2_h_model`: n H, riding,
+   anisotropic; utilities.nsa2_hydrogen_model, written since 2026-11-12); a
+   difference (riding vs free H moves the H, so the table is off) is warned
+   about here and again when a refinement reads the table
+   (cctbx_olex_adapter._report_table_fingerprint). Warned, not refused, like
+   the cell/hkl checks. Older tables carry no H record and pass silently.
 
 ## Pitfalls
 
@@ -84,7 +105,8 @@ block does not appear, that is the place to look.
 
 ## Open
 
-- No quality figures yet (R1, wR2, residual density): nothing per run stores
-  them. Look at what `.hist6` holds per refinement node.
+- No quality figures yet (R1, wR2, residual density): `<name>.NoSpherA2`
+  has them (and an SCF Energy column) for the *last* refinement only; it is
+  overwritten. A copy per series would be needed to show R1 on the chips.
 - Charge is unknown for pTB runs whose table has no header (log has none).
 - Wfn_job/backup_N could be linked to its chip (same N, same times).

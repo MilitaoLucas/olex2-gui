@@ -90,17 +90,36 @@ def _table_settings(table):
     return None
 
 
+def generator_keys(rec, source=''):
+  """the generator-specific header keys (upper-cased) the generator of `rec` uses,
+  or None when the generator is not one of _BY_SOURCE"""
+  key = (str(rec.get('ORIGIN') or '') + str(rec.get('SOURCE') or '') + source).replace(' ', '').upper()
+  for name, k in _BY_SOURCE:
+    if name in key:
+      return k
+  return None
+
+
+def foreign_keys(rec, source=''):
+  """the header keys of `rec` that belong to other generators: the header records
+  every GUI setting (e.g. the selected SALTED model of an ORCA table), but only
+  those of its own generator describe the table"""
+  own = generator_keys(rec, source)
+  if own is None:
+    return set()
+  every = set(k for _, ks in _BY_SOURCE for k in ks)
+  return set(k for k in rec if k in every and k not in own)
+
+
 def _settings_lines(rec, source):
   """the settings that made a table, as key = value lines, restricted to what its generator uses"""
   if rec is None:
     return ["  (table header records no settings; GUI state: method = %s, basis = %s, charge = %s, multiplicity = %s)"
             % (_p('method'), _p('basis_name'), _p('charge'), _p('multiplicity'))]
   key = (str(rec.get('ORIGIN') or '') + str(rec.get('SOURCE') or '') + source).replace(' ', '').upper()
-  keys = ('METHOD', 'BASIS_NAME')
-  for name, k in _BY_SOURCE:
-    if name in key:
-      keys = k
-      break
+  keys = generator_keys(rec, source)
+  if keys is None:
+    keys = ('METHOD', 'BASIS_NAME')
   keys = _COMMON + keys + tuple(sorted(k for k in rec if k.startswith('HYBRID.')))
   if 'TRUE' not in str(rec.get('ORCA_USE_CRYSTAL_QMMM', '')).upper():
     keys = tuple(k for k in keys if not k.startswith('ORCA_CRYSTAL_QMMM_'))

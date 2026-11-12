@@ -26,6 +26,7 @@ PTB_LOG = """
  nalpha           68
  nbeta            68
  nopen             0
+ gaps (1st,2nd, eV)        :     3.642    3.905
 """
 PTB_HEADER = ["origin: pTB", "source: pTB", "method: B3LYP", "basis_name: def2-SVP",
               "charge: 0", "multiplicity: 1", "ORCA_USE_CRYSTAL_QMMM: True"]
@@ -98,11 +99,47 @@ class TestReading(Base):
     self.assertEqual(info["program"], "pTB")
     self.assertEqual(info["version"], "3.7")
     self.assertEqual(info["multiplicity"], "1")
+    self.assertEqual(info["gap"], "3.642")
+    self.assertNotIn("energy", info)
 
   def test_program_name(self):
     self.assertEqual(R.program_name("ORCA 6.1"), "ORCA")
     self.assertEqual(R.program_name("discambMATTS2021"), "DiSCaMB")
     self.assertEqual(R.program_name(""), "")
+
+
+def _run(program="ORCA", mult="1", energy="", gap="", method="r2SCAN", basis="def2-SVP", charge="0"):
+  return dict(program=program, method=method, basis_name=basis, charge=charge,
+              multiplicity=mult, qmmm=False, relativistic=False, solvation="",
+              parts=0, energy=energy, gap=gap)
+
+
+class TestDescribe(unittest.TestCase):
+
+  def test_spin_states(self):
+    """pTB first shot, then ORCA m=1 (iterative), m=3, m=5: one series each,
+    the changed setting on each, energies compared within ORCA/r2SCAN/def2-SVP"""
+    runs = ([_run("pTB", gap="3.6", method="", basis="")] * 2
+            + [_run(mult="1", energy="-100.0"), _run(mult="1", energy="-100.01")]
+            + [_run(mult="3", energy="-100.02")]
+            + [_run(mult="5", energy="-99.9")])
+    s = R.describe(R.group(runs))
+    self.assertEqual([len(x["runs"]) for x in s], [2, 2, 1, 1])
+    self.assertEqual(s[0]["changes"], ["q=0", "m=1"])
+    self.assertEqual(s[0]["gap"], 3.6)
+    self.assertIsNone(s[0]["delta_kj"])
+    self.assertEqual(s[1]["changes"], ["q=0", "m=1", "r2SCAN/def2-SVP"])
+    self.assertEqual(s[1]["energy"], -100.01)  # the last cycle's
+    self.assertEqual(s[2]["changes"], ["m=3"])
+    self.assertTrue(s[2]["lowest"])
+    self.assertAlmostEqual(s[1]["delta_kj"], 0.01 * R.HARTREE_KJ, 3)
+    self.assertFalse(s[3]["lowest"])
+
+  def test_other_charge_not_compared(self):
+    s = R.describe(R.group([_run(energy="-100.0"), _run(charge="1", energy="-99.0")]))
+    self.assertEqual(s[1]["changes"], ["q=1"])
+    self.assertIsNone(s[0]["delta_kj"])
+    self.assertIsNone(s[1]["delta_kj"])
 
 
 class TestScan(Base):
@@ -129,7 +166,10 @@ class TestScan(Base):
     self.assertEqual(runs[1]["basis_name"], "")
     self.assertTrue(runs[1]["qmmm"])
     self.assertTrue(runs[-1].get("live"))
-    self.assertEqual([len(g) for g in R.group(runs)], [1, 3, 1])
+    # the iterative pTB refinement stays one series across the pause before
+    # the latest run; only a change of settings starts a new one
+    self.assertEqual([len(g) for g in R.group(runs)], [1, 4])
+    self.assertEqual([len(g) for g in R.group(runs, gap=60)], [1, 3, 1])
 
   def test_switch_and_back(self):
     runs = R.scan(self.dir, self.name)

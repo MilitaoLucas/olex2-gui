@@ -2145,6 +2145,92 @@ def make_NSA2_GUI(method):
 
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
+
+
+def _source_table_settings():
+  """(file name, settings recorded in its header or None) of the table chosen as the source"""
+  from utilities import nsa2_read_settings_header, _nsa2_resolve_existing_path
+  name = software()
+  path = _nsa2_resolve_existing_path(name)
+  if not path:
+    return name, None
+  try:
+    return name, nsa2_read_settings_header(path)
+  except Exception as error:
+    print("NoSpherA2: could not read the settings recorded in %s: %s" % (name, error))
+    return name, None
+
+
+def _repeat_generator(rec):
+  """(offered source, reason) for repeating the calculation a table records:
+  the generator it names, or the same program in another version"""
+  if not rec:
+    return None, ""
+  recorded = str(rec.get('SOURCE') or '').strip()
+  offered = [s.strip() for s in NoSpherA2_instance.getwfn_softwares().split(';')
+             if s.strip() and " -- " not in s and not s.strip().startswith("Get ")]
+  if not recorded:
+    return None, "The table does not record which program made it."
+  if any(x in recorded for x in (".tsc", ".tshb", ".gbw", ".wfn", ".wfx", ".molden", ".fchk", ".ffn", ".xtb")):
+    return None, "This table was made from the file %s, not by a calculation that can be repeated here." % recorded
+  if recorded in offered:
+    return recorded, ""
+  program = recorded.split()[0].lower()
+  same = [s for s in offered if s.split()[0].lower() == program]
+  if same:
+    return same[-1], ""
+  return None, "%s, which made this table, is not available here." % recorded
+
+
+def tsc_summary_GUI():
+  """spy.NoSpherA2.tsc_summary_GUI(): the settings the selected table was made with"""
+  from hybrid_GUI import make_tsc_summary_GUI
+  name, rec = _source_table_settings()
+  repeat, why_not = _repeat_generator(rec)
+  return make_tsc_summary_GUI(rec, name, repeat, why_not)
+OV.registerFunction(tsc_summary_GUI, False, "NoSpherA2")
+
+
+# what a table records but must not be set again: its source is chosen through
+# change_tsc_generator, PTB_PREREFINE_DONE belongs to the refinement that made it
+_NOT_RESTORED = ('SOURCE', 'PTB_PREREFINE_DONE')
+
+def setup_repeat_run():
+  """spy.NoSpherA2.setup_repeat_run(): select the generator that made the selected
+  table, with the settings it recorded, so the calculation can be run again."""
+  from utilities import _NSA2_RECORDED, _NSA2_XCW_RECORDED, _NSA2_HYBRID_PART
+  from variableFunctions import _nsa2_cast_value, _nsa2_normalize_param_key
+  name, rec = _source_table_settings()
+  repeat, why_not = _repeat_generator(rec)
+  if not repeat:
+    olx.Echo(why_not or "%s records no settings to repeat." % name, m="error")
+    return
+  # selecting the generator resets what other generators use and checks method
+  # and basis; the recorded values go in afterwards, over its defaults
+  change_tsc_generator("  " + repeat)
+  params = list(_NSA2_RECORDED) + list(_NSA2_XCW_RECORDED)
+  for part in OV.ListParts() or []:
+    params += ["Hybrid.%s_Part%d" % (key, part) for key in _NSA2_HYBRID_PART]
+  restored = []
+  for param in params:
+    key = param.upper()
+    if key in _NOT_RESTORED or key not in rec:
+      continue
+    nsa2_set_param(param, _nsa2_cast_value(_nsa2_normalize_param_key(param), rec[key]))
+    restored.append(param)
+  if repeat.split()[0] != "Hybrid":
+    # a recorded choice the program no longer offers falls back, with a note
+    keep_valid_choice('method', get_functional_list(repeat), "PBE")
+    keep_valid_choice('basis_name', NoSpherA2_instance.getBasisListStr(), "def2-SVP")
+  recorded = str(rec.get('SOURCE') or '').strip()
+  if recorded != repeat:
+    print("NoSpherA2: %s made %s; %s is used instead." % (recorded, name, repeat))
+  print("NoSpherA2: set up %s with the settings of %s (%s)." % (repeat, name, ", ".join(restored)))
+  OV.SetItemState("h3-NoSpherA2-extras 2")
+  OV.SetItemState("h3-NoSpherA2-extras 1")
+  olex.m("html.Update()")
+OV.registerFunction(setup_repeat_run, False, "NoSpherA2")
+
 OV.registerFunction(make_CE_GUI, False, "NoSpherA2")
 OV.registerFunction(make_XCW_GUI, False, "NoSpherA2")
 

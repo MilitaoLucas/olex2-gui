@@ -1704,7 +1704,57 @@ def nsa2_model_fingerprint():
     fp['hkl_sha256'] = _nsa2_sha256(hkl)
   except Exception:
     pass
+  h_model = nsa2_hydrogen_model()
+  if h_model:
+    fp['h_model'] = h_model
   return fp
+
+
+def nsa2_hydrogen_model():
+  """'<n> H, <r> riding, <a> anisotropic' for the current model, or '' without H.
+  A table is computed at the H positions of its model: riding H sit where the
+  AFIX puts them (NoSpherA2 stretches them to neutron distances first), free H
+  where HAR left them. The ADPs do not enter the table at all."""
+  n = riding = aniso = 0
+  try:
+    for i in range(int(olx.xf.au.GetAtomCount())):
+      if str(olx.xf.au.IsAtomDeleted(i)).lower() == "true" or str(olx.xf.au.IsPeak(i)).lower() == "true":
+        continue
+      if str(olx.xf.au.GetAtomType(i)).strip() not in ("H", "D"):
+        continue
+      n += 1
+      try:
+        if int(str(olx.xf.au.GetAtomAfix(i))):
+          riding += 1
+      except ValueError:
+        pass
+      if str(olx.xf.au.GetAtomU(i)).count(",") >= 5:
+        aniso += 1
+  except Exception as error:
+    print("Note: could not describe the hydrogen model (%s)." % error)
+    return ''
+  return "%d H, %d riding, %d anisotropic" % (n, riding, aniso) if n else ''
+
+
+def nsa2_hydrogen_model_difference(then, now):
+  """What differs between two nsa2_hydrogen_model() texts, as a phrase, or ''.
+  Only riding vs free matters for the table (it moves the H); anisotropic vs
+  isotropic is said as well, since the model is then not the one refined."""
+  def counts(text):
+    m = re.match(r"\s*(\d+) H, (\d+) riding, (\d+) anisotropic", str(text or ''))
+    return tuple(int(x) for x in m.groups()) if m else None
+  a, b = counts(then), counts(now)
+  if not a or not b or a == b:
+    return ''
+  if a[0] != b[0]:
+    return "number of H (table: %d, model: %d)" % (a[0], b[0])
+  out = []
+  if a[1] != b[1]:
+    out.append("riding H (table: %d of %d, model: %d) - the table was computed at other H positions"
+               % (a[1], a[0], b[1]))
+  if a[2] != b[2]:
+    out.append("anisotropic H (table: %d of %d, model: %d)" % (a[2], a[0], b[2]))
+  return "; ".join(out)
 
 
 def nsa2_settings_header(origin):

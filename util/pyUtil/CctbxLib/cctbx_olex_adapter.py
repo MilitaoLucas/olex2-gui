@@ -4524,7 +4524,8 @@ def _report_table_fingerprint(table_file_name):
   Warn, never refuse -- a transformed cell that still resolves every index
   runs without any other sign.
   """
-  from NoSpherA2.utilities import nsa2_read_settings_header, nsa2_model_fingerprint
+  from NoSpherA2.utilities import nsa2_read_settings_header, nsa2_model_fingerprint, \
+    nsa2_hydrogen_model_difference
   recorded = nsa2_read_settings_header(table_file_name) or {}
   now = nsa2_model_fingerprint()
   name = _table_name_for_log(table_file_name)
@@ -4546,6 +4547,9 @@ def _report_table_fingerprint(table_file_name):
     print("WARNING: %s was computed for reflection file %s, which has changed"
           " since (now %s); recalculate the table."
           % (name, recorded.get('HKL'), now.get('hkl')))
+  h_diff = nsa2_hydrogen_model_difference(recorded.get('H_MODEL'), now.get('h_model'))
+  if h_diff:
+    print("WARNING: %s was computed for another hydrogen model: %s." % (name, h_diff))
 
 
 def _wanted_indices(crystal_symmetry):

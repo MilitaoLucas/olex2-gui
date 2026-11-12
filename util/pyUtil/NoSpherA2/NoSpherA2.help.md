@@ -239,6 +239,8 @@ The Thakkar independent atom model uses spherical atomic densities. **Cations** 
 # NoSpherA2 Extras
 Additional settings of the selected program. For **ELMOdb**: **Tailor made residues** defines residues that are not in the ELMO database.
 
+When a .tsc/.tscb file is the source, this shows the settings it was calculated with, as recorded in the file when Olex2 made it: program, level of theory, charge and multiplicity, SCF convergence, crystal environment, partitioning, and the cell, space group, wavelength and reflection file it was **Computed For** (with a warning when these differ from the current model). **Setup Repeat Run** selects that program again with these settings, so you can check them in the Options and calculate a new table. If the recorded program version is not installed, another version of the same program is used. Tables made outside Olex2 carry no such record.
+
 # NoSpherA2 Properties
 The utilities in this tool tab are for plotting and visualizing the results of NoSpherA2. A calculated wavefunction must be present in the main work folder for the structure (all calculated .wfn files are stored within the olex2 folder). Select the desired resolution of the grid to be calculated and the properties to be evaluated, then click **Calculate** to start the background generation of grids. When done the calculated maps will become available from the **Plot** drop-down menu. Choose *wire* from the **View** drop-down menu and select the desired map from the **Plot** menu. It may be necessary to drag the **Level** slider to view the map.
 

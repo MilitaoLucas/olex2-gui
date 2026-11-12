@@ -936,3 +936,172 @@ def make_XCW_GUI():
     t += "<td width='40%'></td>"
   t += end_line()
   return t
+
+
+# ---------------------------------------------------------------------------
+# Summary of a table chosen as the source: what it was made with, read from
+# the NSA2_<param>: lines nsa2_settings_header wrote into its header. Laid out
+# like the Options panel of a generator, with values instead of controls.
+# ---------------------------------------------------------------------------
+
+def _esc(value):
+  return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+def _yes_no(value):
+  v = str(value).strip().lower()
+  if v in ('true', '1', 'yes'):
+    return "Yes"
+  if v in ('false', '0', 'no'):
+    return "No"
+  return str(value)
+
+def _space_group(hall):
+  try:
+    from cctbx import sgtbx
+    return str(sgtbx.space_group_info(symbol="Hall: " + hall))
+  except Exception:
+    return hall  # an odd Hall symbol is still worth showing as it is
+
+def _relativistic(rec, suffix=""):
+  if _yes_no(rec.get('RELATIVISTIC' + suffix, '')) != "Yes":
+    return "Off"
+  return rec.get('ORCA_RELATIVISTIC') or "On"
+
+def _value_rows(pairs, columns=4):
+  """rows of g_field cells for the (label, value) pairs that have a value;
+  values are text, except those given as ('html', ...) tuples"""
+  cells = []
+  for label, value in pairs:
+    if isinstance(value, tuple):
+      cells.append(g_field(label, value[1]))
+    elif str(value).strip():
+      cells.append(g_field(label, _esc(value)))
+  return [cells[i:i + columns] for i in range(0, len(cells), columns)]
+
+def _model_differences(rec, current):
+  """what of the model the table was made for differs from the current one"""
+  differ = []
+  for key, name in (('CELL', "cell"), ('HALL', "space group"), ('WAVELENGTH', "wavelength"),
+                    ('HKL_SHA256', "reflections")):
+    then, now = str(rec.get(key, '')).strip(), str(current.get(key.lower(), '')).strip()
+    if then and now and then != now:
+      differ.append(name)
+  from utilities import nsa2_hydrogen_model_difference
+  if nsa2_hydrogen_model_difference(rec.get('H_MODEL'), current.get('h_model')):
+    differ.append("hydrogen model")
+  return differ
+
+def make_tsc_summary_GUI(rec, file_name, repeat_source=None, why_not=""):
+  """The settings a table was made with (rec: its NSA2_ header, keys upper-cased)
+  and a button that sets them up again for a new calculation."""
+  from utilities import nsa2_model_fingerprint
+  help_label = "NoSpherA2_Extras"
+  if not rec:
+    return grid_row([g_text("%s carries no record of the settings it was made with "
+                            "(made outside Olex2, or by an older version)." % _esc(file_name),
+                            span=4, bold=False)], help_label)
+
+  # only what its own generator used: the header records every GUI setting
+  try:
+    from NoSpherA2.calc_log import foreign_keys
+    rec = dict((k, v) for k, v in rec.items() if k not in foreign_keys(rec))
+  except Exception as error:
+    print("Note: could not tell which settings belong to %s (%s)." % (file_name, error))
+  origin = rec.get('ORIGIN') or rec.get('SOURCE') or "?"
+  if rec.get('ORCA_VERSION') and rec['ORCA_VERSION'] not in origin:
+    origin = "%s %s" % (origin, rec['ORCA_VERSION'])
+  date = rec.get('DATE', '')
+  if len(date) == 19:  # 2026-11-12_10-11-12
+    date = "%s %s" % (date[:10], date[11:16].replace('-', ':'))
+  t = grid_row([g_group("Calculation", [[g_field("Program", _esc(origin), span=2),
+                                         g_field("Date", _esc(date), span=2)]])], help_label)
+
+  hybrid = str(rec.get('SOURCE', '')).strip() == "Hybrid"
+  grid = rec.get('BECKE_ACCURACY', '')
+  wfn = [] if hybrid else _value_rows([("Basis", rec.get('BASIS_NAME', '')),
+                                       ("Method", rec.get('METHOD', '')),
+                                       ("Relat.", _relativistic(rec) if 'RELATIVISTIC' in rec else ''),
+                                       ("Model", rec.get('SELECTED_SALTED_MODEL', ''))], 3)
+  cells = []
+  if wfn:
+    cells.append(g_group("Wavefunction", wfn, span=3))
+  if grid:
+    cells.append(g_group("Integration", [[g_field("Grid", _esc(grid))]], span=1))
+  if cells:
+    t += grid_row(cells, help_label)
+
+  if hybrid:
+    parts = sorted(set(int(k.rsplit('_PART', 1)[1]) for k in rec
+                       if k.startswith('HYBRID.') and k.rsplit('_PART', 1)[1].isdigit()))
+    for part in parts:
+      def p(key):
+        return rec.get('HYBRID.%s_PART%d' % (key, part), '')
+      rows = _value_rows([("Program", p('SOFTWARE')), ("Method", p('METHOD')), ("Basis", p('BASIS_NAME')),
+                          ("Charge", p('CHARGE')), ("Mult.", p('MULTIPLICITY')),
+                          ("Relat.", _relativistic(rec, '_PART%d' % part) if p('RELATIVISTIC') else '')], 3)
+      if rows:
+        t += grid_row([g_group("PART %d" % part, rows)], "NoSpherA2_Hybrid")
+
+  molecule = [] if hybrid else _value_rows([("Charge", rec.get('CHARGE', '')),
+                                            ("Mult.", rec.get('MULTIPLICITY', ''))], 2)
+  scf = _value_rows([("Thresh.", rec.get('ORCA_SCF_CONV', '')),
+                     ("Strategy", rec.get('ORCA_SCF_STRATEGY', '')),
+                     ("Damping", rec.get('PYSCF_DAMPING', '')),
+                     ("DIIS", rec.get('DIIS', ''))], 2)
+  cells = []
+  if molecule:
+    cells.append(g_group("Molecule", molecule, span=2))
+  if scf:
+    cells.append(g_group("SCF Convergence", scf, span=2))
+  if cells:
+    t += grid_row(cells, help_label)
+
+  env = []
+  if _yes_no(rec.get('ORCA_USE_CRYSTAL_QMMM', '')) == "Yes":
+    env.append(("Embed.", ('html', "%s, %s&nbsp;&Aring;" % (_esc(rec.get('ORCA_CRYSTAL_QMMM_TYPE', '?')),
+                                                             _esc(rec.get('ORCA_CRYSTAL_QMMM_RADIUS', '?'))))))
+  elif rec.get('ORCA_SOLVATION'):
+    env.append(("Solvent", rec['ORCA_SOLVATION']))
+  if rec.get('CLUSTER_RADIUS', '') not in ('', '0', '0.0'):
+    env.append(("Cluster", ('html', "%s&nbsp;&Aring;" % _esc(rec['CLUSTER_RADIUS']))))
+    env.append(("Grow", _yes_no(rec.get('CLUSTER_GROW', ''))))
+  env += [("Cations", rec.get('THAKKAR_CATIONS', '')), ("Anions", rec.get('THAKKAR_ANIONS', ''))]
+  env = _value_rows(env)
+  if env:
+    t += grid_row([g_group("Crystal Environment", env)], help_label)
+
+  partitioning = _value_rows([("Scheme", rec.get('NOSPHERA2_PARTITION', '')),
+                              ("Restrain", '' if rec.get('RI_RESTRAINT') == 'Off' else rec.get('RI_RESTRAINT', '')),
+                              ("XCW", rec.get('XCW.PARTITION', '')),
+                              ("XCW tshb", _yes_no(rec['XCW.TSHB']) if rec.get('XCW.TSHB') else '')])
+  if rec.get('PTB_PREREFINE_DONE'):
+    partitioning.append([g_text("pTB pre-refinement was run before this table", span=4, bold=False)])
+  if partitioning:
+    t += grid_row([g_group("Partitioning", partitioning)], help_label)
+
+  model = []
+  if rec.get('CELL'):
+    model.append([g_field("Cell", _esc(rec['CELL']), span=4)])
+  model += _value_rows([("Sp. grp", _space_group(rec['HALL']) if rec.get('HALL') else ''),
+                        ("Lambda", rec.get('WAVELENGTH', '')),
+                        ("HKL", rec.get('HKL', ''))], 3)
+  if rec.get('H_MODEL'):
+    model.append([g_field("H", _esc(rec['H_MODEL']), span=4)])
+  if any(rec.get(k) for k in ('CELL', 'HALL', 'WAVELENGTH', 'HKL_SHA256', 'H_MODEL')):
+    differ = _model_differences(rec, nsa2_model_fingerprint())
+    if differ:
+      status = "<b>Differs from the current model: %s.</b> The table may not fit this structure." % ", ".join(differ)
+    else:
+      status = "Matches the current model."
+    model.append([g_raw(status, span=4)])
+  if model:
+    t += grid_row([g_group("Computed For", model)], help_label)
+
+  if repeat_source:
+    t += grid_row([g_button("NoSpherA2_setup_repeat@refine", "Setup Repeat Run",
+                            "spy.NoSpherA2.setup_repeat_run()", span=2,
+                            hint="Select %s with these settings for a new calculation" % _esc(repeat_source)),
+                   g_text("with %s" % _esc(repeat_source), span=2, bold=False)], help_label)
+  elif why_not:
+    t += grid_row([g_text(_esc(why_not), span=4, bold=False)], help_label)
+  return t
