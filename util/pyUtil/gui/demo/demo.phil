@@ -1,0 +1,16 @@
+user
+{
+  demo
+    .help = "Demo mode (spy.gui.demo.mode): typed console commands shown large in the info box. Change with spy.gui.demo.set(name, value); saved with the user settings (DataDir/user.phil)"
+  {
+    seconds = 7
+      .type = int
+      .help = "Seconds before the info box is cleared again"
+    font_size = 34
+      .type = int
+      .help = "Point size of the console font in the info box while demo mode is on"
+    prefix = "|>> "
+      .type = str
+      .help = "Shown before each typed command; the pipe reaches below the baseline, so every line sits the same in the box"
+  }
+}
