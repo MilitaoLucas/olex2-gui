@@ -168,6 +168,55 @@ def _refln_columns(block):
   return None
 
 
+def _free_from_pdbx_flag(block, h, k, l, rows):
+  """ Free rows from _refln.pdbx_r_free_flag when _refln.status marks none.
+
+  The column's convention varies by program: CCP4 FreeR_flag has 0 = free (often
+  with values 0..19), others use 1 = free. A wrong guess silently swaps the work
+  and test sets (30OR: taking 1 as free would hold out 95 %). More than two
+  values: the CCP4 convention, 0 is free (refused without a 0). Two values: the
+  rarer one is free. Either way only if it is at most 25 % of the rows, and the
+  choice is printed. Returns (row indices, description) or ([], None).
+  """
+  flag = None
+  for n in ("_refln.pdbx_r_free_flag", "_refln_pdbx_r_free_flag"):
+    if n in block:
+      flag = block[n]
+      break
+  if flag is None:
+    return [], None
+  by_index = {}
+  for i in range(len(h)):
+    try:
+      by_index[(int(h[i]), int(k[i]), int(l[i]))] = int(flag[i])
+    except (TypeError, ValueError):
+      pass
+  values = [by_index.get(r[:3]) for r in rows]
+  counts = {}
+  for v in values:
+    if v is not None:
+      counts[v] = counts.get(v, 0) + 1
+  if len(counts) < 2:
+    return [], None
+  if len(counts) > 2:
+    if 0 not in counts:
+      print("pdbx_r_free_flag: cannot tell which value is the test set (%s); not used"
+            % counts)
+      return [], None
+    # CCP4 FreeR_flag: values 0..N-1 about equally common, 0 is the test set
+    rare = 0
+  else:
+    rare = min(counts, key=counts.get)
+  if counts[rare] > 0.25*len(rows):
+    print("pdbx_r_free_flag: no value is rare enough to be a test set (%s); not used"
+          % counts)
+    return [], None
+  print("Free set from _refln.pdbx_r_free_flag: value %d taken as free (%d of %d rows;"
+        " counts %s)" % (rare, counts[rare], len(rows), counts))
+  return ([i for i, v in enumerate(values) if v == rare],
+          "_refln.pdbx_r_free_flag = %d" % rare)
+
+
 def sf_cif_to_hkl(src, dst, scale=None):
   """Write the deposited structure factors of src as a SHELX .hkl.
 
@@ -216,6 +265,9 @@ def sf_cif_to_hkl(src, dst, scale=None):
       free.append(len(rows) - 1)
   if not rows:
     return None
+  free_source = "_refln.status 'f'" if free else None
+  if not free:
+    free, free_source = _free_from_pdbx_flag(block, h, k, l, rows)
 
   # HKLF 4 holds intensity and sigma in F8.2, and an overflowing field runs
   # into its neighbour with no complaint from anyone. Eight characters take
@@ -258,6 +310,7 @@ def sf_cif_to_hkl(src, dst, scale=None):
     'unusable': unusable,
     'free': len(free),
     'free_file': free_file,
+    'free_source': free_source,
     'sigma_floored': floored,
     'intensities_deposited': is_intensity,
   }

@@ -219,6 +219,16 @@ def normal_equation_class(*args, **kwds):
             params += (r_free*100,)
             self.step_info['_refine_ls_R_factor_R_free'] = r_free
             self.step_info['_refine_ls_number_reflns_R_free'] = n_free
+        elif (ll is None and getattr(self.refinement, 'free_cycle_column', None)
+              and self.refinement.free_cycle_column()):
+          # least squares with a held-out test set: R_free every cycle, from the
+          # refinement's own model (see FullMatrixRefine._r_free_least_squares)
+          r_free = self.refinement.compute_r_free()
+          header += "  % 8.4f" if r_free is not None else "  %8s"
+          params += (r_free*100 if r_free is not None else "n/a",)
+          if r_free is not None:
+            self.step_info['_refine_ls_R_factor_R_free'] = r_free
+            self.step_info['_refine_ls_number_reflns_R_free'] = self.refinement.f_sq_obs_free.size()
         # DAMP shortened this cycle's step: say so on the cycle's own row (report_damp)
         damp = getattr(self.iterations_object, 'last_damp', None)
         if damp is not None:

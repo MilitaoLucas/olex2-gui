@@ -57,20 +57,34 @@ def load_deposited(fo_sq, path=None):
     return None
   if not held:
     return None
-  # the file lists the asymmetric unit as deposited; fo_sq may hold either
-  # member of a Friedel pair, so both are accepted
+  # the file lists the asymmetric unit of the depositing program, which need not be
+  # cctbx's (CCP4 and cctbx choose differently in some space groups), and fo_sq may
+  # hold either member of a Friedel pair: both sides are mapped to cctbx's
+  # non-anomalous asymmetric unit before matching
+  held = set(_asu_list(fo_sq, list(held)))
+  mine = _asu_list(fo_sq, fo_sq.indices())
   flags = flex.bool(fo_sq.indices().size(), False)
   n = 0
-  for i, h in enumerate(fo_sq.indices()):
-    if h in held or (-h[0], -h[1], -h[2]) in held:
+  for i, h in enumerate(mine):
+    if h in held:
       flags[i] = True
       n += 1
   if n == 0:
     print("%s lists %d reflections, none of which are in the data - ignored"
           % (os.path.basename(path), len(held)))
     return None
-  print("Free set: %d of %d reflections, as deposited" % (n, flags.size()))
+  matched = len(held.intersection(mine))
+  print("Free set: %d of %d reflections, as deposited (%d of the %d listed are in"
+        " the data)" % (n, flags.size(), matched, len(held)))
   return flags
+
+
+def _asu_list(fo_sq, indices):
+  """ Each index as its member of cctbx's non-anomalous asymmetric unit, in order. """
+  from cctbx import miller
+  ms = miller.set(fo_sq.crystal_symmetry(), flex.miller_index(list(indices)),
+                  anomalous_flag=False).map_to_asu()
+  return [tuple(h) for h in ms.indices()]
 
 
 def _index_hash(h, seed):
@@ -108,30 +122,46 @@ def stratified_flags(fo_sq, fraction, n_shells=None):
   if n == 0:
     return None
   uc = fo_sq.unit_cell().parameters()
+  # without the reflection count: with it, any OMIT/SHEL/MERG change redrew the whole set.
+  # Python's hash() of a tuple of ints/floats is not salted, so this is stable across runs
   seed = hash((fo_sq.space_group().type().number(),
-               tuple(round(p, 4) for p in uc), n)) & 0x7fffffff
+               tuple(round(p, 4) for p in uc))) & 0x7fffffff
 
-  # by resolution, highest d first, so shell 0 is the innermost
-  d = fo_sq.d_spacings().data()
-  order = flex.sort_permutation(d, reverse=True)
-  flags = flex.bool(n, False)
+  # The draw goes over groups, not reflections: every member of a group maps to the same
+  # index of the non-anomalous asymmetric unit (Friedel mates, and any symmetry mates
+  # an unmerged array holds). A shell boundary or the cut between two mates would
+  # otherwise split a pair, and the work member's Fo then leaks its test mate into the
+  # refinement and the mask (sucrose: 5 of 160).
   indices = fo_sq.indices()
+  d = fo_sq.d_spacings().data()
+  groups = {}
+  for i, k in enumerate(_asu_list(fo_sq, indices)):
+    groups.setdefault(k, []).append(i)
+  # by resolution, highest d first, so shell 0 is the innermost; the key breaks ties
+  # so the order does not depend on the order of the input
+  keys = sorted(groups, key=lambda k: (-d[groups[k][0]], k))
+  ng = len(keys)
+  flags = flex.bool(n, False)
   taken = 0
   for s in range(n_shells):
-    lo = (s*n)//n_shells
-    hi = ((s + 1)*n)//n_shells
+    lo = (s*ng)//n_shells
+    hi = ((s + 1)*ng)//n_shells
     if hi <= lo:
       continue
-    shell = order[lo:hi]
-    # the fraction of this shell, chosen by the index hash so the result is
-    # the same on every run
-    want = int(round((hi - lo)*fraction))
+    shell = keys[lo:hi]
+    # the fraction of this shell's reflections, whole groups chosen by the index
+    # hash so the result is the same on every run
+    want = int(round(sum(len(groups[k]) for k in shell)*fraction))
     if want <= 0:
       continue
-    keyed = sorted(shell, key=lambda i: _index_hash(indices[i], seed))
-    for i in keyed[:want]:
-      flags[i] = True
-    taken += want
+    got = 0
+    for k in sorted(shell, key=lambda k: _index_hash(k, seed)):
+      if got >= want:
+        break
+      for i in groups[k]:
+        flags[i] = True
+      got += len(groups[k])
+    taken += got
   if taken == 0:
     return None
   return flags

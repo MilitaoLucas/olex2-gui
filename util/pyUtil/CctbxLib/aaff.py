@@ -581,6 +581,15 @@ all calculation parameters are properly recorded."""
           _annotations = annotations
           _esds = esds
           n_annotations = len(_annotations)
+          riding_labels = set()
+          try:
+            from smtbx.refinement.constraints.geometrical.hydrogens import hydrogens
+            _scs = self.cctbx.normal_eqns.xray_structure.scatterers()
+            for c in (getattr(self.cctbx, 'constraints', None) or []):
+              if isinstance(c, hydrogens):
+                riding_labels.update(_scs[i].label for i in c.constrained_site_indices)
+          except Exception:
+            pass
           matrix_run = 0
           while matrix_run < n_annotations:
             an = _annotations[matrix_run]
@@ -590,11 +599,17 @@ all calculation parameters are properly recorded."""
             if '.occ' in an:
               matrix_run += 1
             elif '.x' in an:
+              # riding H follow their pivot (and flip at disorder boundaries), so
+              # they do not decide whether the HAR cycle has converged
+              if an.partition('.')[0] in riding_labels:
+                matrix_run += 3
+                continue
               xyz = new_atom['crd'][0]
               xyz2 = old_atom['crd'][0]
-              esd = _esds[matrix_run]
-              if esd > 0:
-                for x in range(3):
+              for x in range(3):
+                # each coordinate by its own s.u. (y and z used the s.u. of x)
+                esd = _esds[matrix_run + x]
+                if esd > 0:
                   res = abs(xyz[x] - xyz2[x]) / esd
                   if res > results.max_dxyz:
                     results.update_xyz(res, an)

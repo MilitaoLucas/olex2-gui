@@ -392,6 +392,42 @@ class OlexCctbxAdapter(object):
       self.xray_structure(construct_restraints=True)
     return self._restraints_manager
 
+  _free_set_refused = None
+
+  def _free_set_key(self):
+    """ (use_free_set, likelihood target, fraction, shells, deposited .free) - what the
+    free split depends on, so a cached split is redone when any of it changes.
+
+    HKLF 2 (per-reflection wavelengths), HKLF 5 (twin batches) and electron
+    diffraction carry per-reflection data that a plain select() would drop, so the
+    free set is refused for them, once and loudly, rather than split wrongly.
+    """
+    use = bool(OV.GetParam('snum.refinement.use_free_set'))
+    if use:
+      why = None
+      if self.hklf_code == 2 or self.hklf_code >= 5:
+        why = "HKLF %d data" % self.hklf_code
+      elif OV.IsEDRefinement():
+        why = "electron-diffraction refinement"
+      if why:
+        if self._free_set_refused != why:
+          print("Free set not used: not supported for %s" % why)
+          self._free_set_refused = why
+        use = False
+    if not use:
+      return (False,)
+    try:
+      import free_set
+      p = free_set._deposited_path()
+      dep = (p, os.path.getmtime(p)) if p else None
+    except Exception:
+      dep = None
+    return (True,
+            likelihood_target_on(),
+            OV.GetParam('snum.refinement.free_fraction'),
+            OV.GetParam('snum.refinement.free_shells'),
+            dep)
+
   def initialise_reflections(self, force=False, verbose=False, doFilter=True):
     self.cell = self.olx_atoms.getCell()
     self.space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
@@ -458,6 +494,11 @@ class OlexCctbxAdapter(object):
       update = True
     if force or omit is None or omit != self.reflections._omit or _shel != self.reflections._shel:
       update = True
+    # what the free split depends on; the split is cached with the reflections, so
+    # a change here (toggling use_free_set, a new .free, switching to ML) must redo it
+    free_key = self._free_set_key()
+    if getattr(self.reflections, '_free_key', None) != free_key:
+      update = True
 
     if update or self.observations is None:
       self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'], doFilter=doFilter)
@@ -465,18 +506,30 @@ class OlexCctbxAdapter(object):
       # every solver refines against the work set without any of them knowing
       # there is a test set at all - the alternative is teaching each mode
       # separately and having one of them quietly not do it.
-      self.free_flags = None
-      self.f_sq_obs_free = None
-      if OV.GetParam('snum.refinement.use_free_set'):
+      free_flags = f_sq_obs_free = None
+      if free_key[0]:
         import free_set
         fo_sq = self.reflections.f_sq_obs_filtered
-        self.free_flags = free_set.flags_for(fo_sq)
-        if self.free_flags is not None:
-          self.f_sq_obs_free = fo_sq.select(self.free_flags)
-          self.reflections.f_sq_obs_filtered = fo_sq.select(~self.free_flags)
+        free_flags = free_set.flags_for(fo_sq)
+        if free_flags is not None:
+          f_sq_obs_free = fo_sq.select(free_flags)
+          if free_key[1]:
+            # a likelihood target holds its free reflections out of the target
+            # itself and needs them in the observations to estimate alpha and
+            # beta: the test set stays in, as its free flags (see get_ml_kwds)
+            pass
+          else:
+            self.reflections.f_sq_obs_filtered = fo_sq.select(~free_flags)
+      # kept with the cached reflections: before, they lived on the adapter only,
+      # so the second refinement of a session (cached observations) had no R_free
+      self.reflections._free_key = free_key
+      self.reflections.free_flags = free_flags
+      self.reflections.f_sq_obs_free = f_sq_obs_free
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
+    self.free_flags = getattr(self.reflections, 'free_flags', None)
+    self.f_sq_obs_free = getattr(self.reflections, 'f_sq_obs_free', None)
 
     if verbose:
       self.reflections.show_summary()
@@ -490,7 +543,46 @@ class OlexCctbxAdapter(object):
     r = self.reflections
     fo_sq = r.f_sq_obs_merged if self.hklf_code >= 5 or r.f_sq_obs_filtered is None\
       else r.f_sq_obs_filtered
-    return fo_sq.average_bijvoet_mates()
+    # the test set must not reach the mask: f_mask is the masked Fo-Fc map, so it
+    # fits each reflection whose Fo goes in (30OR: R_free 0.049 with the free Fo,
+    # 0.108 without, before any refinement). Least squares already refines on the
+    # work set; a likelihood target keeps the free reflections in, as flags.
+    flags = None
+    if fo_sq is r.f_sq_obs_filtered and likelihood_target_on():
+      key = getattr(r, '_free_key', None)
+      if key and key[0]:
+        flags = getattr(r, 'free_flags', None)
+      if flags is None:
+        # the likelihood's own set (get_ml_kwds, also when the drawn split came back
+        # empty): a pure function of the indices, and the observations are built
+        # from this array (HKLF 4)
+        from smtbx.refinement import sigma_a
+        flags = sigma_a.deterministic_free_flags(
+          fo_sq, float(OV.GetParam('snum.refinement.ml.free_fraction')))
+      if flags.size() != fo_sq.size():
+        flags = None
+    if flags is None:
+      return fo_sq.average_bijvoet_mates()
+    # deterministic_free_flags splits Friedel pairs: averaged, a free reflection's
+    # work mate would bring its index (and nearly its Fo) back into the mask
+    return fo_sq.select(~flags).average_bijvoet_mates().lone_set(
+      fo_sq.select(flags).average_bijvoet_mates())
+
+  def mask_extra_set(self, fo_sq):
+    """ The reflections the refinement or R_free needs f_mask for that the mask's
+    own Fo (mask_fo_sq, fo_sq here) leave out - the test set - or None. A mask
+    predicts f_mask there from the work data alone, so R_free stays honest. """
+    r = self.reflections
+    if self.hklf_code >= 5 or r.f_sq_obs_filtered is None:
+      return None
+    needed = r.f_sq_obs_filtered
+    key = getattr(r, '_free_key', None)
+    if (key and key[0] and not key[1]
+        and getattr(r, 'f_sq_obs_free', None) is not None):
+      # least squares: the test set left the observations, R_free still needs it
+      needed = needed.concatenate(r.f_sq_obs_free)
+    extra = needed.average_bijvoet_mates().lone_set(fo_sq)
+    return extra.set() if extra.size() else None
 
   def f_calc(self, miller_set,
              apply_extinction_correction=True,
@@ -660,7 +752,9 @@ class OlexCctbxAdapter(object):
       weighting.compute(fc, scale_factor)
       return weighting.weights
 
-  def load_mask(self):
+  def load_mask(self, check_f_calc=False):
+    """ check_f_calc: return None (so the caller recomputes) when the stored .fab was
+    made against the other kind of F_calc; only the refinement asks for it. """
     import gui
     prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
     _ =  os.path.splitext(OV.HKLSrc())[0]
@@ -673,6 +767,14 @@ class OlexCctbxAdapter(object):
       lines, fab_path, prg = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
       if not lines:
         return
+      if prg == "Olex2" and check_f_calc:
+        # an IAM mask reused under a NoSpherA2 table (or the reverse) put the other
+        # model's residual into the solvent; recompute instead (refinement.py does on None)
+        msg = _fab_f_calc_mismatch(lines) or _fab_held_out_mismatch(
+          lines, held_out_fingerprint(self.mask_extra_set(self.mask_fo_sq())))
+        if msg:
+          print(msg)
+          return None
       for l in lines:
         fields = l.split()
         if len(fields) < 5:
@@ -819,7 +921,49 @@ class OlexCctbxAdapter(object):
     """
     return self.is_inversion_twin_ex()[0]
 
-def write_fab(f_mask, fab_path=None):
+FAB_F_CALC_TAG = "_olex2_mask_f_calc"
+FAB_HELD_OUT_TAG = "_olex2_mask_held_out"
+
+
+def likelihood_target_on():
+  """ As FullMatrixRefine.get_ml_target: MLF/MLI picked, or the older ml.enabled. """
+  return (OV.GetParam('snum.refinement.method') in ('MLF', 'MLI')
+          or bool(OV.GetParam('snum.refinement.ml.enabled')))
+
+
+def held_out_fingerprint(extra):
+  """ 'none', or the count and a checksum of the reflections a mask was made without
+  (mask_extra_set), so a stored .fab is reused only for the same test set. """
+  if extra is None:
+    return "none"
+  import zlib
+  idx = sorted(tuple(h) for h in extra.indices())
+  return "%d %08x" % (len(idx), zlib.crc32(repr(idx).encode()) & 0xffffffff)
+
+
+def _fab_held_out_mismatch(lines, current):
+  """ A message if the stored mask may hold the Fo of reflections this refinement
+  holds out, else None. No test set now: any stored mask will do. """
+  if current == "none":
+    return None
+  tag = None
+  for l in lines:
+    if l.startswith(FAB_HELD_OUT_TAG):
+      tag = l[len(FAB_HELD_OUT_TAG):].strip().strip("'")
+  if tag == current:
+    return None
+  return ("The stored mask (.fab) %s; this refinement holds out %s reflections:"
+          " recomputing it without their Fo"
+          % ("was made for another test set" if tag else
+             "does not record which reflections it was made without",
+             current.split()[0]))
+
+
+def write_fab(f_mask, fab_path=None, f_calc_kind=None, held_out=None):
+  """ f_calc_kind: 'spherical' or 'aspherical <table>', the F_calc the mask was made
+  against; written after the terminator (readers stop there) so load_mask can tell
+  an IAM mask from a NoSpherA2 one. None (unknown, e.g. a copied mask) writes no tag.
+  held_out: held_out_fingerprint() of the reflections left out of the mask's Fo. """
   if not fab_path:
     fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
   with open(fab_path, "w") as f:
@@ -827,6 +971,33 @@ def write_fab(f_mask, fab_path=None):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
       print(line, file=f)
     print("0 0 0 0.0 0.0", file=f)
+    if f_calc_kind:
+      # quoted: one CIF-style token, whatever the table's name holds
+      print("%s '%s'" % (FAB_F_CALC_TAG, f_calc_kind), file=f)
+    if held_out:
+      print("%s '%s'" % (FAB_HELD_OUT_TAG, held_out), file=f)
+
+
+def _fab_f_calc_mismatch(lines):
+  """ A message if the stored mask was made against the other kind of F_calc than this
+  refinement uses (spherical vs NoSpherA2 table), else None. Untagged (older) files
+  are trusted as before, with a note when a table is in use. """
+  tag = None
+  for l in lines:
+    if l.startswith(FAB_F_CALC_TAG):
+      tag = l[len(FAB_F_CALC_TAG):].strip().strip("'")
+  now_aspherical = bool(OV.IsNoSpherA2())
+  if tag is None:
+    if now_aspherical:
+      print("Note: the stored mask (.fab) does not record which F_calc it was made from;"
+            " if it predates the NoSpherA2 table, recompute it")
+    return None
+  was_aspherical = tag.startswith("aspherical")
+  if was_aspherical != now_aspherical:
+    return ("The stored mask was made from %s F_calc, this refinement uses %s ones:"
+            " recomputing it" % ("table" if was_aspherical else "spherical",
+                                 "table" if now_aspherical else "spherical"))
+  return None
 
 from smtbx import absolute_structure
 
@@ -3259,6 +3430,10 @@ class OlexCctbxFlipSolvent(OlexCctbxAdapter):
             / flex.sum(f_obs.data()/scale)
         r_last = r
       self._f_mask = f_obs.customized_copy(data=f_mask)
+      extra = self.mask_extra_set(fo_sq)
+      if extra is not None:
+        self._f_mask = self._f_mask.concatenate(extra.array(
+          data=extra.structure_factors_from_map(map=flipped).data()*fft_scale))
       electrons = flex.sum(flipped)*fft_scale
       print("Flip solvent: %d cycles, threshold %.2f sigma, %d void(s), "
             "%.0f electrons in the region, R %.4f"
@@ -3364,6 +3539,12 @@ class OlexCctbxFlatSolvent(OlexCctbxAdapter):
       self.r_fit, self.k_sol, self.b_sol = best
       self._f_mask = f_obs.customized_copy(
         data=self.k_sol*flex.exp(-self.b_sol*ss)*f_solv)
+      extra = self.mask_extra_set(fo_sq)
+      if extra is not None:
+        # k_sol and B_sol come from the work set; the region needs no data
+        self._f_mask = self._f_mask.concatenate(extra.array(
+          data=self.k_sol*flex.exp(-self.b_sol*extra.sin_theta_over_lambda_sq().data())
+               *extra.structure_factors_from_map(map=region).data()*self.region_scale))
 
       volume = m.n_solvent_grid_points()/m.mask.data.size() \
           * xs.unit_cell().volume()
@@ -3435,7 +3616,23 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       xs = self.xray_structure()
       fo_sq = self.mask_fo_sq()
       use_set_completion = OV.GetParam('snum.masks.use_set_completion')
-      mask = masks.mask(xs, fo_sq, use_set_completion=use_set_completion)
+      # the test set is not in fo_sq but needs f_mask (R_free, and the likelihood,
+      # whose observations hold it: a missing f_mask is an assertion in smtbx)
+      extra = self.mask_extra_set(fo_sq)
+      mask = masks.mask(xs, fo_sq,
+                        use_set_completion=use_set_completion or extra is not None)
+      if extra is not None:
+        print("Mask made without the Fo of %d held-out reflections; their f_mask is"
+              " predicted from the work data" % extra.size())
+        if use_set_completion:
+          # test reflections beyond the work set's d_min are not in its complete set
+          missing = extra.lone_set(mask.complete_set)
+          if missing.size():
+            mask.complete_set = mask.complete_set.concatenate(missing)
+        else:
+          # completed by the measured test reflections only: a NoSpherA2 table made
+          # without set completion holds the measured indices and no others
+          mask.complete_set = fo_sq.set().concatenate(extra)
       # set before compute() so structure_factors sees it; getattr because the
       # cctbx bundle here is refreshed separately from this working copy
       if hasattr(mask, 'boundary_smearing'):
@@ -3470,7 +3667,14 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
-        write_fab(mask.f_mask())
+        # structure_factors() above used the table F_calc exactly when NoSpherA2 is on
+        if OV.IsNoSpherA2():
+          from variableFunctions import nsa2_get_param
+          kind = "aspherical %s" % os.path.basename(str(nsa2_get_param("file")).strip())
+        else:
+          kind = "spherical"
+        write_fab(mask.f_mask(), f_calc_kind=kind,
+                  held_out=held_out_fingerprint(extra))
       out = StringIO()
       fo2 = self.reflections.f_sq_obs
       fo2.show_comprehensive_summary(f=out)

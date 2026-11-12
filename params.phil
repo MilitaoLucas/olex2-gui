@@ -29,6 +29,20 @@ snum
   protein_restraints_done = False
     .type = bool
     .expert_level = 3
+  auto_protein_h_uiso = True
+    .type = bool
+    .short_caption = Riding hydrogen U on load
+    .help = "Once per polymer imported from an mmCIF or PDB file, make the U "
+            "of hydrogens on riding positions ride on their carrier atom (fix "
+            "HUiso). The import brings them in with free U, which on a protein "
+            "adds hundreds of poorly determined parameters. An existing .ins "
+            "or .res is left as it is."
+  protein_h_uiso_done = False
+    .type = bool
+    .expert_level = 3
+  polymer_from_import = False
+    .type = bool
+    .expert_level = 3
   is_polymer = False
     .type = bool
     .help = "Set when the renderer traced a polymer backbone for this "
@@ -627,6 +641,12 @@ routines requiring structure refinement
         inner shells can lose a disproportionate share - and R_free is then \
         noisiest where the model is least constrained. 1 restores an \
         unstratified draw.
+    free_every_cycle = True
+      .type = bool
+      .short_caption = R_free every cycle
+      .help = With a test set held out, print R_free in every cycle of a \
+        least-squares refinement as well as at the end (likelihood targets \
+        always do). Costs one objective-only pass over the test set per cycle.
 
     auto
       .short_caption = Autotidy

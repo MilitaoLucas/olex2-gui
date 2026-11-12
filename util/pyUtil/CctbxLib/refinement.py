@@ -164,6 +164,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
         "bundled cctbx.")
     return target
 
+  def _ml_flags_from_free_set(self):
+    """ The use_free_set test set as flags over self.observations.fo_sq, or None. """
+    free = getattr(self, 'f_sq_obs_free', None)
+    if free is None or free.size() == 0:
+      return None
+    fo = self.observations.fo_sq
+    pairs = miller.match_indices(fo.indices(), free.indices()).pairs()
+    flags = flex.bool(fo.size(), False)
+    flags.set_selected(pairs.column(0), True)
+    if flags.count(True) != free.size():
+      print("Free set: only %d of %d held-out reflections are in the likelihood's"
+            " observations; using its own free set instead" % (flags.count(True), free.size()))
+      return None
+    return flags
+
   def get_ml_kwds(self):
     """ The maximum-likelihood settings, or nothing at all.
 
@@ -193,10 +208,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       " are not valid under the likelihood; the s.u.s in particular are too"
       " small. Do not publish them.", m="warning")
     fraction = float(OV.GetParam('snum.refinement.ml.free_fraction'))
+    # one test set, not two: with use_free_set on, the deposited/drawn set stays in
+    # the observations (initialise_reflections) and is the likelihood's free set too,
+    # so R_free under ML is the R_free a least-squares run reports
+    flags = self._ml_flags_from_free_set()
+    if flags is None:
+      flags = sigma_a.deterministic_free_flags(self.observations.fo_sq, fraction)
     return dict(
       ml_target=target,
-      ml_free_flags=sigma_a.deterministic_free_flags(
-        self.observations.fo_sq, fraction),
+      ml_free_flags=flags,
       ml_free_reflections_per_bin=int(
         OV.GetParam('snum.refinement.ml.free_reflections_per_bin')))
 
@@ -269,7 +289,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         # we need to reinitialise reflections
         self.initialise_reflections()
       if not OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
-        self.f_mask = self.load_mask()
+        self.f_mask = self.load_mask(check_f_calc=True)
       if not self.f_mask:
         _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
         if _ == "Platon":
@@ -1127,6 +1147,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         f(r['r_free'], "%.4f"), f(r['restrained_goof'], "%.3f"),
         "%.4f (%d)" % d if d else "-", "%.3f (%d)" % a if a else "-"), file=log)
 
+  def free_cycle_column(self):
+    """ Whether least-squares cycles print R_free: a test set is held out and
+    snum.refinement.free_every_cycle (default on) asks for it. It costs one
+    objective-only pass over the test set per cycle. """
+    fo = getattr(self, 'f_sq_obs_free', None)
+    return (fo is not None and fo.size() > 0 and
+            bool(OV.GetParam('snum.refinement.free_every_cycle', True)))
+
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
     #restraints = self.normal_eqns.n_restraints
@@ -1149,6 +1177,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if ref_method in ('MLF', 'MLI'):
         header += "  -LL_free/n      R_free"
         hr +=     "  ----------  --------"
+    if (ref_method not in ('MLF', 'MLI') and self.free_cycle_column()):
+      header += "    R_free"
+      hr +=     "  --------"
     # Name the optimiser right above its own table, so that a log holding
     # several runs cannot leave it in doubt which one produced which. The
     # console has had this already, from the line naming the thread counts, so
@@ -1818,6 +1849,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_number_restraints'] = n_restraints
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
+    if getattr(self, 'r_free', None) is not None:
+      # the names the per-cycle step_info already uses (mmCIF _refine.ls_R_factor_R_free
+      # in DDL1 spelling); before, a held-out test set left no trace in the CIF
+      cif_block['_refine_ls_R_factor_R_free'] = fmt % self.r_free
+      cif_block['_refine_ls_number_reflns_R_free'] = self.f_sq_obs_free.size()
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
     if not self.objective_only:
       self.normal_eqns.analyse_shifts()
@@ -2803,13 +2839,55 @@ class FullMatrixRefine(OlexCctbxAdapter):
     fo_sq = getattr(self, 'f_sq_obs_free', None)
     if fo_sq is None or fo_sq.size() == 0:
       return None
+    if getattr(self.normal_eqns, 'ml_target', None) is not None:
+      # the test set is the likelihood's free set (get_ml_kwds), evaluated in its build
+      return self.normal_eqns.r_free()[0]
     try:
-      import free_set
-      fc = self.f_calc(fo_sq, ignore_inversion_twin=True)
-      return free_set.r1(fo_sq, fc)
+      return self._r_free_least_squares(fo_sq)
     except Exception as e:
       print("R_free could not be computed: %s" %e)
       return None
+
+  def _r_free_least_squares(self, fo_sq):
+    """ R1 on the test set from the refinement's own model, at the work-set scale.
+
+    Before, this was a spherical (IAM) F_calc with no solvent mask and a scale
+    refitted on the test set: under NoSpherA2 or with a mask it described another
+    model than the one refined (30OR: 0.0769 against 0.0725 for the refined model).
+    Now an objective-only least-squares build over the test set, with the same
+    linearisation (form-factor table included), solvent mask, extinction and
+    weighting as the refinement, and the refinement's Fo^2 scale - R1 and R_free
+    are the same formula on the two sets.
+    """
+    free_ls = getattr(self, '_free_ls', None)
+    if free_ls is None:
+      if self.get_twin_fractions():
+        print("R_free not computed: twinned refinements are not supported")
+        return None
+      f_mask = None
+      if self.f_mask is not None:
+        f_mask = self.f_mask.common_set(fo_sq)
+        if f_mask.size() != fo_sq.size():
+          print("R_free not computed: the solvent mask covers %d of the %d held-out"
+                " reflections (snum.masks.use_set_completion off?)"
+                % (f_mask.size(), fo_sq.size()))
+          return None
+      # built once per run and rebuilt objective-only on each call (per cycle too)
+      free_ls = self._free_ls = self.normal_equations_class(
+        fo_sq.as_xray_observations(), self, self.olx_atoms,
+        table_file_name=self.table_file_name,
+        f_mask=f_mask,
+        restraints_manager=None,
+        weighting_scheme=self.weighting,
+        log=None,
+        may_parallelise=self.worth_parallelising(),
+        use_openmp=OV.GetParam("user.refinement.use_openmp"),
+        max_memory=int(OV.GetParam("user.refinement.openmp_mem")))
+    free_ls.build_up(objective_only=True)
+    f_obs = free_ls.observations.fo_sq.f_sq_as_f()
+    f_calc = free_ls.fc_sq.f_sq_as_f()
+    return f_obs.r1_factor(f_calc, scale_factor=math.sqrt(self.normal_eqns.scale_factor()),
+                           assume_index_matching=True)
 
   def show_summary(self, log=None):
     _ = self.cycles.n_iterations

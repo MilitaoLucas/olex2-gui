@@ -466,6 +466,11 @@ class OlexRefinementModel(object):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in filtered_atoms]
+          if distilled_atoms and restraint_type in ('bond', 'angle', 'dihedral', 'bond_similarity'):
+            # sym_ops cover filtered_atoms only; with i_seqs still holding every atom the pairs
+            # (triples, ...) after a dropped group took the next group's operator and the
+            # last ones got none, and the "skipped" fixed group was restrained anyway
+            i_seqs = kwds['i_seqs'] = [a[0] for a in filtered_atoms]
           if restraint_type in ('angle', 'dihedral'):
             esd_val = restraint['esd1']*180/math.pi
           else:
@@ -2022,6 +2027,16 @@ def on_polymer_absent():
 OV.registerFunction(on_polymer_absent)
 
 
+def _count_free_h_uiso():
+  """ Isotropic H/D atoms whose U_iso is a free parameter (no riding owner). """
+  n = 0
+  for name, xyz, occu, u, anh, uiso_owner, element, fixed in \
+      OlexRefinementModel(False).iterator():
+    if element in ('H', 'D') and len(u) == 1 and uiso_owner is None:
+      n += 1
+  return n
+
+
 def on_polymer_loaded():
   """Pick refinement settings suited to a polymer. Called from the renderer.
 
@@ -2035,6 +2050,10 @@ def on_polymer_loaded():
   """
   try:
     OV.SetParam('snum.is_polymer', True)
+    # an mmCIF/PDB import passes here first as that file; an existing .ins/.res
+    # opened directly never does, and keeps its hydrogen U as they are
+    if not OV.IsFileType('ires'):
+      OV.SetParam('snum.polymer_from_import', True)
     if OV.GetParam('snum.refinement.method') == 'Gauss-Newton':
       OV.SetParam('snum.refinement.method', 'CGLS-J')
       olx.Echo("Polymer: refining with CGLS-J, which does not form the "
@@ -2070,6 +2089,22 @@ def on_polymer_loaded():
       OV.SetParam('snum.protein_restraints_done', True)
       import ProteinRestraints
       ProteinRestraints.restrain()
+    # Once per structure: hydrogens on riding positions arrive from an mmCIF with
+    # free U_iso - 30OR: ~550 extra parameters, several ran to U = 1.0 A^2.
+    # Phenix idealises H ADPs (regHadp); here the existing
+    # 'fix HUiso' makes each H with one non-metal neighbour ride on it (1.5 x U on O,
+    # else 1.2). Reported, and undone per atom like any other U constraint.
+    if (OV.GetParam('snum.auto_protein_h_uiso', True) and
+        OV.GetParam('snum.polymer_from_import') and
+        not OV.GetParam('snum.protein_h_uiso_done') and
+        OV.IsFileType('ires')):
+      OV.SetParam('snum.protein_h_uiso_done', True)
+      n_before = _count_free_h_uiso()
+      if n_before:
+        olex.m("fix HUiso")
+        n_after = _count_free_h_uiso()
+        olx.Echo("Polymer: %d hydrogen U_iso set to ride on their carrier atom (fix HUiso);"
+                 " %d left free" % (n_before - n_after, n_after))
     # The renderer draws a cartoon by itself above a residue count, but knows
     # nothing of the representation and colour this user settled on. Scheduled
     # rather than called: this runs from inside CreateObjects, which is in the
