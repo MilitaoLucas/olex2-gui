@@ -2,9 +2,9 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SYMDISORDER';help_ext=Symmetry-Disorder-Display;1 -->
   $+
     html.Snippet(GetVar(default_link),
-    "value=Complete Complex",
-    "hint=Show one metal with its ligands complete and no other metal. Uses the selected metal or the first one in the asymmetric unit.",
-    "onclick=spy.gui.symdisorder.complete_complex()",
+    "value=Complete Fragments",
+    "hint=Complete every fragment on screen, however it was grown. A metal is never added, so bridging ligands end without the metal beyond them.",
+    "onclick=spy.gui.symdisorder.complete_fragments()",
     "td1=<td width='50%' align='left'>"
     )
   $-
@@ -12,7 +12,7 @@
   $+
     html.Snippet(GetVar(default_link),
     "value=Group Other Orientation",
-    "hint=Select one atom of a group disordered by symmetry. The other orientation goes into group dp1.",
+    "hint=Select one atom of each group disordered by symmetry, in the orientation to keep. The other orientations go into group dp1.",
     "onclick=if spy.check_for_selection() then 'spy.gui.symdisorder.group_other_orientation()'",
     "td1=<td width='50%' align='left'>"
     )

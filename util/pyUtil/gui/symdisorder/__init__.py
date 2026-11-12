@@ -9,15 +9,15 @@ Pure-Python helpers live in _core.py and are testable without Olex2.
 
 Public API (registered with Olex2 as spy.gui.symdisorder.*)
 -----------------------------------------------------------
-    complete_complex()
+    complete_fragments()
     group_other_orientation()
 """
 
 from __future__ import annotations
 import math
 import re
-from ._core import colour_orientations, is_metal
-from ._core import complete_complex as _complete_complex
+from ._core import colour_orientations, fractional, PolymericError
+from ._core import complete_fragments as _complete_fragments
 
 
 # ===========================================================================
@@ -107,16 +107,32 @@ def _read_grown_model(olex, olx) -> dict:
       printed_of[key] = name
 
   # the bonds as Olex2 has them (FREE etc. honoured): walk out from each atom
-  bonds = set()
-  for key, name in name_of.items():
-    _select_only(olex, [name])
+  def walk(names) -> set:
+    _select_only(olex, names)
     olex.m('sel atom bonds -a')
     olex.m('sel bond atoms -a')
-    for neighbour in _sel_names(olex):
+    return set(_sel_names(olex))
+
+  bonds = set()
+  for key, name in name_of.items():
+    for neighbour in walk([name]):
       if neighbour in printed:
         other = key_at(printed[neighbour])
         if other is not None and other != key:
           bonds.add(frozenset((key, other)))
+
+  # A bond between two a.u. atoms is not reached that way, as neither has a name.
+  # Walking from a bare label (all its copies) reaches the bare label of each a.u.
+  # atom bonded to any copy: one that no named copy reaches is the a.u. copy's.
+  au_key = {label: key_at(xyz, label) for label, xyz in printed.items() if '_' not in label}
+  for label, key in au_key.items():
+    named = set()
+    for copy, name in name_of.items():
+      if atoms[copy][0] == label:
+        named |= {n for n in walk([name]) if n in au_key}
+    for neighbour in walk([label]) & set(au_key):
+      if neighbour != label and neighbour not in named and au_key[neighbour] is not None:
+        bonds.add(frozenset((key, au_key[neighbour])))
   olex.m('sel -u')
   return {'atoms': atoms, 'bonds': bonds, 'name_of': name_of,
           'printed_of': printed_of, 'key_at': key_at}
@@ -125,41 +141,55 @@ def _read_grown_model(olex, olx) -> dict:
 def group_other_orientation() -> None:
   """
     For a picture of a grown structure with symmetry-disordered groups: from
-    one selected atom of a disordered group, find the clash-free orientation it
-    belongs to and put the other orientation, with its bonds, in group dp1.
-    Changes only the selection and the group, not the model.
+    the selected atoms, one per independent disordered group, find the
+    clash-free orientation each belongs to and put the other orientations, with
+    their bonds, in group dp1. Changes only the selection and the group, not
+    the model.
     """
   try:
     import olex
     import olx
     seed = _sel_names(olex)
-    if len(seed) != 1:
-      print(f"[symdisorder] Select exactly one atom of a disordered group first (selected: {len(seed)})")
+    if not seed:
+      print("[symdisorder] Select one atom of each disordered group first, in the orientation to keep")
       return
-    seed_xyz = tuple(float(v) for v in olex.f('crd()').split())
+    seed_xyz = tuple(float(v) for v in olex.f('crd()').split()) if len(seed) == 1 else None
 
     model = _read_grown_model(olex, olx)
     atoms, name_of = model['atoms'], model['name_of']
     if not model['bonds']:
       print("[symdisorder] Could not read the bonds of the structure")
       return
-    colours, labels, n_sets, n_clashes = colour_orientations(atoms, model['bonds'])
+    colours, labels, n_sets, n_clashes, sets = colour_orientations(atoms, model['bonds'])
     if colours is None:
       print("[symdisorder] The contacts contradict each other: no clash-free split exists")
       return
-    seed_key = model['key_at'](seed_xyz)
-    if seed_key not in colours:
+    if seed_xyz is not None:
+      seed_keys = [model['key_at'](seed_xyz)]
+    else:
+      key_of_printed = {name: key for key, name in model['printed_of'].items()}
+      seed_keys = [key_of_printed.get(name) for name in dict.fromkeys(seed)]
+    if any(k not in colours for k in seed_keys):
       found = ' '.join(sorted(labels)) or 'none found'
-      print(f"[symdisorder] The selected atom is not part of the disorder (disordered atoms: {found})")
-      return
-    if n_sets != 1:
-      print(f"[symdisorder] Found {n_sets} independent sets of atoms: one selected atom cannot decide them all")
+      print(f"[symdisorder] A selected atom is not part of the disorder, or is not an atom "
+            f"(disordered atoms: {found})")
       return
 
-    chosen = [k for k, c in colours.items() if c == colours[seed_key]]
-    other = [k for k, c in colours.items() if c != colours[seed_key]]
+    keep = {}
+    for k in seed_keys:
+      if keep.setdefault(sets[k], colours[k]) != colours[k]:
+        print("[symdisorder] Two selected atoms are in different orientations of the same group")
+        return
+    undecided = len(set(sets.values()) - set(keep))
+    if undecided:
+      print(f"[symdisorder] Found {n_sets} independent disordered groups, with no atom selected in "
+            f"{undecided} of them: select one atom in each, in the orientation to keep")
+      return
+
+    chosen = [k for k, c in colours.items() if c == keep[sets[k]]]
+    other = [k for k, c in colours.items() if c != keep[sets[k]]]
     no_name = [k for k in colours if k not in name_of]
-    if len({colours[k] for k in no_name}) > 1:
+    if any(k in chosen for k in no_name) and any(k in other for k in no_name):
       print("[symdisorder] The asymmetric unit atoms fall in both orientations: this case is not handled")
       return
 
@@ -193,11 +223,12 @@ def group_other_orientation() -> None:
     print(f"[symdisorder] group_other_orientation failed: {e}")
 
 
-def complete_complex() -> None:
+def complete_fragments() -> None:
   """
-    Show one metal with its ligands complete and no other metal: from the
-    asymmetric unit, generate exactly those atoms. Uses the selected metal, or
-    the first one in the asymmetric unit. Changes the display, not the model.
+    Complete every fragment on screen, however it was grown: generate exactly
+    the atoms that are missing, and nothing else. A metal is never added, so a
+    bridging ligand is complete without the metal beyond it. Changes the
+    display, not the model.
     """
   try:
     import olex
@@ -210,42 +241,57 @@ def complete_complex() -> None:
         continue
       crd = tuple(float(v) for v in olx.xf.au.GetAtomCrd(i).replace(',', ' ').split())
       atoms.append((olx.xf.au.GetAtomlabel(i), element, crd))
-    metals = [n for n, a in enumerate(atoms) if is_metal(a[1])]
-    if not metals:
-      print("[symdisorder] There is no metal in the asymmetric unit")
+    if not atoms:
+      print("[symdisorder] There are no atoms in the asymmetric unit")
       return
-    selected = {name.split('_')[0] for name in _sel_names(olex)}
-    wanted = [n for n in metals if atoms[n][0] in selected]
-    metal = (wanted or metals)[0]
+    index_of = {a[0]: n for n, a in enumerate(atoms)}
+    cell = tuple(float(v) for v in olx.xf.au.GetCell().replace(',', ' ').split())
 
-    radii = {}
+    # every copy on screen, from the info table (Cartesian)
+    olex.m('sel -u')
+    olex.m('sel atoms where xatom.bai.z > 0')
+    on_screen = sorted({name.split('_')[0] for name in _sel_names(olex)} & set(index_of))
+    olex.m('sel -u')
+    shown, radii = [], {}
+    for label in on_screen:
+      for line in olx.Info(label, f=True, p=6).splitlines():
+        t = line.split()
+        if len(t) > 4 and t[0] == label:
+          xyz = tuple(float(v) for v in t[2:5])
+          shown.append((index_of[label], fractional(cell, xyz)))
+          radii.setdefault(atoms[index_of[label]][1], float(t[-2]))
     for label, element, _ in atoms:
       if element not in radii:
         rows = [line.split() for line in olx.Info(label, f=True, p=3).splitlines()]
         radii[element] = next(float(t[-2]) for t in rows if len(t) > 4 and t[0] == label)
+    if not shown:
+      print("[symdisorder] No atoms are shown")
+      return
 
     ops = [(tuple(tuple(row[:3]) for row in m), tuple(row[3] for row in m))
            for m in olex_core.SGInfo()['MatricesAll']]
     identity = (((1, 0, 0), (0, 1, 0), (0, 0, 1)), (0.0, 0.0, 0.0))
     if identity not in ops:
       ops.insert(0, identity)
-    cell = tuple(float(v) for v in olx.xf.au.GetCell().replace(',', ' ').split())
-    codes, strays = _complete_complex(cell, atoms, ops, metal, radii)
+    try:
+      codes = _complete_fragments(cell, atoms, ops, shown, radii)
+    except PolymericError as e:
+      print(f"[symdisorder] The bonds from {e} lead on without end (a polymer?): nothing changed")
+      return
 
-    olex.m('sel -u')
-    olex.m('fuse')
+    added = sum(len(labels) for labels in codes.values())
+    if not added:
+      print(f"[symdisorder] All fragments on screen are complete ({len(shown)} atoms)")
+      return
     for code, labels in codes.items():
       olx.Sgen(*labels, code)
-
     olex.m('sel atoms where xatom.bai.z > 0')
-    shown = len(_sel_names(olex))
+    now = len(_sel_names(olex))
     olex.m('sel -u')
-    expected = len(atoms) + sum(len(labels) for labels in codes.values())
-    print(f"[symdisorder] {atoms[metal][0]} with complete ligands: {shown} atoms shown, {expected} expected")
-    if strays:
-      print("[symdisorder] Asymmetric unit atoms outside this complex are still shown: " + ' '.join(strays))
+    print(f"[symdisorder] Fragments completed: {added} atoms added, {now} shown, "
+          f"{len(shown) + added} expected")
   except Exception as e:
-    print(f"[symdisorder] complete_complex failed: {e}")
+    print(f"[symdisorder] complete_fragments failed: {e}")
 
 
 # ===========================================================================
@@ -254,7 +300,7 @@ def complete_complex() -> None:
 
 try:
   from olexFunctions import OV
-  OV.registerFunction(complete_complex,        False, 'gui.symdisorder')
+  OV.registerFunction(complete_fragments,      False, 'gui.symdisorder')
   OV.registerFunction(group_other_orientation, False, 'gui.symdisorder')
 except ImportError:
   pass
