@@ -523,6 +523,10 @@ class create_cctbx_xray_structure(object):
           else:
             a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'])
         behaviour_of_variable.pop(5)
+        # Olex2 U23 U13 U12 -> U12 U13 U23: iotbx.builders reads its U flags in
+        # u_star order (as the ShelX parser hands them over), which matters
+        # once it releases symmetry-implied fixes component by component
+        behaviour_of_variable[-3:] = behaviour_of_variable[-1:-4:-1]
       else:
         a = xray.scatterer(label=label,
                            site=site,

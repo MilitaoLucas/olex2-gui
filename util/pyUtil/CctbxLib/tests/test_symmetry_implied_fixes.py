@@ -47,7 +47,23 @@ def test_builder_flags():
   assert _grad_u_aniso([])
 
 
+def test_u_order_reaches_builder():
+  # 2-fold along c (P 1 1 2 setting): U13, U23 follow from symmetry, U12 is
+  # free. iotbx.builders reads U flags in u_star order; handed Olex2's
+  # U23 U13 U12 order, a real U12 fix would look like a U23 one and be dropped
+  cell, sg, site = (5, 6, 7, 90, 90, 100), "hall: P 2", (0, 0, 0.3)
+  U13 = 10
+  def grad(fixed):
+    atoms = [("X1", site, 1.0, (0.02, 0.02, 0.03, 0.0, 0.0, 0.001), None,
+              None, "C", [{'index': i} for i in fixed] or None)]
+    xs = cc.create_cctbx_xray_structure(cell, sg, iter(atoms)).structure()
+    return xs.scatterers()[0].flags.grad_u_aniso()
+  assert grad([U13, U23])
+  assert not grad([U12])
+
+
 if __name__ == '__main__':
   test_implied_indices()
   test_builder_flags()
+  test_u_order_reaches_builder()
   print("OK")

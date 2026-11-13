@@ -374,8 +374,9 @@ class OlexRefinementModel(object):
         for var in fixed_vars:
           if var['index'] not in implied:
             behaviour_of_variable[var['index']] = False
-      if not all(behaviour_of_variable[:3]):
+      if not all(behaviour_of_variable[1:4]):  # catom_var_name_X..Z; 0 is Scale
         fixed_xyz.add(i)
+      # old: [:3] read Scale, X, Y - an atom with only z fixed was not "fixed"
       if not all(behaviour_of_variable[-6:]):
         fixed_adp.append(i)
       if a.get('adp') != None:
