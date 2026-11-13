@@ -2905,8 +2905,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print_l = []
     pad = 2 - len(str(self.cycles.n_iterations))
     print_l.append(f"  ++++++++++++++++++++++++++++++++++++++++++++++++{pad*'+'}++++++ After {self.cycles.n_iterations} CYCLE{plural} +++")
-    print_l.append(f"  +  R1:       {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last}")
-    print_l.append("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data)
+    # with a test set held out R1 is over the work set only: either the set left the
+    # observations (use_free_set) or the likelihood's own flags exclude it
+    ws = getattr(self.normal_eqns, '_work_selection', None)
+    work_only = getattr(self, 'r_free', None) is not None or (ws is not None and ws() is not None)
+    r = "R_work" if work_only else "R1"
+    print_l.append(f"  +  {r + ':':<9} {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last}")
+    print_l.append(f"  +  {r + ' (all):':<9} %.4f for %i reflections" %self.r1_all_data)
     if getattr(self, 'r_free', None) is not None:
       print_l.append("  +  R_free:   %.4f for %i reflections held out" % (
         self.r_free, self.f_sq_obs_free.size()))

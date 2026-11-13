@@ -396,14 +396,15 @@ Refinement aborted."""
         # accepted here and then had "no density" there (30OR, a water moved
         # 0.8 A: the run stopped). The post-run write below stays.
         # ids carry the atom's site; a .ins rounds sites, so every id differs a
-        # little from the table's. Stale means moved beyond the C++ reader's
-        # 0.5 A (0.4 A kept as margin), measured from the sites in the ids.
+        # little from the table's. Stale means moved beyond 80 % of the C++
+        # reader's tolerance (margin), measured from the sites in the ids.
         from cctbx.xray import ext as xray_ext
+        from tsc_scatterer_resync import CPP_ID_MATCH_TOLERANCE_ANGSTROM
         uc = get_unit_cell(old_model)
         def moved(a, b):
           try:
             return uc.mod_short_distance(xray_ext.scatterer_id_big(a).get_crd(),
-                                         xray_ext.scatterer_id_big(b).get_crd()) > 0.4
+                                         xray_ext.scatterer_id_big(b).get_crd()) > 0.8 * CPP_ID_MATCH_TOLERANCE_ANGSTROM
           except Exception:
             return False
         stale = sum(1 for i, c in enumerate(internal_to_tsc)

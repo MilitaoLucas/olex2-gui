@@ -517,6 +517,10 @@ def _match_by_residue_triple(labels, model_labels, model_ids):
 
 
 _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM = 2.0
+# the C++ reader (cctbx::xray::scatterer_ID_lookup::default_tolerance, scatterer_lookup.h)
+# matches ids only this close; a column matched here beyond it needs its id rewritten first.
+# Change both together.
+CPP_ID_MATCH_TOLERANCE_ANGSTROM = 0.5
 # how near a symmetry image of the tabulated site an atom must be to count as moved there
 _MAX_SYMMETRY_MOVE_RESIDUAL_ANGSTROM = 0.5
 # beyond this an atom was moved by hand, not by a refinement, and is named
