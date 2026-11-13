@@ -613,7 +613,9 @@ all calculation parameters are properly recorded."""
                 if esd > 0:
                   res = abs(xyz[x] - xyz2[x]) / esd
                   if res > results.max_dxyz:
-                    results.update_xyz(res, an)
+                    # old: update_xyz(res, an) - always the .x label, so a y or z
+                    # shift (the only free one on e.g. a 2-fold along b) read ".x"
+                    results.update_xyz(res, _annotations[matrix_run + x])
               matrix_run += 3
             elif '.uiso' in an:
               esd = _esds[matrix_run]
@@ -672,7 +674,7 @@ all calculation parameters are properly recorded."""
               if order >= 4:
                 adp_D = new_atom['anharmonic_adp']['D']
                 adp2_D = old_atom['anharmonic_adp']['D']
-                for u in range(14):
+                for u in range(15):  # old: range(14) left D3333 out
                   esd_u = _esds[matrix_run + 10 + u]
                   if esd_u > 0:
                     res = abs(adp_D[u] - adp2_D[u]) / esd_u
