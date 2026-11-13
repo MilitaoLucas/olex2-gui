@@ -470,6 +470,26 @@ def _restraint_labels(structure, i_seqs):
   return " ".join(out) or "(no atoms)"
 
 
+def symmetry_implied_variables(crystal_symmetry, site):
+  """Olex2 variable indices (catom_var_name_*: 1-3 x y z, 6-11 U11 U22 U33 U23
+  U13 U12) that the site symmetry of `site` already determines.
+
+  A fix on one of them changes nothing in SHELXL, but olex2.refine
+  (iotbx.builders) refines a site or a U only when all of its components are
+  free. A CIF that gives the symmetry-zero Uij without an s.u. is imported with
+  those fixed (xlib/cif.cpp), which froze the whole ADP - and the anharmonic
+  tensor riding on grad_u_aniso - of every atom on a special position.
+  """
+  ss = crystal_symmetry.special_position_settings(
+    min_distance_sym_equiv=0.2).site_symmetry(site)  # as the builder below
+  if ss.is_point_group_1():
+    return set()
+  free_xyz = set(ss.site_constraints().independent_indices)
+  free_u = set(ss.adp_constraints().independent_indices)
+  u_star_index = (0, 1, 2, 5, 4, 3)  # U11 U22 U33 U23 U13 U12 -> u_star order
+  return ({1 + j for j in range(3) if j not in free_xyz} |
+          {6 + k for k in range(6) if u_star_index[k] not in free_u})
+
 class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None,
@@ -484,8 +504,13 @@ class create_cctbx_xray_structure(object):
     for label, site, occupancy, u, anharmonic_u, uiso_owner, scattering_type, fixed_vars in atom_iter:
       behaviour_of_variable = [True]*12
       if fixed_vars is not None:
+        implied = symmetry_implied_variables(builder.crystal_symmetry, site)
         for var in fixed_vars:
-          behaviour_of_variable[var['index']] = False
+          if var['index'] not in implied:
+            behaviour_of_variable[var['index']] = False
+        # old: every fix applied, so a symmetry-zero Uij froze the whole U
+        # for var in fixed_vars:
+        #   behaviour_of_variable[var['index']] = False
       if len(u) != 1:
         a = xray.scatterer(label=label,
                            site=site,

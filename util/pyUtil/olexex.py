@@ -21,8 +21,8 @@ _is_online = False
 
 import History
 
-import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
+SPD = None
+RPD = None
 
 from olexFunctions import OV
 import variableFunctions
@@ -41,6 +41,13 @@ if haveGUI:
 
 import Report
 import random
+
+
+def _ensure_program_dictionaries():
+  global SPD, RPD
+  if SPD is None or RPD is None:
+    import ExternalPrgParameters
+    SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
 
 def txt():
@@ -353,12 +360,20 @@ class OlexRefinementModel(object):
     fixed_adp = [] # fixed or constrained
     fixed_xyz = set()
     adp_atoms = set()
+    from cctbx import crystal
+    from cctbx_controller import symmetry_implied_variables
+    cs = crystal.symmetry(unit_cell=self.getCell(),
+      space_group_symbol="hall: " + str(olx.xf.au.GetCellSymm("hall")))
     for i, a in enumerate(self._atoms):
       behaviour_of_variable = [True]*12
       fixed_vars = self._fixed_variables.get(i)
       if fixed_vars is not None:
+        # as create_cctbx_xray_structure: a fix the site symmetry implies does
+        # not make the atom's ADP fixed (its ADP restraints were dropped)
+        implied = symmetry_implied_variables(cs, a['crd'][0])
         for var in fixed_vars:
-          behaviour_of_variable[var['index']] = False
+          if var['index'] not in implied:
+            behaviour_of_variable[var['index']] = False
       if not all(behaviour_of_variable[:3]):
         fixed_xyz.add(i)
       if not all(behaviour_of_variable[-6:]):
@@ -975,6 +990,7 @@ if haveGUI:
   OV.registerFunction(setAllMainToolbarTabButtons)
 
 def onRefinementProgramChange(prg_name, method=None, scope='snum'):
+  _ensure_program_dictionaries()
   if prg_name == 'Auto':
     OV.SetParam('%s.refinement.method' %scope, 'Auto')
     return
@@ -990,6 +1006,7 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   onRefinementMethodChange(prg_name, method)
 
 def onRefinementMethodChange(prg_name, method):
+  _ensure_program_dictionaries()
   if method in RPD.programs[prg_name].methods:
     programSettings.doProgramSettings(prg_name, method)
     OV.SetParam('user.refinement.default_method', method)
@@ -998,6 +1015,7 @@ def onRefinementMethodChange(prg_name, method):
 OV.registerFunction(onRefinementMethodChange)
 
 def onSolutionProgramChange(prg_name, method=None, scope='snum', update=True):
+  _ensure_program_dictionaries()
   if prg_name == "Auto":
     OV.SetParam('%s.solution.method' %scope, 'Auto')
     return
@@ -1018,6 +1036,7 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum', update=True):
     onSolutionMethodChange(prg_name, method)
 
 def onSolutionMethodChange(prg_name, method):
+  _ensure_program_dictionaries()
   if method in SPD.programs[prg_name].methods:
     programSettings.doProgramSettings(prg_name, method)
     OV.SetParam('user.solution.default_method', method)
@@ -1036,6 +1055,7 @@ def sortDefaultMethod(prg):
   return default
 
 def get_solution_programs(scope='snum'):
+  _ensure_program_dictionaries()
   global available_solution_programs
   if available_solution_programs is None:
     p = []
@@ -1055,6 +1075,7 @@ def get_solution_programs(scope='snum'):
 OV.registerFunction(get_solution_programs)
 
 def get_solution_methods(prg, scope='snum'):
+  _ensure_program_dictionaries()
   retval = ""
   if prg == '?' or prg == 'Unknown': return retval
   if prg == 'Auto':
@@ -1070,6 +1091,7 @@ def get_solution_methods(prg, scope='snum'):
 OV.registerFunction(get_solution_methods)
 
 def which_program(prg):
+  _ensure_program_dictionaries()
   if "olex2" in prg.name.lower():
     return True
   if prg.name in SPD or prg.name in RPD:
@@ -1100,6 +1122,7 @@ available_refinement_programs = None
 available_solution_programs = None
 
 def get_refinement_programs(scope='snum'):
+  _ensure_program_dictionaries()
   global available_refinement_programs
   if available_refinement_programs is None:
     p = []
@@ -1127,6 +1150,7 @@ OV.registerFunction(get_refinement_programs)
 experimental_refinement_methods = ('MLF', 'MLI')
 
 def get_refinement_methods(prg, scope='snum'):
+  _ensure_program_dictionaries()
   retval = ""
   if prg == '?' or prg == 'Unknown': return retval
   if prg == 'Auto':
@@ -1405,6 +1429,7 @@ if haveGUI:
   OV.registerFunction(AvailableSkins)
 
 def AvailableExternalPrograms(prgType):
+  _ensure_program_dictionaries()
   if prgType == 'refinement':
     dict = RPD
   elif prgType == 'solution':
