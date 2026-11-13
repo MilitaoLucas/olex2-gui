@@ -519,7 +519,7 @@ class wfn_Job(object):
       inp.write(f'dft_grid_radial_precision = {radial_precision}\n')
     
   def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None, cover=True, embed=True):
-    # embedding is on by default, but builds its cluster from the whole displayed model: never for one PART of a
+    # embedding builds its cluster from the whole displayed model: never for one PART of a
     # disordered structure (no asu.xyz is written there, and the GUI hides the switch) nor when the caller says no;
     # a disordered structure gets the switch turned off so the header and CIF do not claim an embedding
     if OV.ListParts() and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM'):
@@ -533,7 +533,7 @@ class wfn_Job(object):
         try:
           self.write_orca_crystal_input(xyz)
         except RuntimeError as e:
-          # embedding is the default, so a structure it cannot cluster falls back to the gas phase instead of failing;
+          # a structure the embedding cannot cluster falls back to the gas phase instead of failing;
           # the switch goes off so the CIF and the GUI do not claim an embedding that did not happen
           print("%s\nEmbedding switched off, writing a gas-phase ORCA input" % e)
           nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False)
