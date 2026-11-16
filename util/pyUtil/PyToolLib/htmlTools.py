@@ -1188,6 +1188,14 @@ def CheckForImage(name):
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
 OV.registerFunction(CheckForImage)
 
+def _inline_button_image(tool_img):
+  """Settings buttons sit inline in a row: they use the settings icon at the
+  height of the html buttons (made with the toolbar icons in PilTools) when
+  it is there."""
+  if tool_img == 'toolbar-settings' and olx.fs.Exists('toolbar_inline-settingsoff.png') == 'true':
+    return 'toolbar_inline-settings'
+  return tool_img
+
 def MakeHoverButton(name, cmds, onoff="off", btn_bg='HtmlTableGroupBgColour'):
   from PilTools import TI
   #global time_add
@@ -1237,7 +1245,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='HtmlTableGroupBgColour'):
     tool_img = name.split('@')[0]
   else:
     tool_img = name#.lower()
-  d.setdefault('tool_img', tool_img)
+  d.setdefault('tool_img', _inline_button_image(tool_img))
   d.setdefault('nameupper', name.upper())
   d.setdefault('name', name)
   #d.setdefault('bt', n[0])
@@ -1302,7 +1310,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='HtmlTableGroupBgColour'):
     tool_img = name.split('@')[0]
   else:
     tool_img = name#.lower()
-  d.setdefault('tool_img', tool_img)
+  d.setdefault('tool_img', _inline_button_image(tool_img))
   d.setdefault('nameupper', name.upper())
   d.setdefault('cmds', cmds.replace("\(","("))
   if "cbtn" in cmds.lower():

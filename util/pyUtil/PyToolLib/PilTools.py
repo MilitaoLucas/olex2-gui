@@ -2333,6 +2333,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #iconIndex.setdefault("mask_ok", (3, 3, {'border':False, 'colourise':self.params.green.rgb } ))
 
     also_make_small_icons_l = ['open']
+    also_make_inline_icons_l = ['settings']
 
     for icon in iconIndex:
       if self.no_need_to_refresh_image_type.get(self.image_type):
@@ -2355,6 +2356,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         for state in states:
           self.name = name = r"toolbar_small-%s%s.png" %(icon,state)
           self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=OV.GetParam('gui.skin.icon_size'))
+          self.save_with_checking_for_needed()
+
+      # inline icons (settings buttons in a row): as tall as the html buttons and
+      # inputs (gui.html.input_height). icon_items makes them icon_size + 2 wide
+      # and 58/64 of that high.
+      if icon in also_make_inline_icons_l:
+        height = OV.GetParam('gui.html.input_height') or 20
+        inline_size = -(-int(height) * 64 // 58) - 2 # ceil
+        for state in states: # every state MakeHoverButton asks for
+          self.name = name = r"toolbar_inline-%s%s.png" %(icon, state)
+          self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=inline_size)
           self.save_with_checking_for_needed()
 
     height = 10

@@ -141,7 +141,7 @@ class CifTools(ArgumentParser):
     for special_item, special_cif in CifTools.specials.items():
       sv = OV.GetParam(special_item, '')
       if sv:
-        self.cif_block[special_cif] = sv
+        self.cif_block[special_cif] = cif_text(sv, special_cif)
       elif special_cif in self.cif_block:
         del self.cif_block[special_cif]
 
@@ -160,6 +160,7 @@ class CifTools(ArgumentParser):
 
   def update_manageable(self):
     self.sort_crystal_dimensions()
+    self.ed_crystal_defaults()
     self.sort_crystal_colour()
     self.sort_publication_info()
     self.sort_diffractometer()
@@ -185,23 +186,38 @@ class CifTools(ArgumentParser):
         self.cif_block.get('_diffrn_measurement_device_type'))
 
 
+  exptl_crystal_sizes = ('_exptl_crystal_size_min',
+                         '_exptl_crystal_size_mid',
+                         '_exptl_crystal_size_max')
+
   def sort_crystal_dimensions(self):
-    dimensions = []
-    exptl_crystal_sizes = ('_exptl_crystal_size_min',
-                           '_exptl_crystal_size_mid',
-                           '_exptl_crystal_size_max')
+    """Put the three sizes in min/mid/max order. Only when all three are
+    numbers: '?' or '.' (not measured, e.g. ED) stay as they were entered."""
     sz = olx.xf.exptl.Size().split('x')
     if sz[0] != '0':
-      dimensions = sz
+      values = sz
     else:
-      for size in exptl_crystal_sizes:
-        value = self.cif_block.get(size)
-        if value is not None and value != "?":
-          dimensions.append(float(value))
-    if dimensions:
-      dimensions.sort()
-      for i in range(len(dimensions)):
-        self.cif_block[exptl_crystal_sizes[i]] = str(dimensions[i])
+      values = [self.cif_block.get(size) for size in self.exptl_crystal_sizes]
+    try:
+      dimensions = sorted(float(v) for v in values)
+    except (TypeError, ValueError):
+      return # missing, '?' or '.'
+    if len(dimensions) != 3:
+      return
+    for key, value in zip(self.exptl_crystal_sizes, dimensions):
+      self.cif_block[key] = str(value)
+
+  def ed_crystal_defaults(self):
+    """ED crystals are rarely measured and have no habit to speak of: '.' for
+    the sizes and 'irregular' for the shape keep checkCIF from alerting on
+    missing items. Values entered in Report > Crystal are kept."""
+    if not OV.IsEDData():
+      return
+    defaults = [(key, '.') for key in self.exptl_crystal_sizes]
+    defaults.append(('_exptl_crystal_description', 'irregular'))
+    for key, default in defaults:
+      if self.cif_block.get(key) in (None, '', '?'):
+        self.cif_block[key] = default
 
   def sort_crystal_colour(self):
     colour = self.cif_block.get('_exptl_crystal_colour')
@@ -273,7 +289,7 @@ class CifTools(ArgumentParser):
             if ID != None:
               email = info(ID,'email')
               address = info(ID,'address')
-              cif_loop.add_row((unicode_to_cif(name), email, unicode_to_cif(address)))
+              cif_loop.add_row((cif_text(name), email, cif_text(address)))
             else:
               cif_loop.add_row((name, "?", "?"))
           if '_publ_author' in self.cif_block.loops:
@@ -664,21 +680,18 @@ class ExtractCifInfo(CifTools):
         OV.SetParam('snum.masks.update_cif', False)
 
     ## I introduced this condition in order NOT to overwrite the temperature value
-    if '_diffrn_ambient_temperature' not in self.cif_block:
-      temp = olx.xf.exptl.Temperature()
-      if temp != 'n/a':
-        temp = temp.split('(')
-        t = 273.15 + float(temp[0])
-        if len(temp) > 1:
-          if '.' in temp[0]:
-            precision = len(temp[0].split('.')[1])
-          else:
-            precision = 0
-          su = float(temp[1].split(')')[0]) / math.pow(10, precision)
-          t = format_float_with_standard_uncertainty(t, su)
-          self.cif_block['_diffrn_ambient_temperature'] = t
-        else:
-          self.cif_block['_diffrn_ambient_temperature'] = '{:.2f}'.format(t)
+    # ED: the CrysAlisPro .cif_od temperature is a stage sensor reading
+    # (e.g. 298(5) or 199(5) K for a crystal measured at 100 K), so TEMP from
+    # the ins wins there, unless the temperature was typed in the GUI.
+    user_modified = OV.GetParam('snum.metacif.user_modified') or []
+    ed_temp = (OV.IsEDData() and olx.xf.exptl.Temperature() != 'n/a'
+               and '_diffrn_ambient_temperature' not in user_modified)
+    if '_diffrn_ambient_temperature' not in self.cif_block or ed_temp:
+      t = self.temperature_from_ins()
+      if t is not None:
+        self.cif_block['_diffrn_ambient_temperature'] = t
+        if ed_temp and '_cell_measurement_temperature' not in user_modified:
+          self.cif_block['_cell_measurement_temperature'] = t
 
     if '_diffrn_ambient_temperature' in self.cif_block and\
        '_cell_measurement_temperature' not in self.cif_block:
@@ -749,6 +762,22 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
     self.conflict_evaluation()
+
+  def temperature_from_ins(self):
+    """TEMP (deg C, optionally with su) as a CIF temperature in K; None if unset."""
+    temp = olx.xf.exptl.Temperature()
+    if temp == 'n/a':
+      return None
+    temp = temp.split('(')
+    t = 273.15 + float(temp[0])
+    if len(temp) > 1:
+      if '.' in temp[0]:
+        precision = len(temp[0].split('.')[1])
+      else:
+        precision = 0
+      su = float(temp[1].split(')')[0]) / math.pow(10, precision)
+      return format_float_with_standard_uncertainty(t, su)
+    return '{:.2f}'.format(t)
 
   def read_files(self, path, save_state):
     all_sources_d = {}
@@ -1309,63 +1338,66 @@ def set_source_file(file_type, file_path):
     OV.SetParam('snum.metacif.%s_file' %file_type, file_path)
 OV.registerFunction(set_source_file)
 
+# CIF 1.1 special codes (IUCr, CIF syntax "character set"): accents as
+# \<mark><letter>, Greek as \<latin letter>
+CIF_ACCENTS = {
+  '\u0301': "'", '\u0300': '`', '\u0302': '^', '\u0308': '"', '\u0303': '~',
+  '\u0327': ',', '\u0328': ';', '\u030b': '>', '\u0304': '=', '\u0307': '.',
+  '\u0306': '(', '\u030c': '<', '\u030a': '%',
+}
+CIF_SPECIALS = {
+  '\u00f8': r'\/o', '\u00d8': r'\/O', '\u0142': r'\/l', '\u0141': r'\/L',
+  '\u0111': r'\/d', '\u0110': r'\/D', '\u00df': r'\&s', '\u0131': r'\?i',
+  '\u00e6': 'ae', '\u00c6': 'AE', '\u0153': 'oe', '\u0152': 'OE',
+  '\u00b0': r'\%', '\u00b1': '+-', '\u2213': '-+', '\u00d7': r'\\times',
+  '\u221e': r'\\infty', '\u2192': r'\\rightarrow', '\u2190': r'\\leftarrow',
+  '\u2248': r'\\sim', '\u2264': '<=', '\u2265': '>=', '\u00b5': r'\m',
+  # typography that word processors put in: plain ASCII
+  '\u2013': '--', '\u2014': '--', '\u2010': '-', '\u2011': '-', '\u2012': '-',
+  '\u2212': '-', '\u2018': "'", '\u2019': "'", '\u201a': "'", '\u201c': '"',
+  '\u201d': '"', '\u201e': '"', '\u00a0': ' ', '\u2009': ' ', '\u202f': ' ',
+  '\u2026': '...', '\u00b7': '.',
+}
+# alpha..omega (no final sigma) -> \a \b \g \d \e \z \h \q ...
+_GREEK = ('\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc'
+          '\u03bd\u03be\u03bf\u03c0\u03c1\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9')
+for _latin, _greek in zip('abgdezhqiklmnxoprstufcyw', _GREEK):
+  CIF_SPECIALS[_greek] = '\\' + _latin
+  CIF_SPECIALS[_greek.upper()] = '\\' + _latin.upper()
+CIF_SPECIALS['\u03c2'] = r'\s' # final sigma
+
 def unicode_to_cif(u):
-  d = {
-    '\xe0':'\`a',
-    '\xe8':'\`e',
-    '\xec':'\`i',
-    '\xf2':'\`o',
-    '\xf9':'\`u',
-
-    '\xc0':'\`A',
-    '\xc8':'\`E',
-    '\xcc':'\`I',
-    '\xd2':'\`O',
-    '\xd9':'\`U',
-
-    '\xe1':'\'a',
-    '\xe9':'\'e',
-    '\xed':'\'i',
-    '\xf3':'\'o',
-    '\xfa':'\'u',
-    '\xfd':'\'y',
-
-    '\xc1':'\'A',
-    '\xc9':'\'E',
-    '\xed':'\'I',
-    '\xd3':'\'O',
-    '\xda':'\'U',
-    '\xdd':'\'Y',
-
-    '\xe2':'\^a',
-    '\xea':'\^e',
-    '\xee':'\^i',
-    '\xf4':'\^o',
-    '\xfb':'\^u',
-
-    '\xc2':'\^A',
-    '\xca':'\^E',
-    '\xce':'\^I',
-    '\xd4':'\^O',
-    '\xdb':'\^U',
-
-    '\xe3':'\^a',
-    '\xf1':'\^n',
-    '\xf5':'\^o',
-
-    '\xc3':'\^A',
-    '\xd1':'\^N',
-    '\xd5':'\^O',
-
-    '\xe7':'\,c',
-
-    '\xc7':'\,C',
-
- }
-  retVal = ''
+  """Text in CIF 1.1 notation (ASCII only): accented letters, Greek and the
+  usual symbols as CIF codes, typographic dashes/quotes as plain ASCII.
+  Returns (text, characters that have no CIF code, replaced by '?')."""
+  import unicodedata
+  out, unknown = [], []
   for char in u:
-    retVal += d.get(char,char)
-  return retVal
+    if ord(char) < 128:
+      out.append(char)
+      continue
+    code = CIF_SPECIALS.get(char)
+    if code is None:
+      parts = unicodedata.normalize('NFD', char)
+      if (len(parts) == 2 and ord(parts[0]) < 128 and parts[0].isalpha()
+          and parts[1] in CIF_ACCENTS):
+        code = '\\' + CIF_ACCENTS[parts[1]] + parts[0]
+    if code is None:
+      code = '?'
+      unknown.append(char)
+    out.append(code)
+  return ''.join(out), unknown
+
+def cif_text(value, key=''):
+  """unicode_to_cif for values going into the CIF, telling the user about
+  what could not be converted."""
+  if not isinstance(value, str):
+    return value
+  text, unknown = unicode_to_cif(value)
+  if unknown:
+    print("CIF%s: no CIF code for %s, written as '?'"
+          % (" item %s" % key if key else "", ' '.join(sorted(set(unknown)))))
+  return text
 
 for item in timings:
   print(item)

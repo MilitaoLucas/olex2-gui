@@ -254,11 +254,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
-      try:
-        value.encode('ascii')
-      except:
-        print("Please use only ASCII characters")
-        return
+      # CIF 1.1 is ASCII: umlauts, Greek, en dashes etc. become CIF codes
+      # (they used to make the whole entry disappear)
+      import CifInfo
+      value = CifInfo.cif_text(value, key)
       data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
       if isinstance(value, str):
