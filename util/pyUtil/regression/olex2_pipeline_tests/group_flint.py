@@ -112,7 +112,7 @@ def _expand_hkl_to_p1():
   src = OV.HKLSrc()
   cs = crystal.symmetry(
     unit_cell=[float(x) for x in olex.f("xf.au.GetCell()").split(',')],
-    symbol="hall: " + olex.f("sg(%HS)"))
+    space_group_symbol="hall: " + olex.f("sg(%HS)"))
   ma = hklf.reader(file_name=src).as_miller_arrays(
     crystal_symmetry=cs)[0]
   with open(src, "w") as f:

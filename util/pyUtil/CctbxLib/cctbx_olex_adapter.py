@@ -2916,24 +2916,71 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # determined yet" rather than "triclinic": deriving a Laue class of -1 from
     # it would restrict the shortlist to P1 and P-1 and throw away the answer.
     # In that case the candidates come from the solution map instead.
+    from cctbx import sgtbx
     laue = None
     try:
       current = f_obs.space_group()
       if current.order_z() > 1:
-        from cctbx import sgtbx
         laue = sgtbx.space_group_info(
           group=current.build_derived_laue_group())
     except Exception:
       laue = None
 
+    # The typed Laue class can still be wrong, and then the right group is not
+    # on the shortlist at all. The unmerged intensities say which rotations
+    # they obey: on 3000 COD deposits that class is determined for 93.5 % and
+    # agrees with the deposit on 98.5 % of those (16 Nov 2026). It replaces a
+    # P1 input; a determined class that refutes the typed one adds its own
+    # shortlist after the typed one, with a warning. Undetermined (data merged
+    # in the typed group cannot test its own rotations), the typed class stands.
+    data_laue = None
+    try:
+      i_obs = self.reflections.f_sq_obs
+      lt = sgtbx.space_group()
+      for t in i_obs.space_group().ltr():
+        lt.expand_ltr(t)
+      i_obs = i_obs.customized_copy(crystal_symmetry=i_obs.crystal_symmetry()
+        .customized_copy(space_group_info=sgtbx.space_group_info(group=lt)))
+      res = space_group_suggest.laue_from_data(i_obs)
+      # ponytail: a data class whose settings need a supergroup cell (cb_op
+      # to a new conventional cell) is dropped, not transformed
+      if (res is not None and res.determined and
+          space_group_suggest._settings_compatible_with(
+            f_obs.unit_cell(), laue_number=res.laue_group_info.type().number())):
+        data_laue = res.laue_group_info
+    except Exception as e:
+      print("Laue class from the unmerged data unavailable: %s" % e)
+    laue_warning = None
+    if data_laue is not None:
+      if laue is None:
+        laue, data_laue = data_laue, None
+      elif data_laue.type().number() == laue.type().number():
+        data_laue = None
+      else:
+        laue_warning = ("The unmerged data obey Laue class %s, not the %s of "
+          "the current space group: candidates of both are listed"
+          % (data_laue, laue))
+
+    zs = self.expectedZs()
+    kw = dict(n_suggestions=n_suggestions, ensure_centric=max(zs or [0]) >= 19,
+              non_h_per_formula=len(zs)/float(olx.xf.au.GetZ()) if zs else None)
     try:
       suggestion = space_group_suggest.suggest(
-        f_obs, result.f_calc_in_p1, laue_group_info=laue,
-        n_suggestions=n_suggestions,
-        ensure_centric=max(self.expectedZs() or [0]) >= 19)
+        f_obs, result.f_calc_in_p1, laue_group_info=laue, **kw)
+      if data_laue is not None:
+        extra = space_group_suggest.suggest(
+          f_obs, result.f_calc_in_p1, laue_group_info=data_laue, **kw)
+        have = set(s.space_group_info.type().number()
+                   for s in suggestion.suggestions)
+        suggestion.suggestions += [s for s in extra.suggestions
+          if s.space_group_info.type().number() not in have]
     except Exception as e:
       print("Space-group suggestions unavailable: %s" % e)
       return None
+    suggestion.data_laue = data_laue
+    suggestion.laue_warning = laue_warning
+    if laue_warning:
+      print("WARNING: " + laue_warning)
     suggestion.cc_peak_height = result.cc_peak_height
     # c33 (FLINT_C33_SGRERANK, default 1): skipped. The only caller hands in
     # f_obs merged by runChargeFlippingSolution, so `fusion_weight` is 0 and
