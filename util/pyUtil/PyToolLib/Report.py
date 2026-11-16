@@ -53,6 +53,52 @@ def makeSpecialCifCharacter(txt):
   txt = txt.replace("^2^", "<sup>2</sup>")
   return txt
 
+REFERENCE_VARS = ('olex2_reference_long', 'solution_reference_long',
+                  'refinement_reference_long')
+
+def report_references():
+  """([Olex2, solution, refinement], [the other references]) for the HTML
+  report. The first three keep their places (the footer text cites them as
+  [1]-[3]); the others are the generated ones in the CIF's
+  _publ_section_references (ED N-Beam, NoSpherA2 and its wavefunction program,
+  dispersion refinement ...), minus those already among the first three."""
+  import olx
+  from olexFunctions import OV
+  key = lambda ref: ''.join(ref.split())
+  first = [olx.GetVar(name, '') for name in REFERENCE_VARS]
+  seen = set(key(ref) for ref in first if ref)
+  more = []
+  refs = OV.get_cif_item('_publ_section_references', '') or ''
+  if refs in ('?', '.'):
+    refs = ''
+  for chunk in refs.replace('\r', '').split('\n\n'):
+    ref = chunk.strip()
+    if ref and key(ref) not in seen:
+      seen.add(key(ref))
+      more.append(ref)
+  return first, more
+
+def _reference_html(ref):
+  ref = ' '.join(ref.split())
+  return (ref.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+          .replace('%', '&#37;'))
+
+def references_html():
+  """The numbered reference list of the HTML report footer."""
+  first, more = report_references()
+  return '<ol class="journal_reference">%s</ol>' % ''.join(
+    '<li>%s</li>' % _reference_html(ref) for ref in first + more)
+
+def further_references():
+  """' Further programs and methods used: [4-6].' when the CIF cites more
+  than Olex2 and the solution and refinement programs, else ''."""
+  first, more = report_references()
+  if not more:
+    return ''
+  start, end = len(first) + 1, len(first) + len(more)
+  label = '[%d]' % start if start == end else '[%d-%d]' % (start, end)
+  return ' Further programs and methods used: %s.' % label
+
 def handleNA(val, ifna):
   if 'n/a' in val.lower():
     return ifna
@@ -63,5 +109,7 @@ if not registered:
   registered = True
   olex.registerFunction(makeSpecialCifCharacter, False, "report")
   olex.registerFunction(handleNA, False, "report")
+  olex.registerFunction(references_html, False, "report")
+  olex.registerFunction(further_references, False, "report")
 
 
