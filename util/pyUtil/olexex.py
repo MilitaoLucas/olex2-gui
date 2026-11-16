@@ -1529,7 +1529,7 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
     return rv
   try:
     import iotbx
-    with open(cf_name, "rUb") as fo:
+    with open(cf_name, "r") as fo: # "rUb" is an invalid mode since Python 3.11
       reader = iotbx.cif.reader(file_object=fo)
     models = []
     for k, v in reader.model().items():
@@ -1618,6 +1618,7 @@ def getReportImageData(size='w400', imageName=None):
   else:
     imagePath_l = imagePath
 
+  html = ''
   for imagePath in imagePath_l:
 
     IM = Image.open(imagePath)
@@ -1646,11 +1647,13 @@ def getReportImageData(size='w400', imageName=None):
 
     out = io.BytesIO()
     IM.save(out, "PNG")
-    data = base64.b64encode(out.getvalue())
-    html = b'''
-  <!--[if IE]><img width='%s' src='%s'><![endif]-->
-  <![if !IE]><img width='%s' src='data:image/png;base64,%b'><![endif]>
-    '''%(bytes(size//2), os.path.split(imagePath)[1].encode(), bytes(size//2), data)
+    # Olex2 functions must return str (bytes gave "TypeError: argument must be
+    # str, not bytes" in the HTML report, and bytes(n) is n zero bytes, not 'n')
+    data = base64.b64encode(out.getvalue()).decode('ascii')
+    html += '''
+  <!--[if IE]><img width='%d' src='%s'><![endif]-->
+  <![if !IE]><img width='%d' src='data:image/png;base64,%s'><![endif]>
+    '''%(size//2, os.path.split(imagePath)[1], size//2, data)
   return html
 OV.registerFunction(getReportImageData)
 
