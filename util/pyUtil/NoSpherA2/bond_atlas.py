@@ -291,7 +291,7 @@ _cp_head = re.compile(r"^\s+CP\s+(\d+)\s+\[(\w+)\s*\]\s+(NOT )?converged\s*(?:(\
 _cp_value = re.compile(r"^\s+(Position|Rho|DelSqRho|Bond Ellipticity)\s*:\s+(.+)$")
 _di_row = re.compile(r"^  (\S+)\s+(\S+)\s+(\d+\.\d{4})$")
 # basin tables: QTAIM electrons charge volume maximum x y z, ELI-D electrons volume maximum x y z
-_basin_row = re.compile(r"^\s+\d+\s+(\S+)(?: (\w+))?((?:\s+-?\d+\.\d+){6,7})\s*$")
+_basin_row = re.compile(r"^\s+\d+\s+(\S+)(?: (\w+)(?:\(\d+\))?)?((?:\s+-?\d+\.\d+){6,7})\s*$")
 _float = re.compile(r"^-?\d+\.\d+$")
 _balls = {"bond": "0.1,0.6,0.2", "ring": "0.85,0.1,0.1", "cage": "0.1,0.3,0.9", "eli": "0.85,0.65,0.1"}
 _desc = {
