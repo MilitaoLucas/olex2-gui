@@ -1078,7 +1078,8 @@ OV.registerFunction(get_solution_programs)
 def get_solution_methods(prg, scope='snum'):
   _ensure_program_dictionaries()
   retval = ""
-  if prg == '?' or prg == 'Unknown': return retval
+  if not prg or prg == '?' or prg == 'Unknown':
+    return retval
   if prg == 'Auto':
     OV.SetParam("%s.solution.method" %scope,'Auto')
     return 'Auto'
@@ -1153,7 +1154,7 @@ experimental_refinement_methods = ('MLF', 'MLI')
 def get_refinement_methods(prg, scope='snum'):
   _ensure_program_dictionaries()
   retval = ""
-  if prg == '?' or prg == 'Unknown': return retval
+  if not prg or prg == '?' or prg == 'Unknown': return retval
   if prg == 'Auto':
     OV.SetParam("%s.refinement.method" %scope,'Auto')
     return 'Auto'

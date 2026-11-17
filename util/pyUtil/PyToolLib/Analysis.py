@@ -1397,7 +1397,7 @@ class Graph(ArgumentParser):
         href_map.append(('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">',
                         box, (hrefs[i], targets[i])))
       else:
-        href = ""
+        href, reload_graph = "", ""
         href_str = "OMIT"
         if scale == None:
           scale = 1

@@ -1491,6 +1491,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if len(l) == 2:
           return l + " K\\a"
         return "%s K\\%s~%s~" %(l[:2], l[2].lower(), l[3])
+    if self.wavelength == 0.0251:
+      return "electron"
     return 'synchrotron'
 
   def wR2_factor(self, cutoff_factor=None):

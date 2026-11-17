@@ -33,10 +33,16 @@ class PluginTools(VFSDependent):
       try:
         #gui.help.gh.git_help(quick=True, specific=self.p_path)
         t = gui.file_open(p, 'r')
+        if t is None:
+          print(f"Missing GUI: {p}")
+          return
         OlexVFS.write_to_olex(p, t)
         OV.UpdateHtml()
-      except:
-        print("No GUI available")
+      except Exception as e:
+        if OV.IsDebugging():
+          import sys
+          sys.stderr.formatExceptionInfo()
+        print(str(e))
 
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
