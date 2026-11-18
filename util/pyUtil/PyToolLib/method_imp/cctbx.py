@@ -383,7 +383,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
     if not alts and not tangent:
       return
     import shutil
-    res = '%s.res' % OV.FileName()
+    # absolute, as in flint_levers.reap: attempt() reaps it directly
+    res = os.path.abspath('%s.res' % OV.FileName())
     shutil.copyfile(res, res + '.pre')
     def final_r1(k):
       try:

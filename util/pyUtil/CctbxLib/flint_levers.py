@@ -195,7 +195,9 @@ def add(L=None):
 def reap(res):
   """ the reap macro's model load without its hooks: history, the snum phil round trip, cif info and GUI cost ~0.7 s a
   call (170 of 2,400 s on sp15); of them only what set_params_from_ires reads from the file reaches FLINT """
-  olx.Atreap('"%s"' % res)
+  # absolute: Atreap of a bare file name sets FilePath to 'none' and StrDir then raises, which the next OV.File repairs;
+  # a reap that is the last word left _retry's seed file at os.path.join(None, ...) (5.9 % of the COD gate, 17 Nov 2026)
+  olx.Atreap('"%s"' % os.path.abspath(res))
   olx.current_mask = None
   from variableFunctions import set_params_from_ires
   set_params_from_ires()
