@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<style>.f-ink{fill:#262B33}.s-ink{stroke:#262B33}.f-acc{fill:#C65100}.s-acc{stroke:#C65100}.f-sec{fill:#1069DA}.s-sec{stroke:#1069DA}.f-mut{fill:#C9CACC}.s-mut{stroke:#C9CACC}</style>
+<path class="f-mut" d="M5 10.2L12 4l7 6.2V20H5z"/>
+<path class="s-ink" d="M5 10v10h14V10M3 12l9-8 9 8"/>
+<path class="f-acc" d="M10 19v-5h4v5z"/>
+</svg>

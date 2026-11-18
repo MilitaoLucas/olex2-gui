@@ -802,7 +802,7 @@
   <body
     <cmd
       <cmd1 "load style basedir()/etc/styles/default.glds">
-      <cmd2 "load scene basedir()/etc/styles/default.glps">
+      <cmd2 "load scene basedir()/etc/styles/default.glsp">
       <cmd3 "spy.SetParam(user.bonds.bzoom,80)">
       <cmd3 "spy.SetParam(user.bonds.mask,48)">
       <cmd3 "spy.SetParam(user.bonds.colour,elements)">
@@ -815,7 +815,7 @@
   <body
     <cmd
       <cmd1 "load style basedir()/etc/styles/default.glds">
-      <cmd2 "load scene basedir()/etc/styles/defaultu.glps">
+      <cmd2 "load scene basedir()/etc/styles/defaultu.glsp">
       <cmd3 "telp 50">
     >
   >

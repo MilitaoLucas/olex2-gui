@@ -12,9 +12,15 @@ import variableFunctions
 import olex
 from gui.images import GI
 
-gui_green = OV.GetParam('gui.green')
-gui_orange = OV.GetParam('gui.orange')
-gui_red = OV.GetParam('gui.red')
+from gui.theme.live import on_skin_change
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global gui_green, gui_orange, gui_red
+  gui_green = OV.GetParam('gui.green')
+  gui_orange = OV.GetParam('gui.orange')
+  gui_red = OV.GetParam('gui.red')
+on_skin_change(_skin_colours)
 
 
 class GeneratedGuiMaker(object):

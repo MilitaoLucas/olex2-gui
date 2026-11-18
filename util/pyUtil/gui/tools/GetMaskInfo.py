@@ -22,12 +22,18 @@ debug = OV.IsDebugging()
 global mask_info_has_updated
 mask_info_has_updated = False
 
-gui_green = OV.GetParam('gui.green').hexadecimal
-gui_orange = OV.GetParam('gui.orange').hexadecimal
-gui_red = OV.GetParam('gui.red').hexadecimal
-gui_grey = OV.GetParam('gui.grey').hexadecimal
-gui_light_grey = OV.GetParam('gui.light_grey').hexadecimal
-gui_highlight = OV.GetParam('gui.html.highlight_colour').hexadecimal
+from gui.theme.live import on_skin_change
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global gui_green, gui_orange, gui_red, gui_grey, gui_light_grey, gui_highlight
+  gui_green = OV.GetParam('gui.green').hexadecimal
+  gui_orange = OV.GetParam('gui.orange').hexadecimal
+  gui_red = OV.GetParam('gui.red').hexadecimal
+  gui_grey = OV.GetParam('gui.grey').hexadecimal
+  gui_light_grey = OV.GetParam('gui.light_grey').hexadecimal
+  gui_highlight = OV.GetParam('gui.html.highlight_colour').hexadecimal
+on_skin_change(_skin_colours)
 gui_width = OV.GetParam('gui.htmlpanelwidth')
 
 OV.SetParam('snum.masks.special_detail_colour', gui_green)
@@ -975,10 +981,11 @@ def get_and_check_mask_origin(fab_path=None, prg=None, check_time=False):
     platon_in_file = any(find in line for line in reversed(lines))
 
     msg = ""
+    fab_name = os.path.basename(fab_path)
     if prg == "Platon" and not platon_in_file:
-      msg = f"-- .fab was created by Olex2, and we want a {prg} mask. Not Good"
+      msg = f"-- existing {fab_name} is not a Platon mask; not used"
     elif prg == "Olex2" and platon_in_file:
-      msg = f"-- .fab was created by Platon, and we want a {prg} mask. Not Good"
+      msg = f"-- existing {fab_name} is a Platon mask, not an Olex2 one; not used"
     if msg:
       if debug:
         print(msg)

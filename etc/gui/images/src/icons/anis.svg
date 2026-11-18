@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<style>.f-ink{fill:#262B33}.s-ink{stroke:#262B33}.f-acc{fill:#C65100}.s-acc{stroke:#C65100}.f-sec{fill:#1069DA}.s-sec{stroke:#1069DA}.f-mut{fill:#C9CACC}.s-mut{stroke:#C9CACC}</style>
+<g transform="rotate(-30 12 12)">
+<ellipse cx="12" cy="12" rx="9.5" ry="6" class="f-mut s-ink"/>
+<ellipse cx="12" cy="12" rx="9.5" ry="2.4" class="s-acc" stroke-width="0.9"/>
+</g>
+</svg>

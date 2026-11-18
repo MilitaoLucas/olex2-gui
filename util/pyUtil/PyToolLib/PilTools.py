@@ -885,6 +885,9 @@ class timage(ArgumentParser):
       self.iconSource = Image.open(icon_source)
       self.iconSource.load()
       icon_source.close()
+    # user.icon_set = flat: the theme paints the flat set in the skin colours
+    from gui.theme import icons as theme_icons
+    theme_icons.load()
 
   def open_image_source(self):
     if not self.imageSource:
@@ -2342,7 +2345,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       states = ["on", "off", "hover", "", "hoveron", "highlight"]
       for state in states:
         self.name = name = r"toolbar-%s%s.png" %(icon,state)
-        self.image = image = self.icon_items(iconIndex[icon], state, name)
+        self.image = image = self.icon_items(iconIndex[icon], state, name, key=icon)
 
         self.save_with_checking_for_needed()
         if state == "off":
@@ -2355,7 +2358,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
         for state in states:
           self.name = name = r"toolbar_small-%s%s.png" %(icon,state)
-          self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=OV.GetParam('gui.skin.icon_size'))
+          self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=OV.GetParam('gui.skin.icon_size'), key=icon)
           self.save_with_checking_for_needed()
 
       # inline icons (settings buttons in a row): as tall as the html buttons and
@@ -2366,8 +2369,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         inline_size = -(-int(height) * 64 // 58) - 2 # ceil
         for state in states: # every state MakeHoverButton asks for
           self.name = name = r"toolbar_inline-%s%s.png" %(icon, state)
-          self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=inline_size)
+          self.image = image = self.icon_items(iconIndex[icon], state, name=name, icon_size=inline_size, key=icon)
           self.save_with_checking_for_needed()
+
+    from gui.theme import icons as theme_icons
+    theme_icons.make_action_and_player_images()
 
     height = 10
     width = 10
@@ -2586,19 +2592,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "snumtitle":
       self.title_case = False
-      # this had been commented out in this style... it wasn't me... not sure why it was done. Any idea, Oleg?
-      #=========================================================================
+      # the file type (and ED) shows either as a striped band below the title
+      # or as the title colour: user.file_type_mark, see gui.theme.snumtitle
       filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
-      if OV.FileExt() == "cif":
-        grad_colour = self.params.dark_green.rgb
-        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
-      elif OV.FileFull().endswith(".oxm"):
-        grad_colour = self.params.orange.rgb
-        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
-      if OV.IsEDData():
-        grad_colour = self.params.ed_bg.rgb
-        filefullinfo_colour = self.params.ed_fg.rgb
-      #=========================================================================
+      from gui.theme import snumtitle as theme_snumtitle
+      grad_colour, filefullinfo_colour = theme_snumtitle.title_colours(
+        self.params, grad_colour, filefullinfo_colour)
 
     elif item_type == "small_button":
       underground = self.params.html.table_bg_colour.rgb
@@ -2752,6 +2751,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     filename = item
     if item_type == 'snumtitle':
       filename = 'sNumTitle.png'
+      from gui.theme import snumtitle as theme_snumtitle
+      image, band = theme_snumtitle.add_band(image, self.scale, underground)
+      height += band
     else:
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
@@ -2810,7 +2812,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           counter += 1
       if cnt > 1:
         txt += (' (%s/%s)') %(current, counter - 1)
-      font_colour = '#ffdf09'
+      from gui.theme import snumtitle as theme_snumtitle
+      font_colour = theme_snumtitle.title_font_colour(font_colour)
     ## Actually print the text on the new image item.
     wX, wY = IT.write_text_to_draw(draw,
                             txt,
@@ -3624,7 +3627,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image.paste(content)
     return image
 
-  def icon_items(self, idx, state, name, icon_size=None):
+  def icon_items(self, idx, state, name, icon_size=None, key=None):
     d = {}
     border = True
     colourise = False
@@ -3647,7 +3650,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = Image.new('RGBA', size, colour)
     cut = idxY * width, idxX * height, idxY * width + width, idxX * height + height
 
-    crop = self.iconSource.crop(cut)
+    from gui.theme import icons as theme_icons
+    crop = theme_icons.toolbar_cell(key)
+    if crop is None:
+      crop = self.iconSource.crop(cut)
+    elif theme_icons.tinted(key):
+      # painted in its state colour already (mask_same red, mask_ok green)
+      colourise = False
 
     if state == "highlight":
       colourise = '#ff0000'
@@ -3680,6 +3689,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       outline_colour = self.params.skin.icon_border_colour.rgb
 
+    border = theme_icons.toolbar_border(border, state)
     if border:
       draw.rectangle((0, 0, image.size[0]-1, image.size[1]-1), outline=outline_colour)
       

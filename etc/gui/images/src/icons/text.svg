@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<style>.f-ink{fill:#262B33}.s-ink{stroke:#262B33}.f-acc{fill:#C65100}.s-acc{stroke:#C65100}.f-sec{fill:#1069DA}.s-sec{stroke:#1069DA}.f-mut{fill:#C9CACC}.s-mut{stroke:#C9CACC}</style>
+<rect x="4.5" y="3.5" width="15" height="17" rx="1.5" class="f-mut s-ink"/>
+<path class="s-ink" stroke-width="0.9" d="M8 8.5h8M8 12h8M8 15.5h5"/>
+</svg>

@@ -14,9 +14,15 @@ from olexex import OlexRefinementModel
 from olexFunctions import OV, SilentException
 from variableFunctions import nsa2_get_param, nsa2_set_param
 debug = OV.IsDebugging()
-green = OV.GetParam('gui.green')
-red = OV.GetParam('gui.red')
-orange = OV.GetParam('gui.orange')
+from gui.theme.live import on_skin_change
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global green, red, orange
+  green = OV.GetParam('gui.green')
+  red = OV.GetParam('gui.red')
+  orange = OV.GetParam('gui.orange')
+on_skin_change(_skin_colours)
 white = "#ffffff"
 black = "#000000"
 table = OV.GetVar('HtmlTableFirstcolColour')

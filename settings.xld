@@ -14,9 +14,9 @@
   <shortcut key="del" macro="kill sel">
   <shortcut key="Alt+back" macro="selback">
   <shortcut key="Ctrl+back" macro="kill sel">
-  <shortcut key="F2" macro="swapbg">
+  <shortcut key="F2" macro="swapbg>>spy.gui.theme.text_colours_update()">
   <shortcut key="F3" macro="labels">
-  <shortcut key="F4" macro="grad -i">
+  <shortcut key="F4" macro="grad -i>>spy.gui.theme.text_colours_update()">
   <shortcut key="F5" macro="spy.gui.SwitchPanel(work)">
   <shortcut key="F6" macro="spy.gui.SwitchPanel(view)">
   <shortcut key="F7" macro="spy.gui.SwitchPanel(tools)">
@@ -74,9 +74,9 @@
     <item title="Model;Solve" macro="solve">
 
     <item title="Tools;Options" macro="setup" before="Model">
-    <item title="Tools;Settings;Toggle Background \tF2" macro="swapbg">
+    <item title="Tools;Settings;Toggle Background \tF2" macro="swapbg>>spy.gui.theme.text_colours_update()">
     <item title="Tools;Settings;Show Labels \tF3" macro="labels">
-    <check title="Tools;Settings;Gradient \tF4" macro="grad -i" statedependent="gradbg">
+    <check title="Tools;Settings;Gradient \tF4" macro="grad -i>>spy.gui.theme.text_colours_update()" statedependent="gradbg">
     <item title="Tools;Settings;Swap Control Panel" macro="htmlpanelswap">
     <check title="Tools;Settings;Show Info Bar" macro="showwindow info" statedependent="infovis">
     <check title="Tools;Settings;Show Help" macro="showwindow help" statedependent="helpvis">

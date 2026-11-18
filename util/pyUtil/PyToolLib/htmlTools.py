@@ -1188,6 +1188,18 @@ def CheckForImage(name):
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
 OV.registerFunction(CheckForImage)
 
+def hover_button_bg(btn_bg='HtmlTableGroupBgColour'):
+  """Background of an image button: btn_bg names an Olex variable set by the
+  skin (gui/skin export_parameters, e.g. HtmlTableGroupBgColour = the colour of
+  the rows the buttons sit in), or a gui.* param.  The button paints this colour
+  behind the transparent icon, so it must match the row on dark skins too."""
+  if btn_bg.startswith('gui.'):
+    v = OV.GetParam(btn_bg)
+    return getattr(v, 'hexadecimal', v) or ''
+  if btn_bg.startswith('#'):
+    return btn_bg
+  return OV.GetVar(btn_bg, '')
+
 def _inline_button_image(tool_img):
   """Settings buttons sit inline in a row: they use the settings icon at the
   height of the html buttons (made with the toolbar icons in PilTools) when
@@ -1236,7 +1248,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='HtmlTableGroupBgColour'):
   global hover_buttons
   click_console_feedback = False
   n = name.split("-")
-  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
+  d = {'bgcolor': hover_button_bg(btn_bg)}
   if len(n) > 1:
     target=" ".join(n[1:])
   else:
@@ -1304,7 +1316,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='HtmlTableGroupBgColour'):
 
   click_console_feedback = False
   n = name.split("-")
-  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
+  d = {'bgcolor': hover_button_bg(btn_bg)}
   target=" ".join(n[1:])
   if '@' in name:
     tool_img = name.split('@')[0]

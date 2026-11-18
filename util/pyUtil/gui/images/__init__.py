@@ -11,10 +11,10 @@ class GuiImages:
     if olx.HasGUI() != 'true':
       return
 
-    img_root = OV.GetParam("gui.GuiImages.action", "%s/etc/gui/images/action" %OV.BaseDir())
+    # the images are action-<which>_<state>.png in the VFS, made by PilTools from
+    # the current icon set (gui.GuiImages.action still names the classic folder)
     height = OV.GetParam('gui.html.input_height')
     self.img_d = {
-      'root':img_root,
       'width':height,
       'height':height,
       'bg':OV.GetParam('gui.html.table_bg_colour').hexadecimal,
@@ -24,7 +24,7 @@ class GuiImages:
     link = '''
       <input
         type="button"
-        image="up=%(root)s/%(which)s_off.png,down=%(root)s/%(which)s_on.png,hover=%(root)s/%(which)s_hover.png"
+        image="up=action-%(which)s_off.png,down=action-%(which)s_on.png,hover=action-%(which)s_hover.png"
         hint="%(hint)s"
         width="%(width)s"
         height="%(height)s"

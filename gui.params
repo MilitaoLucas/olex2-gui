@@ -86,6 +86,35 @@ gui
     action = None
     .type=str
   }
+
+  icons
+    .help = "Colours of the flat icon set. None means the skin colour named in each help. Skins may set them, spy.gui.theme.designer() edits them live."
+  {
+    ink = None
+      .type = colour
+      .help = "Lines and glyphs. None: gui.html.font_colour"
+    accent = None
+      .type = colour
+      .help = "The one element that carries the meaning. None: gui.html.highlight_colour"
+    secondary = None
+      .type = colour
+      .help = "A second distinct element (atoms, axes, arrows). None: gui.action_colour"
+    muted = None
+      .type = colour
+      .help = "Quiet fill behind outlines. None: the ink colour, see muted_opacity"
+    muted_opacity = 25
+      .type = int
+      .help = "Opacity of the muted fill in percent"
+    red = None
+      .type = colour
+      .help = "Accent of delete/stop/less. None: gui.red"
+    green = None
+      .type = colour
+      .help = "Accent of OK/more. None: gui.green"
+    border = True
+      .type = bool
+      .help = "Draw the thin frame round toolbar icons (gui.skin.icon_border_colour)"
+  }
   
   notification{
     normal_bg = 'gui.html.table_bg_colour'
@@ -236,7 +265,7 @@ gui
       .type = int
     combo_width_2 = 50
       .type = int
-      .help = Width of a combobox that is to take 2 digits and a decimal point.
+      .help = "Width of a combobox that is to take 2 digits and a decimal point."
     combo_height = 20
       .type = int
     spin_height = 18
@@ -350,6 +379,27 @@ gui
         .type = str
       buttonmark = None
         .type = str
+      type_band_height = 4
+        .type = int
+        .help = "Height of the striped file-type band under the title (0 = off)"
+      type_band_period = 8
+        .type = int
+        .help = "Distance between the stripes of the file-type band"
+      type_colour_ins = None
+        .type = colour
+        .help = "Stripes for res/ins files (None = gui.blue)"
+      type_colour_cif = None
+        .type = colour
+        .help = "Stripes for cif files (None = gui.green)"
+      type_colour_oxm = None
+        .type = colour
+        .help = "Stripes for oxm files (None = gui.orange)"
+      type_colour_other = None
+        .type = colour
+        .help = "Stripes for other files (None = gui.grey)"
+      type_colour_ed = None
+        .type = colour
+        .help = "Second stripe colour for electron diffraction data (None = gui.ed_fg)"
     }
 
 
@@ -582,6 +632,9 @@ gui
         .type = int
       font_size = 16
         .type = int
+      font_name = DefaultFont
+        .type = str
+        .help = "Font of the HOS images, kept apart from the All images font of the theme"
     }
 
     h1{
@@ -703,6 +756,70 @@ gui
     .type = str
   labels_font = #olex2.fnt:frb_20
     .type = str
+  console_colours
+    .help = "Text colours of the console in the 3D view. None keeps Olex2's own. Skins may set them; spy.gui.theme.designer() edits them. Info and warning lines are orange, set in Olex2's core and not changeable here."
+  {
+    text = None
+      .type = colour
+      .help = "Typed commands and ordinary output. None: gui.infobox_text"
+    output = None
+      .type = colour
+      .help = "Output of programs Olex2 runs, e.g. SHELXL during a refinement. None: yellow"
+    error = None
+      .type = colour
+      .help = "Error messages. None: orange"
+    exception = None
+      .type = colour
+      .help = "Program faults. None: red"
+    help = None
+      .type = colour
+      .help = "Help text. None: cyan"
+    help_command = None
+      .type = colour
+      .help = "Command names in the help. None: yellow"
+  }
+  label_colours
+    .help = "Text colours of labels in the 3D view. None keeps the colours of the 3D style."
+  {
+    all = None
+      .type = colour
+      .help = "Labels of all atoms, the cell and the axes (style material Labels.Text)"
+    atoms = None
+      .type = colour
+      .help = "Single atom labels (style material PLabels.Text)"
+  }
+  console_colours_light
+    .help = "The same console colours on a light 3D background (plain colour or gradient). None uses the value above."
+  {
+    text = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    output = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    error = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    exception = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    help = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    help_command = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+  }
+  label_colours_light
+    .help = "The same colours on a light 3D background (plain colour or gradient). None uses the value above."
+  {
+    all = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+    atoms = None
+      .type = colour
+      .help = "Used on a light background; None: the dark-background value"
+  }
   htmlpanelwidth = 500
     .type = int
   htmlpanelwidth_margin_adjust = 21
@@ -758,16 +875,16 @@ gui
   help_box{
     width = 450
       .type = int
-      .help = Width of the help popup boxes
+      .help = "Width of the help popup boxes"
     height_factor = 60
       .type = int
-      .help = A factor that helps estimating the height of the help box by the total number of characters in the help text
+      .help = "A factor that helps estimating the height of the help box by the total number of characters in the help text"
     height_constant = 60
       .type = int
-      .help = Number of pixels to add per row to the height of a help box
+      .help = "Number of pixels to add per row to the height of a help box"
     height_max = 500
       .type = int
-      .help = Maximum height of the help popup boxes
+      .help = "Maximum height of the help popup boxes"
 
     }
 

@@ -37,12 +37,25 @@ class PluginTools(VFSDependent):
           print(f"Missing GUI: {p}")
           return
         OlexVFS.write_to_olex(p, t)
+        self.page_in_vfs = True
         OV.UpdateHtml()
       except Exception as e:
         if OV.IsDebugging():
           import sys
           sys.stderr.formatExceptionInfo()
         print(str(e))
+
+  def load_ressources(self):
+    """After a skin change cleared the virtual file system (gui.skin
+    change_skin, after live.restore_vfs).  A plugin with p_onclick (kickstart)
+    loads its page on the first click: add_tool_to_index puts an empty page in
+    its place, and endKickstarter the real one.  Replaying add_tool_to_index
+    brings the empty page back, but a plugin kickstarted already does not run
+    endKickstarter again, so the opened panel was empty and the entry vanished
+    until a restart.  Put the real page back."""
+    if getattr(self, 'page_in_vfs', False) and getattr(self, 'p_onclick', ''):
+      p = os.path.join(self.p_path, self.p_htm + ".htm")
+      OlexVFS.write_to_olex(p, gui.file_open(p, 'r'))
 
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))

@@ -12,13 +12,13 @@
     $+
     html.Snippet(GetVar(default_link),
       "value=Colour/White [F2]",
-      "onclick=swapbg",
+      "onclick=swapbg>>spy.gui.theme.text_colours_update()",
     )$-
 
     $+
     html.Snippet(GetVar(default_link),
       "value=Graduated [F4]",
-      "onclick=grad -i",
+      "onclick=grad -i>>spy.gui.theme.text_colours_update()",
     )$-
 
     $+
@@ -95,6 +95,50 @@
     html.Snippet(GetVar(default_link),
       "value=Buttons",
       "onclick=spy.SetParam('gui.skin.default_link',gui/snippets/gui-link-button)>>panel",
+    )$-
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_ICONS';help_ext=GUI_Icons;1 -->
+  <td width='23%'>
+    <b>Icons</b>
+  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Classic",
+      "onclick=spy.gui.theme.set_icon_set(classic)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Flat",
+      "onclick=spy.gui.theme.set_icon_set(flat)",
+    )$-
+
+    <!-- #ignoreif not(spy.gui.theme.has_designer())
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Designer...",
+      "onclick=spy.gui.theme.designer()",
+    )$-
+    #ignoreif -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_FILE_TYPE_MARK';help_ext=GUI_File_Type_Mark;1 -->
+  <td width='23%'>
+    <b>File type</b>
+  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Stripes",
+      "onclick=spy.gui.theme.set_file_type_mark(stripes)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Colour",
+      "onclick=spy.gui.theme.set_file_type_mark(colour)",
     )$-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

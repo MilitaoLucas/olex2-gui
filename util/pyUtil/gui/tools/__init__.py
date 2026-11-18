@@ -48,12 +48,18 @@ regex_l = {}
 global cache
 cache = {}
 
-gui_green = OV.GetParam('gui.green')
-gui_orange = OV.GetParam('gui.orange')
-gui_red = OV.GetParam('gui.red')
-gui_grey = OV.GetParam('gui.grey')
-gui_yellow = OV.GetParam('gui.dark_yellow')
-gui_light_grey = OV.GetParam('gui.light_grey')
+from gui.theme.live import on_skin_change, survives_vfs_clear
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global gui_green, gui_orange, gui_red, gui_grey, gui_yellow, gui_light_grey
+  gui_green = OV.GetParam('gui.green')
+  gui_orange = OV.GetParam('gui.orange')
+  gui_red = OV.GetParam('gui.red')
+  gui_grey = OV.GetParam('gui.grey')
+  gui_yellow = OV.GetParam('gui.dark_yellow')
+  gui_light_grey = OV.GetParam('gui.light_grey')
+on_skin_change(_skin_colours)
 
 import subprocess
 
@@ -252,6 +258,7 @@ def _timage_key(img_txt, img_type):
     return None
   return hashlib.sha1(s.encode('utf-8', 'surrogatepass')).hexdigest()
 
+@survives_vfs_clear
 def make_single_gui_image(img_txt="", img_type='h2', force=False):
   import PilTools
   import OlexVFS
@@ -316,6 +323,7 @@ def __inject_into_tool(tool, t, where, befaf='before'):
     txt = txt.replace(where, "%s%s" % (where, t))
   OlexVFS.write_to_olex('%s%s' % (OV.BaseDir(), tool), u, txt)
 
+@survives_vfs_clear
 def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2", image="", onclick=""):
   import OlexVFS
   if not OV.HasGUI:
@@ -361,7 +369,6 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
     t = r'''
 <!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=%s;%s; -->''' % (filetype, level, location, scope, link, path, link, image, onclick, state)
 
-  index_text = ""
   if t not in txt:
     if before.lower() == "top":
       u = "%s\n%s" % (t, txt)
@@ -382,16 +389,8 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
         else:
           u += "%s\n" % line.strip()
     OlexVFS.write_to_olex(file_to_write_to, u, 0)
-    index_text = u
   else:
-    if run:
-      OlexVFS.write_to_olex(file_to_write_to, t, 0)
-    else:
-      if not index_text:
-        text = txt
-      else:
-        text = index_text
-      OlexVFS.write_to_olex(file_to_write_to, text, 0)
+    OlexVFS.write_to_olex(file_to_write_to, txt, 0)
 
   make_single_gui_image(link, img_type=level)
 
@@ -1259,6 +1258,8 @@ def deal_with_gui_phil(action):
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
+    from gui.theme import overlay
+    skin_phils.append(overlay.phil_for(skin_name))
     olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     olx.gui_phil_handler.save_param_file(
@@ -2086,17 +2087,37 @@ def load_res_from_cif():
 
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
 
+def _is_etc_styles(path):
+  """True for the shipped styles folder (any Olex2 installation), whatever the
+  separators or a trailing slash: 'basedir()/etc/styles/' arrives with '/'."""
+  norm = os.path.normcase(os.path.normpath(str(path)))
+  return norm.endswith(os.path.normcase(os.path.join("etc", "styles")))
+
+
+def _copy_missing_files(src, dst):
+  """Copy the files of src that dst lacks; never overwrite one the user changed."""
+  os.makedirs(dst, exist_ok=True)
+  for fn in os.listdir(src):
+    s, d = os.path.join(src, fn), os.path.join(dst, fn)
+    if os.path.isfile(s) and not os.path.exists(d):
+      shutil.copyfile(s, d)
+
+
 def set_style_and_scene(style=None, scene=None, src_dir=None):
   ETC_STYLES = os.path.join("etc", "styles")
+  etc_dir = os.path.join(OV.BaseDir(), ETC_STYLES)
 
   # --- resolve source directory ---
-  if not src_dir or ETC_STYLES in src_dir:
-    src_dir = OV.GetParam('user.def_style_scene_src_dir')
-
-    if ETC_STYLES in src_dir:
-      dst_dir = os.path.join(OV.DataDir(), 'styles')
-      copy_directory(src_dir, dst_dir)
-      src_dir = dst_dir
+  # The shipped folder cannot be written to (Program Files), so styles are
+  # used from DataDir/styles, which gets whatever shipped file it lacks.
+  if not src_dir or _is_etc_styles(src_dir):
+    src_dir = OV.GetParam('user.def_style_scene_src_dir') or etc_dir
+    if _is_etc_styles(src_dir):
+      src_dir = os.path.join(OV.DataDir(), 'styles')
+      try:
+        _copy_missing_files(etc_dir, src_dir)
+      except OSError as err:
+        print("Could not copy the shipped styles to %s: %s" % (src_dir, err))
 
   os.makedirs(src_dir, exist_ok=True)
 
@@ -2115,24 +2136,15 @@ def set_style_and_scene(style=None, scene=None, src_dir=None):
   style_p = os.path.join(src_dir, f"{style}.glds")
   scene_p = os.path.join(src_dir, f"{scene}.glsp")
 
-  etc_dir = os.path.join(OV.BaseDir(), ETC_STYLES)
-
-  # --- ensure files exist ---
-  if not os.path.exists(style_p):
-    shutil.copyfile(
-          os.path.join(etc_dir, f"{style}.glds"),
-            style_p
-        )
-
-  if not os.path.exists(scene_p):
-    shutil.copyfile(
-          os.path.join(etc_dir, f"{scene}.glsp"),
-            scene_p
-        )
-
-  # --- load ---
-  olex.m(f"load style {style_p}")
-  olex.m(f"load scene {scene_p}")
+  # --- ensure files exist, then load ---
+  for path, kind in ((style_p, 'style'), (scene_p, 'scene')):
+    if not os.path.exists(path):
+      shipped = os.path.join(etc_dir, os.path.basename(path))
+      if not os.path.exists(shipped):
+        print("No %s file %s" % (kind, path))
+        continue
+      shutil.copyfile(shipped, path)
+    olex.m(f'load {kind} "{path}"')
 
 
 OV.registerFunction(set_style_and_scene, False, 'gui.tools')

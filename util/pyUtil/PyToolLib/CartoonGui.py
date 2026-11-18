@@ -257,7 +257,7 @@ def button(kind):
 ''' % {'K': k.upper(), 'k': k, 'img': img,
        'up': 'on' if on else 'off',
        'hint': hint,
-       'bg': OV.GetParam('gui.html.HtmlTableGroupBgColour')}
+       'bg': OV.GetVar('HtmlTableGroupBgColour', '')}
   raise ValueError(kind)
 
 

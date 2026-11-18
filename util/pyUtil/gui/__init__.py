@@ -10,13 +10,19 @@ from . import restraints
 from . import disorder
 import re
 
-table_col = OV.GetVar('HtmlTableFirstcolColour')
-green_text = OV.GetParam('gui.green_text')
-green = OV.GetParam('gui.green')
-notification_base_colour = OV.GetParam('gui.notification_base_colour')
-notification_highlight_colour = OV.GetParam('gui.notification_highlight_colour')
-red = OV.GetParam('gui.red')
-orange = OV.GetParam('gui.orange')
+from .theme.live import on_skin_change
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global table_col, green_text, green, notification_base_colour, notification_highlight_colour, red, orange
+  table_col = OV.GetVar('HtmlTableFirstcolColour')
+  green_text = OV.GetParam('gui.green_text')
+  green = OV.GetParam('gui.green')
+  notification_base_colour = OV.GetParam('gui.notification_base_colour')
+  notification_highlight_colour = OV.GetParam('gui.notification_highlight_colour')
+  red = OV.GetParam('gui.red')
+  orange = OV.GetParam('gui.orange')
+on_skin_change(_skin_colours)
 white = "#ffffff"
 black = "#000000"
 

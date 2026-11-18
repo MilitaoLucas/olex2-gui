@@ -8,8 +8,14 @@ from ImageTools import ImageTools
 IT = ImageTools()
 import re
 import sys
-green = OV.GetParam('gui.green')
-red = OV.GetParam('gui.red')
+from gui.theme.live import on_skin_change
+
+def _skin_colours():
+  # read again after every skin change (gui.theme.live)
+  global green, red
+  green = OV.GetParam('gui.green')
+  red = OV.GetParam('gui.red')
+on_skin_change(_skin_colours)
 import gui
 debug = bool(OV.GetParam("olex2.debug", False))
 olx.SetVar('show_restraints_table', "false")

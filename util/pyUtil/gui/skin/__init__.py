@@ -101,6 +101,9 @@ def SetMaterials():
   olex.m("gl.lm.ClearColor(%s)" % OV.GetParam('gui.skin.clearcolor'))
   olex.m("SetFont Default %s" % OV.GetParam('gui.console_font'))
   olex.m("SetFont Labels %s" % OV.GetParam('gui.labels_font'))
+  # console and label text colours of the skin or the theme (gui.console_colours, gui.label_colours)
+  from gui.theme import glcolours
+  glcolours.apply()
 
   olex.m("lines %s" % OV.GetParam('gui.lines_of_cmd_text'))
 
@@ -182,6 +185,8 @@ def deal_with_gui_phil(action):
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
+    from gui.theme import overlay
+    skin_phils.append(overlay.phil_for(skin_name))
     olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     gui_phil_path = "%s/gui.phil" % (OV.DataDir())
@@ -298,6 +303,11 @@ class Skin():
     self.data_index = ""
     import PilTools
     self.TI = PilTools.TI
+    # Modules read skin colours on import (gui.tools: weight buttons, battery),
+    # and ImageTools its fonts, before the skin and the theme were loaded; a
+    # normal start does not go through change_skin, so re-read them here too
+    from gui.theme import live
+    live.skin_loaded()
     OV.registerFunction(self.change_skin)
     OV.registerFunction(self.adjust_font_size_for_ppi, True, 'gui.skin')
     rebuild_stale_gui_images(self)
@@ -354,6 +364,10 @@ class Skin():
       print("After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
+    # colours that modules read at import, and the image fonts, from this skin
+    from gui.theme import live
+    live.skin_loaded()
+
     self.TI.run_timage(force_images=False)
     if olx.IsFileLoaded() =='true':
       im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
@@ -400,6 +414,9 @@ class Skin():
     if olx.IsFileLoaded() =='true':
       olex.m("spy.make_HOS()")
 
+    # olx.fs.Clear above also took the plugins' index entries and header images
+    live.restore_vfs()
+
     try:
       for item in olx.VFSDependent:
         try:
@@ -413,15 +430,6 @@ class Skin():
       olex.m(f"console.offset {OV.GetParam('gui.console_offset', 6)}")
     except:
       pass
-
-    #try:
-      #for plugin in olx.InstalledPlugins:
-        #try:
-          #plugin.setup_gui(force=True)
-        #except Exception as err:
-          #print("Could not update images for plugin '%s': %s" % (plugin, err))
-    #except:
-      #pass
 
     olx.FlushFS()
 

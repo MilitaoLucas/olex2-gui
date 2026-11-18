@@ -191,14 +191,14 @@ class FontInstances(ArgumentParser):
       ##################################################### Default
       "DefaultFont":{
         "font_src":(
-          r"%s/etc/gui/fonts/%s" %(self.basedir,default_font_name),
+          self.font_file(default_font_name),
           default_font_name
           ),
         "fontInstance":{}
           },
       "DefaultFont Bold":{
         "font_src":(
-          r"%s/etc/gui/fonts/%s" %(self.basedir,default_font_name_bold),
+          self.font_file(default_font_name_bold),
           default_font_name_bold,
           ),
         "fontInstance":{}
@@ -518,7 +518,38 @@ class FontInstances(ArgumentParser):
         }
     #for font_name in self.fonts:
       #self.registerFontInstance(font_name, 10)
+    self.add_font_files()
     return self.fonts
+
+  def font_dirs(self):
+    """Fonts the user added (theme designer, Fonts tab) first, then the shipped ones."""
+    import os
+    return [os.path.join(self.datadir, "fonts"),
+            os.path.join(self.basedir, "etc", "gui", "fonts")]
+
+  def font_file(self, name):
+    """Full path of font file 'name' from font_dirs(), or the shipped path."""
+    import os
+    for d in self.font_dirs():
+      p = os.path.join(d, name)
+      if os.path.isfile(p):
+        return p
+    return r"%s/etc/gui/fonts/%s" %(self.basedir, name)
+
+  def add_font_files(self):
+    """Every .ttf/.otf in font_dirs() can be named by its file name without
+    extension (e.g. a skin's font_name = Inter-Regular)."""
+    import os
+    for d in self.font_dirs():
+      if not os.path.isdir(d):
+        continue
+      for fn in sorted(os.listdir(d)):
+        stem, ext = os.path.splitext(fn)
+        if ext.lower() in (".ttf", ".otf") and stem not in self.fonts:
+          self.fonts[stem] = {"font_src": (os.path.join(d, fn), fn), "fontInstance": {}}
+          # <b> in drawn text asks for "<name> Bold"
+          self.fonts.setdefault("%s Bold" % stem,
+                                {"font_src": (os.path.join(d, fn), fn), "fontInstance": {}})
 
   def registerFontInstance(self, font_name, font_size, encoding='unic'):
     #font_src = r"%s\etc\gui\fonts\Vera.ttf" %self.basedir

@@ -81,7 +81,7 @@ routines requiring structure refinement
 
   atoms
   {
-  style = matt.glds
+  style = default.glds
     .type = str
   azoom = 100
     .type = int
@@ -1439,6 +1439,12 @@ programs
 user
   .short_caption = User Specific
   {
+  icon_set = *classic flat
+    .type = choice
+    .help = Toolbar and button icons: the original hand-drawn set or the new flat set painted in the skin colours (etc/gui/images/src/icons).
+  file_type_mark = *stripes colour
+    .type = choice
+    .help = "How the title above the HTML panel shows the type of the loaded file: a striped band under a skin-coloured title, or the whole title in a file-type colour (the original look)."
   sample_dir = ""
     .type = str
   customisation_dir = ""
@@ -1575,7 +1581,31 @@ user
       .type = choice
     padding = 60
       .type = str
-  }  
+    width = None
+      .type = float
+      .help = "Width of the atom legend in pixels, measured with spy.gui.theme.legend_measure()"
+    row_height = None
+      .type = float
+      .help = "Height of one legend row (element type) in pixels, measured with spy.gui.theme.legend_measure()"
+    font_size = None
+      .type = float
+      .help = "Size of the atom label font when the legend was measured: the legend scales with it"
+    symbol_chars = 1
+      .type = int
+      .help = "Characters of the longest element symbol when the legend was measured"
+    char_width = None
+      .type = float
+      .help = "Pixels one more symbol character adds to the legend, from two measurements"
+    nudge_x = 0
+      .type = int
+      .help = "Pixels the placed legend is moved to the right (negative: to the left)"
+    nudge_y = 0
+      .type = int
+      .help = "Pixels the placed legend is moved down (negative: up)"
+    auto = False
+      .type = bool
+      .help = "Put the legend at the bottom right of the structure after every file is opened"
+  }
   edit_ins_atom_order = ins_atom
     .type = str
   parts{
@@ -1663,6 +1693,10 @@ user
 
     .short_caption = Analysis Graphs
     {
+
+    use_theme_bg_colour = True
+      .type = bool
+      .help = "Graphs (GUI and reports) in the colours of the skin; off: white background, dark text"
 
     non_highlight_colour = "#ababab"
       .type = str
@@ -2807,7 +2841,7 @@ user
 
   atoms
   {
-  style = matt.glds
+  style = default.glds
     .type = str
   azoom = 100
     .type = int

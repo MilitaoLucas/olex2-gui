@@ -933,6 +933,13 @@ class ImageTools(FontInstances):
     self.translate = translate
     self.txt = txt
     self.txt_top = top_left[1]
+    try:  # per-font vertical shift set in the theme designer
+      from gui.theme import fontfiles
+      self.txt_top -= int(round(fontfiles.offset_for_key(font_name) * (self.scale or scale or 1)))
+    except Exception as err:
+      print("Font shift for '%s' not applied: %s" % (font_name, err))
+      if hasattr(sys, '_wing_debugger'):
+        raise
     self.txt_left = top_left[0]
     self.titleCase = titleCase
     self.lowerCase = lowerCase

@@ -51,6 +51,14 @@ if OV.HasGUI():
 
 silent = True
 
+def graph_colours(gui_params):
+  """Colours for the graphs: the skin's gui.graph, or, with
+  user.graphs.use_theme_bg_colour off, the plain ones of gui.params (white
+  background, dark text), so dark skins give no light text on white."""
+  if OV.GetParam('user.graphs.use_theme_bg_colour', True):
+    return gui_params.graph
+  return olx.gui_phil_handler.master_phil.extract().gui.graph
+
 class ReciprocalResolutionAxis(object):
   """x-axis transform for plots against d-spacing.
 
@@ -149,6 +157,7 @@ class Graph(ArgumentParser):
     self.TopRightTitle = _
 
     self.guiParams = OV.GuiParams()
+    self.graphColours = graph_colours(self.guiParams)
 
     self.graphInfo = {
       "TopRightTitle":self.TopRightTitle,
@@ -274,7 +283,7 @@ class Graph(ArgumentParser):
       box = (2,2,boxWidth-2,boxHeight-2)
       draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
 
-    txt_colour = "#444444"
+    txt_colour = self.graphColours.grey.hexadecimal
     top = 1 * self.scale
     for key in keys_to_draw:
       key_type = key['type']
@@ -355,17 +364,17 @@ class Graph(ArgumentParser):
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
-    self.light_grey = self.guiParams.graph.light_grey.hexadecimal
-    self.grey = self.guiParams.graph.grey.hexadecimal
-    self.dark_grey = self.guiParams.graph.grey.hexadecimal
-    self.filenameColour = self.guiParams.graph.filename_colour.hexadecimal
-    self.titleColour = self.guiParams.graph.title_colour.hexadecimal
-    self.fillColour = self.guiParams.graph.fill_colour.hexadecimal
-    self.outlineColour = self.guiParams.graph.outline_colour.hexadecimal
-    self.fitlineColour = self.guiParams.graph.fitline_colour.hexadecimal
-    self.pageColour = self.guiParams.graph.page_colour.hexadecimal
-    self.graphBgColour = self.guiParams.graph.graph_bg_colour.hexadecimal
-    self.axislabelColour = self.guiParams.graph.axislabel_colour.hexadecimal
+    self.light_grey = self.graphColours.light_grey.hexadecimal
+    self.grey = self.graphColours.grey.hexadecimal
+    self.dark_grey = self.graphColours.grey.hexadecimal
+    self.filenameColour = self.graphColours.filename_colour.hexadecimal
+    self.titleColour = self.graphColours.title_colour.hexadecimal
+    self.fillColour = self.graphColours.fill_colour.hexadecimal
+    self.outlineColour = self.graphColours.outline_colour.hexadecimal
+    self.fitlineColour = self.graphColours.fitline_colour.hexadecimal
+    self.pageColour = self.graphColours.page_colour.hexadecimal
+    self.graphBgColour = self.graphColours.graph_bg_colour.hexadecimal
+    self.axislabelColour = self.graphColours.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
@@ -1772,9 +1781,9 @@ class Graph(ArgumentParser):
     x = self.graph_right - wX - self.bSides + 6 * self.scale
     y = self.boxY - self.imY * -0.002 * self.scale
 
+    # blank out the grid under the label, in the graph's colour like the y label
     box = (x, y, x+wX, y+wY)
-    fill = (256, 256, 256)
-    self.draw.rectangle(box, fill=fill)
+    self.draw.rectangle(box, fill=self.graphBgColour)
 
     self.draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
 
@@ -2327,7 +2336,7 @@ class WilsonPlot(Analysis):
       wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
       if i == 0:
         first_wX = wX
-      colour = "#444444"
+      colour = self.graphColours.grey.hexadecimal
       if "E^2" in txt:
         if float(estats) < float(self.wilson_grad_begin):
           colour = "#ff0000"
@@ -2584,12 +2593,12 @@ class ChargeFlippingPlot(PrgAnalysis):
       box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
       tt = "R1"
-      self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
+      self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill=self.graphColours.light_grey.hexadecimal)
 
       ## Draw Current Numbers
       wX, wY = get_text_size(self.draw, txt, font=self.font_large)
       x = width - wX - self.bSides
-      self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+      self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill=self.graphColours.light_grey.hexadecimal)
       self.update_image()
 
 class CumulativeIntensityDistribution(Analysis):
@@ -4470,7 +4479,15 @@ class HealthOfStructure():
         l = ['_refine_ls_shift/su_max', '_refine_diff_density_max',
              '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
              '_refine_ls_abs_structure_Flack']
-        if olx.Cif('_refine_ls_abs_structure_Flack') == "n/a":
+        # Show the Flack/Hooft chip only for a non-centrosymmetric structure
+        # with a numeric value: an achiral CIF carries '?', '.' or nothing.
+        flack_cif = olx.Cif('_refine_ls_abs_structure_Flack').strip()
+        try:
+          float(flack_cif.split('(')[0])
+          has_flack = True
+        except ValueError:
+          has_flack = False
+        if not has_flack or self.hkl_stats.get('IsCentrosymmetric'):
           l.remove("_refine_ls_abs_structure_Flack")
 
       else:
@@ -4765,7 +4782,7 @@ class HealthOfStructure():
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
     width = self.width
     scale = self.scale
-    font_name = "DefaultFont"
+    font_name = OV.GetParam('gui.timage.hos.font_name', None) or "DefaultFont"
     font_size =  round(OV.GetParam('gui.timage.hos.font_size'))
     value_display_extra = ""
     targetWidth = round(width/n)
