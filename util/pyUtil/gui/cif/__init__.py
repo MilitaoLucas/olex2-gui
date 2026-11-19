@@ -48,7 +48,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     "runtype": "symmonly",
     "referer": "Olex2",
     "from_index": "from_index",
-    "valout": "vrfab",
+    "valout": OV.GetParam('user.cif.checkcif.valout'),
     "outputtype": outputtype.upper(),
     'validtype': 'checkcif_only'
   }
