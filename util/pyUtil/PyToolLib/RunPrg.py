@@ -31,32 +31,96 @@ from CifInfo import MergeCif, ED_NBEAM_DOI
 NOSPHERA2_DOI = "10.1039/D0SC05526C"
 import time
 import shutil
-# The listeners expect a function
+from contextlib import contextmanager
+
+
 class ListenerManager(object):
+  """Tells listeners when a refinement or solution starts and ends.
+
+  Listeners are functions or methods taking the RunPrg object, registered
+  for "onStart" or "onEnd". Each run is announced once: RunRefinementPrg.run
+  and RunSolutionPrg.run are whole runs, and the startRun/endRun calls made
+  inside them -- one pair per refinement step of a NoSpherA2 refinement, or a
+  start without an end when a solution stops early -- are not passed on. The
+  end of a whole run is always announced, however the run stops. A listener
+  that raises is reported and does not stop the run."""
+
+  # Plugins check this before relying on the above. Older versions announced
+  # every startRun/endRun call and could miss the end of a run.
+  whole_runs = True
 
   def __init__(self):
     self.onStart_listeners = []
     self.onEnd_listeners = []
+    self._current_run = None  # the caller of the whole run in progress
 
-  def register_listener(self, listener,event):
+  def _listeners(self, event):
     if event == "onEnd":
-      for l in self.onEnd_listeners:
-        if type(l.__self__) == type(listener.__self__):
-          return False
-      self.onEnd_listeners.append(listener)
-    elif event == "onStart":
-      for l in self.onStart_listeners:
-        if type(l.__self__) == type(listener.__self__):
-          return False
-      self.onStart_listeners.append(listener)
+      return self.onEnd_listeners
+    if event == "onStart":
+      return self.onStart_listeners
+    raise ValueError("unknown run event %r" % event)
+
+  @staticmethod
+  def _key(listener):
+    """Identity that survives a reload of the listener's module."""
+    owner = getattr(listener, '__self__', None)
+    if owner is None:
+      return (listener.__module__, listener.__qualname__)
+    t = type(owner)
+    return (t.__module__, t.__qualname__, listener.__name__)
+
+  def register_listener(self, listener, event):
+    """Add a listener; one registered before from the same place (e.g.
+    before its module was reloaded) is replaced."""
+    listeners = self._listeners(event)
+    key = self._key(listener)
+    listeners[:] = [l for l in listeners if self._key(l) != key]
+    listeners.append(listener)
+    return True
+
+  def unregister_listener(self, listener, event):
+    listeners = self._listeners(event)
+    if listener in listeners:
+      listeners.remove(listener)
+      return True
+    return False
+
+  @contextmanager
+  def whole_run(self, caller):
+    """Announce the start of a run on entry and its end on exit."""
+    if self._current_run is not None:  # inside a run that is already announced
+      yield
+      return
+    self._current_run = caller
+    self._notify(self.onStart_listeners, caller)
+    try:
+      yield
+    finally:
+      self._current_run = None
+      self._notify(self.onEnd_listeners, caller)
 
   def startRun(self, caller):
-    for item in self.onStart_listeners:
-      item(caller)
+    if self._current_run is None:
+      self._notify(self.onStart_listeners, caller)
 
   def endRun(self, caller):
-    for item in self.onEnd_listeners:
-      item(caller)
+    if self._current_run is None:
+      self._notify(self.onEnd_listeners, caller)
+
+  def _notify(self, listeners, caller):
+    for item in list(listeners):
+      try:
+        item(caller)
+      except Exception:
+        report = getattr(sys.stderr, 'formatExceptionInfo', None)
+        if report is not None:
+          report()
+        else:
+          import traceback
+          traceback.print_exc()
+
+
 LM = ListenerManager()
 class RunPrg(ArgumentParser):
   running = None
@@ -427,6 +491,10 @@ class RunSolutionPrg(RunPrg):
     self.run()
 
   def run(self):
+    with LM.whole_run(self):
+      return self._run()
+
+  def _run(self):
     if int(olx.xf.au.GetAtomCount()) != 0:
       if OV.HasGUI():
         if OV.GetParam('user.alert_solve_anyway') == 'Y':
@@ -629,6 +697,10 @@ class RunRefinementPrg(RunPrg):
       print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
   def run(self):
+    with LM.whole_run(self):
+      return self._run()
+
+  def _run(self):
     self.setup_masking()
     self.run_pre_run_macro()
     if RunRefinementPrg.running:
