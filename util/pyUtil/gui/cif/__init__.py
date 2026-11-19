@@ -52,7 +52,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     "outputtype": outputtype.upper(),
     'validtype': 'checkcif_only'
   }
-  headers = {'User-agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'}
+  headers = {'User-agent' : "Olex2, compiled " + olx.GetCompilationInfo()}
   fcf_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'fcf'))
   if send_fcf:
     if not os.path.exists(fcf_name):
