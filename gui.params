@@ -823,6 +823,31 @@ gui
       .type = colour
       .help = "Used on a light background; None: the dark-background value"
   }
+  element_buttons
+    .help = "Element buttons below the formula: model count below, equal to or above the formula. None takes the colour from the skin."
+  {
+    neutral = None
+      .type = colour
+      .help = "Plain button; None: gui.html.input_bg_colour"
+    under = None
+      .type = colour
+      .help = "Fewer atoms than the formula; None: input background with gui.purple mixed in"
+    ok = None
+      .type = colour
+      .help = "As in the formula; None: input background with gui.green mixed in"
+    over = None
+      .type = colour
+      .help = "More atoms than the formula; None: input background with gui.red mixed in"
+    font_colour = None
+      .type = colour
+      .help = "Element symbol; None: gui.html.font_colour"
+    tint = 0.25
+      .type = float
+      .help = "Share of the status colour on a light input background, 0 to 1"
+    tint_dark = 0.45
+      .type = float
+      .help = "Share of the status colour on a dark input background, 0 to 1"
+  }
   htmlpanelwidth = 500
     .type = int
   htmlpanelwidth_margin_adjust = 21

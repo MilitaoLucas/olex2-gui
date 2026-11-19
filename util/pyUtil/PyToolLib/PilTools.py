@@ -2202,7 +2202,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     btn_dict = {}
     icon_size = OV.GetParam('gui.skin.icon_size')
-    tints = [("",(250,250,250)), ("b",(210,210,255)), ('g',(210,255,210)), ('r',(255,210,210))]
+    # '' neutral, b under-assigned, g as in the formula, r over-assigned:
+    # from the skin (element_button_colours), not fixed light tints
+    ebc = element_button_colours()
+    tints = [("", ebc['neutral']), ("b", ebc['under']), ('g', ebc['ok']), ('r', ebc['over'])]
     for symbol in pt:
       for tint in tints:
         bgcolour = tint[1]
@@ -2218,18 +2221,18 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             'image_prefix':'element',
             'width':icon_size ,
             'top_left':(0,4),
-            'font_colour':'#333333',
+            'font_colour':ebc['font'],
             'grad':False,
             'name':name
           })
       btn_dict.setdefault(
         'Table', {
           'txt':'...',
-          'bgcolour':'#efefef',
+          'bgcolour':ebc['neutral'],
           'width':int(icon_size*1.0),
           'image_prefix':'element',
           'top_left':(0,5),
-          'font_colour':'#333333',
+          'font_colour':ebc['font'],
           'grad':False,
           'name':'Table',
         })
@@ -3996,3 +3999,36 @@ if __name__ == "__main__":
 
   #a = Boxplot((0.054999999999999938, 0.56999999999999995, 0.63500000000000001, 0.67000000000000004, 0.68999999999999995, 0.76000000000000001))
   #a.makeBoxplot()
+
+
+def _mix(a, b, share):
+  """'#rrggbb' of a with share (0..1) of b mixed in."""
+  ca = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
+  cb = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+  return '#%02x%02x%02x' % tuple(int(round(x + (y - x) * share)) for x, y in zip(ca, cb))
+
+
+def element_button_colours():
+  """Colours of the element buttons below the formula (gui.element_buttons):
+  neutral, under (fewer atoms than the formula), ok, over (more), font.
+  Unset colours come from the skin: the input background with a share of
+  gui.purple / gui.green / gui.red mixed in (tint, or tint_dark when the
+  input background is dark), text in the panel font colour."""
+  from gui.theme.glcolours import to_hex
+  def get(name, default=None):
+    v = OV.GetParam(name, default)
+    return to_hex(v) or default
+  base = get('gui.html.input_bg_colour', '#ffffff')
+  r, g, b = (int(base[i:i + 2], 16) for i in (1, 3, 5))
+  dark = 0.299 * r + 0.587 * g + 0.114 * b < 128
+  key = 'gui.element_buttons.tint_dark' if dark else 'gui.element_buttons.tint'
+  try:
+    share = float(OV.GetParam(key, 0.45 if dark else 0.25))
+  except (TypeError, ValueError):
+    share = 0.45 if dark else 0.25
+  out = {'neutral': get('gui.element_buttons.neutral') or base,
+         'font': get('gui.element_buttons.font_colour') or get('gui.html.font_colour', '#333333')}
+  for kind, skin in (('under', 'gui.purple'), ('ok', 'gui.green'), ('over', 'gui.red')):
+    out[kind] = (get('gui.element_buttons.%s' % kind)
+                 or _mix(base, get(skin, '#808080'), share))
+  return out

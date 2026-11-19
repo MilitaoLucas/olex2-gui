@@ -31,11 +31,19 @@ SLOTS = (
   ('console_colours.exception', 'exception', 2053, '1;255'),
   ('console_colours.help', 'helptxt', 2053, '1;16776960'),
   ('console_colours.help_command', 'helpcmd', 2053, '1;65535'),
-  ('label_colours.all', 'Labels.Text', 2049, None),  # None: the style's
-  ('label_colours.atoms', 'PLabels.Text', 2049, None),
+  # labels: emissive (IdentityDraw + ambient + emission, 2305).  The styles'
+  # own 2049 is ambient only, so the scene's ambient light scales the colour
+  # and white comes out dark grey; emission shows the colour as chosen
+  ('label_colours.all', 'Labels.Text', 2305, None),  # None: the style's
+  ('label_colours.atoms', 'PLabels.Text', 2305, None),
   # the atom legend's text (collection AtomLegend) follows the atom labels
-  ('label_colours.atoms', 'AtomLegend.Text', 2049, None),
+  ('label_colours.atoms', 'AtomLegend.Text', 2305, None),
 )
+# material flags (Olex2 TGlMaterial)
+AMBIENT_F, EMISSION_F = 0x1, 0x100
+# full materials chosen in Olex2's material dialog, by param: theme overlay
+# section; they win over the plain colour of the same param
+MATERIALS = 'text_materials'
 # the same slots for a light 3D background (gui.console_colours_light.*,
 # gui.label_colours_light.*); unset, the plain value is used on light too
 LIGHT = dict((s[0], s[0].replace('_colours.', '_colours_light.', 1)) for s in SLOTS)
@@ -65,8 +73,68 @@ def material(hex_colour, flags):
   """An Olex2 material string with this colour: colours are 0xAABBGGRR."""
   r, g, b = (int(hex_colour[i:i + 2], 16) for i in (1, 3, 5))
   c = (255 << 24) | (b << 16) | (g << 8) | r
-  n = bin(flags & 0x3FF).count('1')  # one colour per colour flag set
-  return ';'.join([str(flags)] + [str(c)] * n)
+  # one value per colour flag set, in bit order; with emission the colour is
+  # the emission and the ambient is black, so the lights add nothing
+  black = 255 << 24
+  values = []
+  for bit in range(10):
+    if flags & (1 << bit):
+      emissive_ambient = (1 << bit) == AMBIENT_F and flags & EMISSION_F
+      values.append(black if emissive_ambient else c)
+  return ';'.join([str(flags)] + [str(v) for v in values])
+
+
+def colour_of_material(m):
+  """'#rrggbb' a material string shows: its emission if it has one, else its
+  first (ambient) colour; None if it cannot be read."""
+  try:
+    parts = str(m).split(';')
+    flags = int(parts[0])
+    bits = [b for b in range(10) if flags & (1 << b)]
+    if not bits:
+      return None
+    pick = bits.index(8) if flags & EMISSION_F else 0
+    v = int(parts[1 + pick]) & 0xFFFFFF
+  except (ValueError, IndexError):
+    return None
+  r, g, b = v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF
+  return '#%02x%02x%02x' % (r, g, b)
+
+
+def slot_of(param):
+  """(material name, flags, own) of the first slot of a param or its light
+  variant, None if unknown."""
+  base = dict((v, k) for k, v in LIGHT.items()).get(param, param)
+  for p, name, flags, own in SLOTS:
+    if p == base:
+      return name, flags, own
+  return None
+
+
+def stored_material(param):
+  from . import overlay
+  return overlay.section(MATERIALS).get(param) or None
+
+
+def set_material(param, m):
+  """Keep a full material for this param (None forgets it)."""
+  from . import overlay
+  s = overlay.section(MATERIALS)
+  if m:
+    s[param] = str(m)
+  else:
+    s.pop(param, None)
+  overlay.set_section(MATERIALS, s)
+
+
+def material_of(param, flags):
+  """The material string a param stands for: a stored full material, else
+  its colour; None if neither is set."""
+  m = stored_material(param)
+  if m:
+    return m
+  c = colour_of(param)
+  return material(c, flags) if c else None
 
 
 def colour_of(param):
@@ -151,10 +219,10 @@ def apply(restore=False):
       raise
     light = False
   for param, name, flags, own in SLOTS:
-    c = effective(param, light)
+    m = (light and material_of(LIGHT[param], flags)) or material_of(param, flags)
     try:
-      if c:
-        olx.SetMaterial(name, material(c, flags))
+      if m:
+        olx.SetMaterial(name, m)
       elif restore and param.startswith('console_colours.'):
         olx.SetMaterial(name, own or OV.GetParam('gui.infobox_text'))
     except Exception as err:

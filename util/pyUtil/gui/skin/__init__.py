@@ -81,6 +81,22 @@ def SetGrad():
   olx.Grad(v[0], v[1], v[2], v[3])
 
 
+def set_gl_fonts():
+  """Console and 3D label fonts of the skin or the theme (gui.console_font,
+  gui.labels_font).  olx.SetFont, not the macro: a system font description
+  ends in the face name, which may hold spaces ('JetBrains Mono')."""
+  for area, param in (('Default', 'gui.console_font'), ('Labels', 'gui.labels_font')):
+    font = OV.GetParam(param)
+    if not font:
+      continue
+    try:
+      olx.SetFont(area, str(font))
+    except Exception as err:
+      print("Could not set the %s font to '%s': %s" % (area, font, err))
+      if hasattr(sys, '_wing_debugger'):
+        raise
+
+
 def SetMaterials():
   if OV.GetParam('gui.skin.materials_have_been_set'):
     return
@@ -99,8 +115,7 @@ def SetMaterials():
   olx.SetMaterial('dp1', OV.GetParam('gui.materials.dp1'))
 
   olex.m("gl.lm.ClearColor(%s)" % OV.GetParam('gui.skin.clearcolor'))
-  olex.m("SetFont Default %s" % OV.GetParam('gui.console_font'))
-  olex.m("SetFont Labels %s" % OV.GetParam('gui.labels_font'))
+  set_gl_fonts()
   # console and label text colours of the skin or the theme (gui.console_colours, gui.label_colours)
   from gui.theme import glcolours
   glcolours.apply()
@@ -308,6 +323,9 @@ class Skin():
     # normal start does not go through change_skin, so re-read them here too
     from gui.theme import live
     live.skin_loaded()
+    # a normal start does not run SetMaterials either; the theme's console and
+    # label fonts (theme font files are registered by now, gui.theme import)
+    set_gl_fonts()
     OV.registerFunction(self.change_skin)
     OV.registerFunction(self.adjust_font_size_for_ppi, True, 'gui.skin')
     rebuild_stale_gui_images(self)
