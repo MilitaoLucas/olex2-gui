@@ -2866,6 +2866,8 @@ user
         .help = The URL to which the cif and fcf file will be sent
       format = *pdf html
         .type = choice
+      valout = *vrfa vrfab vrfabc vrfno
+        .type = choice
       send = False
         .type = bool
         .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'

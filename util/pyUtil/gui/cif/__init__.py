@@ -46,11 +46,13 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
   params = {
     "file": cif,
     "runtype": "symmonly",
-    "referer": "checkcif_server",
+    "referer": "Olex2",
+    "from_index": "from_index",
+    "valout": "vrfab",
     "outputtype": outputtype.upper(),
     'validtype': 'checkcif_only'
   }
-
+  headers = {'User-agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'}
   fcf_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'fcf'))
   if send_fcf:
     if not os.path.exists(fcf_name):
@@ -66,7 +68,9 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
       url = OV.GetParam('user.cif.checkcif.hkl_url')
     else:
       url = OV.GetParam('user.cif.checkcif.url')
-    response = HttpTools.make_url_call(url, params, http_timeout=120)
+    response = HttpTools.make_url_call(url, params,
+      headers=headers,
+      http_timeout=120)
   except Exception as e:
     threadPrint('Failed to receive Checkcif report...')
   finally:
@@ -110,7 +114,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
         threadPrint('Downloading PDF report')
         response = None
         try:
-          response = HttpTools.make_url_call(href)
+          response = HttpTools.make_url_call(href, headers=headers)
           threadPrint('Done')
         except Exception as e:
           threadPrint('Failed to download PDF report...')

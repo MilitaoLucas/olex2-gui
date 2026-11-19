@@ -52,7 +52,7 @@ $+
     GetVar(default_link),
     "value=IUCr checkCIF",
     "onclick=spy.cif.GetCheckCifReport()",
-    "td1=<td width='33%'>"
+    "td1=<td width='21%'>"
   )
 $-
 
@@ -70,6 +70,16 @@ $+
 $-
 </td>
 
+<td name=GET_CHECKCIF_VALOUT align='left' VALIGN='center' width='15%'>
+  <snippet src="gui/snippets/input-combo"
+    name="SET_CHECKCIF_VALOUT"
+    items="A alerts only<-vrfa;A and B alerts<-vrfab;A, B and C alerts<-vrfabc;None<-vrfno"
+    value="spy.GetParam('user.cif.checkcif.valout')"
+    readonly="True"
+    onchange="spy.SetParam('user.cif.checkcif.valout',html.GetValue('~name~'))"
+  />
+</td>
+
 <td width='20%' align='center'>
 <zimg border="0" src="gui/images/src/CCDC_tiny.png">
 </td>
@@ -78,8 +88,7 @@ $+
   html.Snippet(
     GetVar(default_link),
     "value=Request CCDC Number",
-    "onclick=spy.ccdc_submit()",
-    "td1=<td width='30%'>"
+    "onclick=spy.ccdc_submit()"
   )
 $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

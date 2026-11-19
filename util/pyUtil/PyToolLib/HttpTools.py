@@ -8,17 +8,18 @@ auto_update = True
 use_proxy_settings = True
 proxy = None
 
-def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
+def make_url_call_with_proxy(url, proxy, values, headers, http_timeout = 5):
   if proxy:
     proxies = {'http': proxy}
   else:
     proxies = {}
   opener = urllib.request.build_opener(
     urllib.request.ProxyHandler(proxies))
-  return opener.open(url,values, http_timeout)
+  rq = urllib.request.Request(url, values, headers=headers)
+  return opener.open(rq, None, http_timeout)
 
 
-def make_url_call(url, values=None, http_timeout = 5):
+def make_url_call(url, values=None, headers={}, http_timeout = 5):
   global use_proxy_settings
   global proxy
   localhost = False
@@ -39,15 +40,17 @@ def make_url_call(url, values=None, http_timeout = 5):
   if use_proxy_settings and not localhost:
     try:
       read_usettings()
-      res = make_url_call_with_proxy(url, proxy, values, http_timeout)
+      res = make_url_call_with_proxy(url, proxy, values, headers, http_timeout)
     except urllib.error.URLError: #try system settings
       try:
-        res = urllib.request.urlopen(url,values, http_timeout)
+        rq = urllib.request.Request(url, values, headers=headers)
+        res = urllib.request.urlopen(rq, None, http_timeout)
         use_proxy_settings = False
       except Exception:
         raise
   else:
-    res = urllib.request.urlopen(url,values, http_timeout)
+    rq = urllib.request.Request(url, values, headers=headers)
+    res = urllib.request.urlopen(rq, None, http_timeout)
   return res
 
 def read_usettings():
