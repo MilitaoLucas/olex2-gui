@@ -1222,7 +1222,17 @@ class ImageTools(FontInstances):
     # OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
-  def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y=0, char_pos=(0, 0), char_char="+", width=10, align='left', scale=1.0):
+  def paint_disc(self, image, box, colour, supersample=4):
+    """Paints an antialiased filled disc of colour into box (l, t, size) of image."""
+    l, t, size = box
+    big = size * supersample
+    mask = Image.new('L', (big, big), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, big - 1, big - 1), fill=255)
+    mask = mask.resize((size, size), Image.LANCZOS)
+    image.paste(Image.new('RGBA', (size, size), colour), (l, t), mask)
+    return image
+
+  def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y=0, char_pos=(0, 0), char_char="+", width=10, align='left', scale=1.0, disc_colour=None):
     if align == 'right':
       adval_parameter = OV.GetParam('gui.timage.adval')
       adval = int(round(adval_parameter * scale, 0))
@@ -1311,6 +1321,23 @@ class ImageTools(FontInstances):
       r = width - pad
 
       mark = self.get_PIL_image_from_olex_VFS('%s_raw.png' % direction)
+
+      if disc_colour:
+        # the ring of the mark is transparent inside and out: the disc gives
+        # it its fill, outside the disc the button background stays
+        _ = int(image.size[1] - (pad*scale*2))
+        box = (int(round(l)), int(round(t)), _)
+        if mark:
+          # the ring is not centred in its sprite cell: fit the disc to the
+          # ring itself, with its edge under the middle of the ring
+          ring = mark.resize((_, _), Image.LANCZOS).split()[3].point(lambda v: 255 if v > 128 else 0).getbbox()
+          if ring:
+            d = min(ring[2] - ring[0], ring[3] - ring[1])
+            inset = max(1, int(round(d * 0.04)))
+            d -= 2 * inset
+            box = (box[0] + ring[0] + inset, box[1] + ring[1] + inset, d)
+        image = self.paint_disc(image, box, disc_colour)
+        draw = ImageDraw.Draw(image)
 
       if mark:
         watermark = True
@@ -1616,7 +1643,8 @@ class ImageTools(FontInstances):
     if not border:
       border = float(OV.GetParam('user.image.bitmap.trim_border',1))
     if not border_col:
-      border_col = OV.GetParam('user.image.trim_border_colour')
+      # declared in params.phil as user.image.bitmap.trim_border_colour
+      border_col = OV.GetParam('user.image.bitmap.trim_border_colour') or '#bbbbbb'
 
     from PIL import Image, ImageChops, ImageOps
     p = None

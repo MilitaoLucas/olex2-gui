@@ -2930,6 +2930,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         img = img.resize(nSize, Image.LANCZOS)
         image.paste(img,(0,0))
 
+    # cbtn arrows: the state colour only fills the disc behind the ring/arrow
+    # mark; outside it the button background shows (gui.timage.cbtn.arrow_disc)
+    disc_colour = None
     if 'bar' in arrows:
       draw = ImageDraw.Draw(image)
       try:
@@ -2945,7 +2948,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         sidefill = fill
       else:
         sidefill = fill
-      image = IT.add_whitespace(image=image, side=side, weight=weight * self.scale, colour = sidefill, overwrite=True)
+      if 'arrow' in arrows and OV.GetParam('gui.timage.cbtn.arrow_disc', False):
+        disc_colour = sidefill
+      else:
+        image = IT.add_whitespace(image=image, side=side, weight=weight * self.scale, colour = sidefill, overwrite=True)
 
     if 'arrow' in arrows:
       draw = ImageDraw.Draw(image)
@@ -2975,7 +2981,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           fill = IT.adjust_colour(fill,luminosity = 1.6)
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
-      image = IT.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale=scale)
+      image = IT.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale=scale, disc_colour=disc_colour)
 
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)

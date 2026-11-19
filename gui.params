@@ -508,6 +508,9 @@ gui
         .type = colour
       dot_colour_on = #444444
         .type = colour
+      arrow_disc = True
+        .type = bool
+        .help = "Fill only the disc behind the open/close arrow with the state colour; the rest of the arrow box shows the button background. False: solid square as before."
       shadow = False
         .type = bool
       border = 1
