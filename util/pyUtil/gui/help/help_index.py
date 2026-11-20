@@ -69,7 +69,7 @@ _here = os.path.dirname(os.path.abspath(__file__))
 def _markdown2():
   try:
     from . import markdown2
-  except ImportError:          # run as a script
+  except (ImportError, ValueError):  # run as a script (Python 2 raises ValueError)
     if _here not in sys.path:
       sys.path.insert(0, _here)
     import markdown2

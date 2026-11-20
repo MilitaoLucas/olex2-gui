@@ -545,11 +545,6 @@ try:
     for t in toks:
       platforms[t] = True
 
-  # the build below rewrites this tracked file: start each release from the
-  # committed version, so the update cannot conflict with the last build
-  help_index_json = os.path.join(working_directory, 'util', 'pyUtil', 'gui', 'help', 'help_index.json')
-  if os.path.exists(help_index_json):
-    client.revert(help_index_json)
   if option.update_file:
     filepath = option.update_file
     print('Updating %s only...' %filepath)
@@ -583,14 +578,9 @@ except Exception as err:
     parser.print_help()
     #sys.exit(1)
 
-# help: compile the *.help.md files into gui/help/help_index.json, which
-# ships (svn property olex-update) instead of the old help.zip
-help_index_script = os.path.join(working_directory, 'util', 'pyUtil', 'gui', 'help', 'help_index.py')
-if os.path.exists(help_index_script):
-  import subprocess
-  if subprocess.call([sys.executable, help_index_script, working_directory]) != 0:
-    print("ERROR: building the help index failed")
-    sys.exit(1)
+# help: nothing to build here. The *.help.md files ship (olex-update) and
+# Olex2 compiles them into DataDir()/help_index.json on the first help lookup
+# (gui.help, since r7909).
 
 # gather files and put them in different groups
 top_files = filter_out_directories(
