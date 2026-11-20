@@ -33,10 +33,10 @@ from . import help_index
 class GetHelp(VFSDependent):
   """
   The help behind the 'i' buttons. Help comes from *.help.md files
-  (help_index.py), compiled into gui/help/help_index.json at release time.
-  Nothing is read at startup: the index is loaded on the first lookup, plus
-  help shipped by plugins / modules (PluginLib, DataDir()/modules), which is
-  compiled on demand and cached in DataDir() until those files change.
+  (help_index.py), compiled on the first lookup and cached in
+  DataDir()/help_index.json (core) and DataDir()/help_extra_index.json
+  (plugins / modules: PluginLib, DataDir()/modules); a file is compiled again
+  only when it is new or changed.  Nothing is read at startup.
   In development (debug or developer mode) a help file that changed since
   it was indexed is recompiled when one of its entries is shown.
   """
@@ -84,18 +84,31 @@ class GetHelp(VFSDependent):
   def _extra_cache_path(self):
     return os.path.join(OV.DataDir(), 'help_extra_index.json')
 
+  def _core_cache_path(self):
+    return os.path.join(OV.DataDir(), help_index.INDEX_NAME)
+
+  def _write_cache(self, index, path):
+    try:
+      help_index.write_index(index, path)
+    except OSError as err:
+      print("Help: could not cache the help index in %s: %s" % (path, err))
+
   def _load_index(self):
-    """Shipped index + plugin/module help; built on the first lookup."""
+    """Core help + plugin/module help, on the first lookup.  Both are
+    compiled from the *.help.md files and cached in DataDir(); only files
+    that are new or changed since (an update, a plugin) are compiled again.
+    Nothing is shipped or kept in svn."""
     if self._index is not None:
       return self._index
     base = OV.BaseDir()
-    index = help_index.read_index(os.path.join(self.p_path, help_index.INDEX_NAME))
-    if index is None:
-      # no (current) index shipped -- e.g. a development checkout
-      index, dups = help_index.build_index(base)
-      for hid, a, b in dups:
-        print("Help: duplicate ID %s in %s and %s" % (hid, a, b))
-    entries, files = index['entries'], index['files']
+    core_path = self._core_cache_path()
+    index = help_index.read_index(core_path) or {'entries': {}, 'files': {}}
+    changed, dups = help_index.refresh(index, help_index.core_help_files(base), base)
+    for hid, a, b in dups:
+      print("Help: duplicate ID %s in %s and %s" % (hid, a, b))
+    if changed:
+      self._write_cache(index, core_path)
+    entries, files = dict(index['entries']), dict(index['files'])
 
     # plugins / modules: their *.help.md, recompiled only when changed
     extra = help_index.read_index(self._extra_cache_path()) or {'entries': {}, 'files': {}}
@@ -183,17 +196,19 @@ class GetHelp(VFSDependent):
 
   def rebuild(self, write=True):
     """
-    spy.help.rebuild() -- recompile all help (development; also picks up
-    new *.help.md files) and, if possible, write help_index.json.
+    spy.help.rebuild() -- recompile all help from scratch (development)
+    and, with write, cache it in DataDir().
     """
     index, dups = help_index.build_index(OV.BaseDir())
     for hid, a, b in dups:
       print("Help: duplicate ID %s in %s and %s" % (hid, a, b))
     if write in (True, 'True', 'true'):
+      self._write_cache(index, self._core_cache_path())
+    else:
       try:
-        help_index.write_index(index, os.path.join(self.p_path, help_index.INDEX_NAME))
-      except OSError as err:
-        print("Help: could not write the help index: %s" % err)
+        os.remove(self._core_cache_path())
+      except FileNotFoundError:
+        pass
     self._index = None
     try:
       os.remove(self._extra_cache_path())

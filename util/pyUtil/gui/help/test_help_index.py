@@ -91,6 +91,27 @@ class HelpIndexTest(unittest.TestCase):
     self.assertEqual(H.read_index(path), index)
     self.assertIsNone(H.read_index(os.path.join(self.base, 'missing.json')))
 
+  def test_refresh_compiles_only_new_changed_and_drops_gone(self):
+    a = os.path.join(self.root, 'a.help.md')
+    b = os.path.join(self.root, 'b.help.md')
+    _write(a, "# One\nx\n")
+    _write(b, "# Two\ny\n")
+    index = {}
+    self.assertEqual(H.refresh(index, H.core_help_files(self.base), self.base), (True, []))
+    self.assertEqual(sorted(index['entries']), ['ONE', 'TWO'])
+    # nothing changed: nothing compiled
+    self.assertEqual(H.refresh(index, H.core_help_files(self.base), self.base), (False, []))
+    # an update: a edited, b removed, c new
+    _write(a, "# Uno\nx\n")
+    os.utime(a, (1, 1))
+    os.remove(b)
+    _write(os.path.join(self.root, 'c.help.md'), "# Three\nz\n")
+    changed, _ = H.refresh(index, H.core_help_files(self.base), self.base)
+    self.assertTrue(changed)
+    self.assertEqual(sorted(index['entries']), ['THREE', 'UNO'])
+    self.assertNotIn('util/pyUtil/b.help.md', index['files'])
+    self.assertEqual(index['version'], H.INDEX_VERSION)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -2,8 +2,9 @@
 gui/help/help_index.py
 
 Builds and reads the help index: help ID -> HTML, compiled from help
-markdown files. Plain Python (no Olex2 imports), so the release script
-can build the index too:
+markdown files. Plain Python (no Olex2 imports). Olex2 builds it itself
+on the first help lookup and caches it in DataDir() (gui.help); it is not
+shipped or kept in svn. From the command line (checks, tests):
 
     python util/pyUtil/gui/help/help_index.py <Olex2 BaseDir>
     python util/pyUtil/gui/help/help_index.py <Olex2 BaseDir> --check
@@ -28,7 +29,7 @@ heading (YAML front matter, [comment]: <...> lines) is ignored.
 
 Index
 -----
-help_index.json next to this file:
+DataDir()/help_index.json (the command line writes it next to this file):
     {"version": 1,
      "entries": {ID: {"html": ..., "src": path relative to BaseDir}},
      "files": {path relative to BaseDir: mtime}}
@@ -177,6 +178,31 @@ def build(paths, base_dir, entries=None, files=None):
       entries[hid] = {'html': html, 'src': rel}
     files[rel] = os.path.getmtime(path)
   return entries, files, duplicates
+
+
+def refresh(index, paths, base_dir):
+  """
+  Bring index ({'entries', 'files'}) up to date with the help files `paths`:
+  files that are new or changed (by mtime) are compiled, entries of files no
+  longer in `paths` are dropped.  Returns (changed, duplicates).
+  """
+  entries, files = index.setdefault('entries', {}), index.setdefault('files', {})
+  by_rel = {os.path.relpath(p, base_dir).replace(os.sep, '/'): p for p in paths}
+  gone = [rel for rel in files if rel not in by_rel]
+  for rel in gone:
+    del files[rel]
+    for hid in [k for k, v in entries.items() if v['src'] == rel]:
+      del entries[hid]
+  stale = [p for rel, p in by_rel.items() if files.get(rel) != os.path.getmtime(p)]
+  dups = build(stale, base_dir, entries, files)[2] if stale else []
+  index['version'] = INDEX_VERSION
+  return bool(gone or stale), dups
+
+
+def core_help_files(base_dir):
+  """The *.help.md (and legacy help) files of Olex2 itself."""
+  return (find_help_files(os.path.join(base_dir, 'util', 'pyUtil'))
+          + legacy_help_files(base_dir))
 
 
 def build_index(base_dir):
