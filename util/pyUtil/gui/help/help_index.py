@@ -283,6 +283,11 @@ def check_buttons(base_dir, entries):
 
 
 def main(argv):
+  if sys.version_info[0] < 3:
+    # old release scripts still call this with Python 2; the index is no
+    # longer part of a release (Olex2 builds it in DataDir()), so succeed
+    print("help_index.py: Python 3 needed; nothing to do (Olex2 builds the help index itself).")
+    return 0
   check = '--check' in argv
   argv = [a for a in argv if a != '--check']
   if len(argv) != 1:
