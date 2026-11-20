@@ -123,6 +123,18 @@
 >
 >
 
+<demo help="Demo mode: typed commands shown large in the info box. demo = on/off, demo on|off, demo settings = edit its settings"
+  <body
+    <args
+      <arg1 name="action" def="toggle">
+    >
+
+  <cmd
+    <cmd1 "if strcmp(%1,'settings') then 'spy.editparams(user.demo)' else 'spy.gui.demo.mode(%1)'">
+  >
+>
+>
+
 <onexit help="Executes on program exit"
   <body
   <cmd
