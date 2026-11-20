@@ -1,4 +1,5 @@
 import os
+import sys
 import fnmatch
 import re
 import glob
@@ -50,10 +51,8 @@ class GetHelp(VFSDependent):
     super(GetHelp, self).__init__()
     import gui
     self.git_url = OV.GetParam('gui.help.git_url')
-    language = olx.CurrentLanguage()
-    self.language = "EN"
-    if language == "German":
-      self.language = "DE"
+    self.language = self._language_code()
+    self._index_language = None
 
     olex.registerFunction(self.get_help_item, False, "gui")
     self.load_ressources()
@@ -72,6 +71,19 @@ class GetHelp(VFSDependent):
   # -------------------------------------------------------------------------
   # Index
   # -------------------------------------------------------------------------
+
+  # Olex2 language name -> help language folder (gui/help/gui/<code>)
+  LANGUAGE_CODES = {'German': 'DE', 'French': 'FR', 'Spanish': 'ES', 'Russian': 'RU',
+                    'Greek': 'EL', 'Japanese': 'JA', 'Chinese': 'ZH', 'Arabic': 'AR'}
+
+  def _language_code(self):
+    try:
+      return self.LANGUAGE_CODES.get(olx.CurrentLanguage(), 'EN')
+    except Exception as err:
+      print("Help: could not read the current language: %s" % err)
+      if hasattr(sys, '_wing_debugger'):
+        raise
+      return 'EN'
 
   def _developing(self):
     return debug or OV.IsDeveloping()
@@ -98,8 +110,12 @@ class GetHelp(VFSDependent):
     compiled from the *.help.md files and cached in DataDir(); only files
     that are new or changed since (an update, a plugin) are compiled again.
     Nothing is shipped or kept in svn."""
-    if self._index is not None:
+    # the language is read at every lookup: at startup (when this object is
+    # made) Olex2 may not have set it yet, and it can be changed later
+    language = self._language_code()
+    if self._index is not None and language == self._index_language:
       return self._index
+    self.language = self._index_language = language
     base = OV.BaseDir()
     core_path = self._core_cache_path()
     index = help_index.read_index(core_path) or {'entries': {}, 'files': {}}
@@ -134,6 +150,19 @@ class GetHelp(VFSDependent):
     for hid, e in extra['entries'].items():
       entries.setdefault(hid, e)        # core help wins over plugin help
     files.update(extra['files'])
+
+    # translations (e.g. gui/help/gui/DE/...): replace the English entries by ID
+    if self.language != 'EN':
+      lang_path = os.path.join(OV.DataDir(), 'help_index_%s.json' % self.language)
+      lang_index = help_index.read_index(lang_path) or {'entries': {}, 'files': {}}
+      changed, dups = help_index.refresh(
+        lang_index, help_index.core_help_files(base, self.language), base)
+      for hid, a, b in dups:
+        print("Help (%s): duplicate ID %s in %s and %s" % (self.language, hid, a, b))
+      if changed:
+        self._write_cache(lang_index, lang_path)
+      entries.update(lang_index['entries'])
+      files.update(lang_index['files'])
     self._index = {'entries': entries, 'files': files}
     return self._index
 

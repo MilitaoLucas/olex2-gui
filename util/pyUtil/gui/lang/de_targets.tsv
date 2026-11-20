@@ -1,0 +1,115 @@
+# German tooltips: the '<name>-target' rows of dictionary.txt, which htmlTools.MakeHoverButton
+# looks up with OV.TranslatePhrase('<name>-target').  OlexID<TAB>German; &#013; is a line break.
+# Merge: python merge_dictionary.py de_targets.tsv German --overwrite
+CHN Analysis-target	Berechnet die CHN-Analysewerte der aktuellen Struktur.
+Molecular Isotope Pattern-target	Simuliert das molekulare Isotopenmuster der aktuellen Struktur
+Molecular Volume-target	Berechnet das Molekülvolumen der aktuellen Struktur
+calcvol-target	Berechnet das Volumen eines Polyeders um das ausgewählte Atom
+assemble-target	Fragmentierte asymmetrische Einheit zusammenfügen
+move_near-target	Ein Atom auswählen und diese Schaltfläche anklicken. Danach angeklickte Atome werden in die Nähe des zuerst ausgewählten Atoms verschoben.
+copy_near-target	Ein Atom auswählen und diese Schaltfläche anklicken. Danach angeklickte Atome werden in die Nähe des zuerst ausgewählten Atoms kopiert.
+mode_grow-target	Zeigt anklickbare 'Bindungen' zu den Atomen, die vervollständigt werden können
+center_on_cell-target	Zentriert alle Fragmente in der Mitte der Elementarzelle
+Basis-target	Basisvektoren anzeigen
+grow_all-target	Vervollständigt alle möglichen Fragmente der Struktur
+Match All Fragments-target	Überlagert automatisch alle geladenen Fragmente
+Match Selected Atoms-target	Überlagert ausgewählte Atome verschiedener Fragmente. Mindestens vier Atome müssen ausgewählt sein
+DFIX-target	DFIX d s[0.02] Atompaar
+DANG-target	DANG d s[0.04] Atompaare
+hydrogen-atoms-target	Tools für Wasserstoffatome&#013;- H-Atomnamen anzeigen/ausblenden&#013;- HIMP-Entsprechung&#013;- Wasserstoffatome geometrisch hinzufügen&#013;- Wasserstoffatome automatisch platzieren
+mpln-target	Beste Ebene durch die aktuelle Auswahl berechnen
+line-target	Beste Gerade durch die aktuelle Auswahl berechnen
+sel-target	Geometrische Angaben zur aktuellen Auswahl ausgeben
+esd-target	Gibt geometrische Parameter mit Standardunsicherheiten aus
+anis-target	Ausgewählte Atome anisotrop machen. Ist nichts ausgewählt, werden alle Atome umgewandelt
+help-target	Olex2 hält alles fest, &#013;was mit Ihrer Struktur geschehen ist. &#013;Hier geht es zu einem früheren Stand zurück.
+history-target	Olex2 hält alles fest, &#013;was mit Ihrer Struktur geschehen ist. &#013;- Zu einem früheren Stand zurückgehen &#013;- Eine frühere Lösung wählen &#013;- Einen früheren Lösungsbaum umbenennen
+toolbox work-target	Eine Sammlung nützlicher Tools. &#013;- Alle Peaks zu Kohlenstoff machen&#013;- Atome verschieben&#013;- Peaks anzeigen/ausblenden&#013;- Kurze Kontakte erweitern&#013;- Peak-Regler
+select-target	Tools zum Auswählen bestimmter Atome &#013;Ihrer Struktur, z.B.:&#013;- Vorherige Auswahl&#013;- Auswahl umkehren&#013;- Ringe auswählen
+naming-target	Tools zum Benennen von Atomen.&#013;- Atomnummer wählen&#013;- Suffix an den Atomnamen anhängen&#013;- Atomtyp ändern
+sorting-target	Sortiert die Textdarstellung Ihrer Struktur&#013;- nach Atommasse und Atomname&#013;- nach Atomname&#013;- teilt die Liste in Baueinheiten
+quick-drawing-styles-target	Schneller Zugriff auf voreingestellte Zeichenstile&#013;- Kugel-Stab&#013;- Ellipsoide&#013;- Drahtmodell&#013;- Kugelpackung&#013;- Röhren
+geometry-target	Messungen an Ihrer Struktur&#013;- Beste Ebene&#013;- Beste Gerade&#013;- Abstände und Winkel&#013;- Standardunsicherheiten
+editins-target	Die Anweisungen Ihrer Struktur bearbeiten&#013;Nur die Anweisungen werden angezeigt,&#013;nicht die Atome!
+editatom-target	Atome in Textdarstellung bearbeiten.&#013;- die ausgewählten Atome, falls welche ausgewählt sind&#013;- alle Atome, falls keine ausgewählt sind
+dire-target	Den Ordner der aktuellen Struktur öffnen.&#013;- oder 'dire' eingeben
+snuminfo-target	Weitere Angaben zu dieser Struktur anzeigen.
+rotate-target	Ihre Struktur auf dem Bildschirm drehen&#013;- entlang der Zellachsen ausrichten&#013;- um einen bestimmten Winkel in Grad drehen&#013;- die Struktur fortlaufend drehen
+show-target	Elemente zum Anzeigen oder Ausblenden wählen:&#013;- Elementarzelle&#013;- Basisvektoren&#013;- Wasserstoffatome/H-Atomnamen&#013;
+symmetry-generation-target	Tools zum Erzeugen symmetrieäquivalenter Atome:&#013;- Packen&#013;- Vervollständigen&#013;- Fragmente kopieren&#013;- Fragmente verschieben
+chemical-tools-target	Verschiedene Tools:&#013;- CHN-Analysewerte der aktuellen Struktur&#013;- Molekulare Isotopenmuster&#013;- Molekülvolumen&#013;- Polyedervolumen um Atome
+OLEX2-conres-target	Neue Olex2-Constraints und -Restraints
+SHELX-compatible-constraints-target	Alle Constraints, die SHELX kennt&#013;- AFIX&#013;- EADP&#013;- EXYZ
+SHELX-compatible-restraints-target	Alle Restraints, die SHELX kennt&#013;
+disorder-target	Tools für Fehlordnung:&#013;- Atome koppeln&#013;- Besetzungen koppeln&#013;- PARTs zuweisen&#013;- Ausgewählte PARTs anzeigen
+calculate-voids-target	Die Hohlräume Ihrer Struktur berechnen
+electron-density-target	Die Elektronendichte interaktiv anzeigen&#013;- Zeichenstil anpassen&#013;- Atomtypen ändern und Karte neu berechnen&#013;- Auflösung ändern
+twinning-target	Nach möglichen Zwillingsgesetzen Ihrer Struktur suchen
+settings-target	Einstellungen für Olex2
+overlay-target	Strukturen überlagern&#013;- Eine weitere Struktur importieren&#013;- Fragmente überlagern (Z' > 1)&#013;- Teilstrukturen überlagern
+recent-files-target	Zuletzt in Olex2 geöffnete Dateien auflisten
+refinement-indicators-target	So läuft Ihre Verfeinerung!
+bad-reflections-target	Schlecht passende Reflexe untersuchen&#013;- Schlechte Reflexe auslassen (OMIT)&#013;- Alle Vorkommen eines Reflexes auslassen&#013;- Reflexe nach h,k,l auslassen
+reflection-statistics-target	Ihre Reflexstatistik grafisch untersuchen:&#013;- Wilson-Plot
+electron-density-peaks-target	Restelektronendichte-Peaks grafisch untersuchen&#013;- Relative Höhe der Peaks sehen&#013;- Transparenz der Peak-Darstellung ändern
+start-target	Hier beginnen!&#013;- Beispielstrukturen&#013;- Vorhandene Datei öffnen
+news-target	Hier finden Sie:&#013;- Wichtige Mitteilungen&#013;- Tipp des Tages&#013;- Links zum Olex2-Portal
+center_on_largest_part-target	Die Struktur auf das größte Fragment zentrieren
+fuse-target	Die asymmetrische Einheit der Struktur neu laden
+pack_limits-target	Symmetrieäquivalente Atome innerhalb der eingegebenen Grenzen erzeugen
+x-target	Um die x-Achse der aktuellen Ansicht drehen
+y-target	Um die y-Achse der aktuellen Ansicht drehen
+atom_label-target	Atomliste alphanumerisch nach Atomnamen sortieren
+atomic_mass-target	Atomliste nach Atommasse sortieren
+moieties-target	Atomliste in Baueinheiten aufteilen
+wireframe-target	Die Struktur als Drahtmodell darstellen
+sphere_packing-target	Die Struktur raumfüllend als Kugelpackung darstellen
+tubes-target	Die Struktur als Röhren darstellen
+polyhedra-target	Die Struktur als Polyeder darstellen
+name-target	Benennungsmodus starten
+HFIX 43-target	Atome, die nach dieser Schaltfläche angeklickt werden, erhalten den SHELX-Befehl HFIX 43
+Fix Unit-target	Den Inhalt der Elementarzelle an die aktuelle Struktur anpassen
+HFIX 23-target	Atome, die nach dieser Schaltfläche angeklickt werden, erhalten den SHELX-Befehl HFIX 23
+Toggle H-target	Wasserstoffatome: An > An mit Wasserstoffbrücken > Aus
+HFIX 137-target	Atome, die nach dieser Schaltfläche angeklickt werden, erhalten den SHELX-Befehl HFIX 137
+HFIX 13-target	Atome, die nach dieser Schaltfläche angeklickt werden, erhalten den SHELX-Befehl HFIX 13
+Show Cell-target	Anzeige der Elementarzelle ein- und ausschalten
+isot-target	Ausgewählte Atome isotrop machen. Ist nichts ausgewählt, werden alle Atome umgewandelt
+bounding_box-target	Die Begrenzungsbox um Ihr Molekül berechnen
+largest_part-target	Den Inhalt der asymmetrischen Einheit auf das größte Fragment zentrieren
+Q To H-target	Alle Elektronendichte-Peaks in H umwandeln
+center_on-target	Die Struktur auf das ausgewählte Atom oder den Schwerpunkt der ausgewählten Atome zentrieren.
+htmlpanelswap-target	Seite des HTML-Bereichs wechseln
+swapbg-target	Hintergrund zwischen benutzerdefinierter Farbe und Weiß umschalten
+graduated-target	Abgestuften Hintergrund ein-/ausschalten
+change_element-target	Atomtypen ändern in
+view-rotate-target	Entlang der Kristallachse a blicken
+tutorials-target	Einige interaktive Anleitungen.
+tool-target	Verschiedene Tools, darunter&#013;- Bilderzeugung&#013;- Karten und Masken&#013;- Wasserstoffbrücken&#013;- Fehlordnung
+work-target	Grundlegende Tools zum Lösen,&#013;Verfeinern und Modellbau
+info-target	Informationen zu Ihrer Struktur und Ihren Daten
+view-target	Vervollständigen, Packen, Abstände und Winkel messen usw.
+home-target	Einstellungen, Neuigkeiten, Tutorials
+tools-target	Verschiedene Tools, darunter&#013;- Bilder&#013;- Karten & Masken&#013;- Fehlordnung&#013;- Wasserstoffatome
+add_h-target	Wasserstoffatome geometrisch platzieren
+QH-target	Alle Q-Peaks in H umwandeln
+QC-target	Alle Q-Peaks in C umwandeln
+center-target	Die Struktur auf dem Bildschirm zentrieren&#013;und die Vergrößerung anpassen.
+H-target	Zwischen drei Zuständen umschalten:&#013;- Wasserstoffatome anzeigen&#013;- Peaks mit Wasserstoffbrücken anzeigen&#013;- Wasserstoffatome ausblenden
+Q-target	Zwischen drei Zuständen umschalten:&#013;- Peaks anzeigen&#013;- Peaks mit Bindungen anzeigen&#013;- Peaks ausblenden
+killH-target	Löscht alle H-Atome aus Ihrem Modell.&#013;Rückgängig mit CTRL+Z
+tidy-target	Ihre Struktur aufräumen.&#013;Nur am Anfang empfohlen!
+delete-target	Alle ausgewählten Objekte löschen
+ok-target	Die chemische Formel&#013;an Ihr Modell anpassen.&#013;Der Wert von Z' wird&#013;berücksichtigt, prüfen Sie&#013;ihn also besser!
+select@q-target	Alle sichtbaren Q-Peaks auswählen
+delete@q-target	Alle sichtbaren Q-Peaks löschen
+select@uiso-target	Wählt alle Atome aus,&#013;die Ihre Kriterien erfüllen
+quick drawing styles-target	Darstellungsstile festlegen&#013;- Kugel-Stab&#013;- Ellipsoide&#013;- Drahtmodell&#013;- Kugelpackung&#013;- Röhren&#013;- Polyeder
+symmetry generation-target	Vervollständigen, Packen, kurze Wechselwirkungen
+stereo view-target	Verschiedene Stereo-/3D-Ansichten einstellen
+afix-target	Beliebiges AFIX setzen.&#013;Die Zahlen in das Feld&#013;eingeben und dann die&#013;Atome anklicken, auf die&#013;der Constraint angewendet&#013;werden soll
+hydrogen atoms-target	Tools rund um Wasserstoffatome
+hfix-target	Atome mit AFIX-Constraint hinzufügen.&#013;Die Zahlen in das Feld&#013;eingeben und dann die&#013;Atome anklicken, auf die&#013;der Constraint angewendet&#013;werden soll
+maps-target	- Hohlräume berechnen&#013;- Lösungsmittelzugängliche Hohlräume berechnen&#013;- Elektronendichtekarten&#013;- Lösungsmittelmasken
+folder view-target	Einen Basisordner wählen. Alle&#013;Unterordner werden als&#013;Baumansicht angezeigt
+symmetry-target	Symmetriebezogene Operationen

@@ -23,6 +23,17 @@ upper case with spaces as underscores ("# Moiety" -> MOIETY, which the
 the help file (![0.5 caption](images/x.png): optional leading number = width
 as a fraction of the help box) and should sit next to it.
 
+Translations
+------------
+A translated help file has the same name in a folder named by the language
+code: gui/help/gui/DE/work/naming.help.md for gui/help/gui/EN/work/naming.help.md,
+gui/moiety/DE/moiety.help.md for gui/moiety/moiety.help.md.  Top-level
+headings are IDs and stay in English; everything else is translated.  In
+that language its entries replace the English ones by ID; anything not
+translated stays English.  Images not next to the translation are taken
+from the English file's folder.  Two-capital folders other than EN are
+language folders and never part of the English help.
+
 An entry whose heading ends in "-target" (e.g. "# start-target") is raw
 text, not markdown -- kept from the original format. Text before the first
 heading (YAML front matter, [comment]: <...> lines) is ignored.
@@ -88,15 +99,38 @@ def legacy_help_files(base_dir, under=None):
   return out
 
 
-def find_help_files(root, all_md=False):
-  """Help files under root (*.help.md; every *.md with all_md=True)."""
+def is_language_dir(name):
+  """A folder of translated help: two capitals other than EN (DE, FR, ...)."""
+  return len(name) == 2 and name.isalpha() and name.isupper() and name != 'EN'
+
+
+def find_help_files(root, all_md=False, lang=None):
+  """Help files under root (*.help.md; every *.md with all_md=True).
+  lang=None: the English help, language folders skipped; lang='DE': only
+  the files inside DE folders."""
   out = []
   for folder, dirs, files in os.walk(root):
-    dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('_')]
+    dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('_')
+               and (not is_language_dir(d) or d == lang)]
+    if lang and lang not in os.path.normpath(folder).split(os.sep):
+      continue
     for f in files:
       if f.endswith(HELP_SUFFIX) or (all_md and f.endswith('.md')):
         out.append(os.path.join(folder, f))
   return sorted(out)
+
+
+def _english_dir(md_dir):
+  """The folder of the English original of a translated help file:
+  .../gui/DE/work -> .../gui/EN/work; .../moiety/DE -> .../moiety."""
+  parts = os.path.normpath(md_dir).split(os.sep)
+  for i in range(len(parts) - 1, -1, -1):
+    if is_language_dir(parts[i]):
+      en = parts[:i] + ['EN'] + parts[i + 1:]
+      if os.path.isdir(os.sep.join(en)):
+        return os.sep.join(en)
+      return os.sep.join(parts[:i] + parts[i + 1:])
+  return None
 
 
 def help_id(heading):
@@ -119,6 +153,10 @@ def _image_markers(html, md_dir, base_dir):
       except ValueError:
         pass
     path = os.path.normpath(os.path.join(md_dir, src))
+    if not os.path.exists(path):   # a translation: the English file's images
+      en = _english_dir(md_dir)
+      if en and os.path.exists(os.path.join(en, src)):
+        path = os.path.normpath(os.path.join(en, src))
     rel = os.path.relpath(path, base_dir).replace(os.sep, '/')
     return '{{HELPIMG|%s|%s|%s}}' % (rel, width, alt.replace('|', ' '))
   return _IMG.sub(repl, html)
@@ -199,10 +237,13 @@ def refresh(index, paths, base_dir):
   return bool(gone or stale), dups
 
 
-def core_help_files(base_dir):
-  """The *.help.md (and legacy help) files of Olex2 itself."""
-  return (find_help_files(os.path.join(base_dir, 'util', 'pyUtil'))
-          + legacy_help_files(base_dir))
+def core_help_files(base_dir, lang=None):
+  """The *.help.md (and legacy help) files of Olex2 itself; with lang, its
+  translations into that language."""
+  root = os.path.join(base_dir, 'util', 'pyUtil')
+  if lang:
+    return find_help_files(root, lang=lang)
+  return find_help_files(root) + legacy_help_files(base_dir)
 
 
 def build_index(base_dir):

@@ -39,7 +39,14 @@ def save_image_to_olex(image, name, isPersistent=0):
   olex.writeImage(str(name), data, int(isPersistent))
   return data
 
+# Set by gui.lang when the GUI language is not English: html text -> html text
+# (whole-string translation).  Applied to .htm/.html written as text.
+html_filter = None
+
+
 def write_to_olex(filename, data, isPersistent=0):
+  if html_filter and isinstance(data, str) and str(filename).lower().endswith(('.htm', '.html')):
+    data = html_filter(data)
   if isinstance(data, str):
     data = data.encode("utf-8")
   elif isinstance(data, (bytearray, memoryview)):

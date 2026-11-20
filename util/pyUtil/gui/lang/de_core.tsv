@@ -1,0 +1,645 @@
+# German translations of the core GUI strings (etc/gui), English<TAB>German.
+# Keys are matched without regard to case; an ALL-CAPS original gets an ALL-CAPS translation.
+# Strings that stay English (program names, SHELX commands, file types, sample names) are left out.
+# Merged into the German column of dictionary.txt by merge_dictionary.py.
+Move the slider to adjust the threshold for short contacts to be displayed. Alternatively, you can add the required value in the text box.	Mit dem Schieberegler wird der Schwellenwert für die angezeigten kurzen Kontakte eingestellt. Alternativ kann der Wert im Textfeld eingegeben werden.
+the value has to be between 0.9 and 1.7 Angstrom. Short inter and intramolecular distances will be displayed. If there are intermolecular interactions within the given threshold, clicking on these bonds will expand the missing symmetry equivalent part.	Der Wert muss zwischen 0.9 und 1.7 Ångström liegen. Kurze inter- und intramolekulare Abstände werden angezeigt. Gibt es intermolekulare Wechselwirkungen innerhalb des Schwellenwerts, ergänzt ein Klick auf diese Bindungen den fehlenden symmetrieäquivalenten Teil.
+This will produce a series of .bmp files in the sub-folder 'movie'	Dies erzeugt eine Reihe von .bmp-Dateien im Unterordner 'movie'
+&mu; Plot	&mu;-Diagramm
+(System Font)	(Systemschrift)
+- we may need to contact you in the case of new releases or feature updates.	– wir kontaktieren Sie eventuell bei neuen Versionen oder Funktionen.
+A simple coordination complex	Ein einfacher Koordinationskomplex
+A small organic structure to get started with	Eine kleine organische Struktur für den Einstieg
+A Z'=2 structure	Eine Struktur mit Z'=2
+Absolute structure determination	Bestimmung der absoluten Struktur
+Absorption Correction	Absorptionskorrektur
+Add	Hinzufügen
+Add as author by default	Standardmäßig als Autor hinzufügen
+Add as new	Neu hinzufügen
+Add Fog	Nebel hinzufügen
+Add H	H hinzufügen
+Add Hydrogen	Wasserstoff hinzufügen
+Additive:	Zusatz:
+Address:	Adresse:
+Adjust Current Formula to what is on the screen	Aktuelle Formel an die Anzeige anpassen
+Adjust Formula	Formel anpassen
+Adjust Weight	Wichtung anpassen
+Align	Ausrichten
+All	Alle
+All constraints and restraints are also displayed in this editor.	Alle Constraints und Restraints werden ebenfalls in diesem Editor angezeigt.
+All Credits	Alle Danksagungen
+all reflections where |Error/esd| > than	alle Reflexe mit |Fehler/esd| größer als
+Analyse &pi;-&pi; Interactions	&pi;-&pi;-Wechselwirkungen analysieren
+Analyse Hydrogen Bonds	Wasserstoffbrücken analysieren
+Analyze	Analyse
+Angle	Winkel
+Angle-Axis	Winkel-Achse
+Anharmonic	Anharmonisch
+Animate	Animieren
+Anomalous Dispersion	Anomale Dispersion
+Anomalous Dispersion Plot	Diagramm anomale Dispersion
+API key	API-Schlüssel
+archive	Archiv
+Archive Files	Dateien archivieren
+Assemble	Zusammenfügen
+Assign	Zuweisen
+Assign as C	Als C zuweisen
+Assign part C	PART C zuweisen
+Assign to part A	PART A zuweisen
+Assign to part B	PART B zuweisen
+Atomic Vol. =	Atomvol. =
+Atoms	Atome
+atoms, bonds, planes, lines	Atome, Bindungen, Ebenen, Linien
+Automatic	Automatisch
+Automatic Hydrogen Naming	Automatische Benennung der Wasserstoffatome
+Back	Zurück
+Background:	Hintergrund:
+Bad Refl'ns	Schlechte Refl.
+Bad Reflections	Schlechte Reflexe
+Best Line	Beste Gerade
+Bitmap Images	Bitmap-Bilder
+Blank	Leer
+Bond	Bindung
+Bond Font	Bindungsschrift
+Bonds	Bindungen
+Border (%)	Rand (%)
+Break ED refinement ASAP	ED-Verfeinerung baldmöglichst abbrechen
+Buttons	Schaltflächen
+Calcium tartrate, a continuous solid	Calciumtartrat, ein kontinuierlicher Festkörper
+Calculate Solvent Accessible Voids	Lösungsmittelzugängliche Hohlräume berechnen
+Calculate Voids	Hohlräume berechnen
+Calibrate	Kalibrieren
+Cancel	Abbrechen
+Cell	Zelle
+Cell Parameters	Zellparameter
+Centrosymmetric	Zentrosymmetrisch
+Chemical Composition	Chemische Zusammensetzung
+Chemical Tools	Chemie-Tools
+choice	Auswahl
+Choose a command	Befehl auswählen
+Choose...	Auswählen...
+Citations	Zitate
+City:	Stadt:
+Classic	Klassisch
+Cleanup	Aufräumen
+Clear Fog	Nebel entfernen
+Clear HFIX	HFIX löschen
+Clear tmp files	Temporäre Dateien löschen
+ClearOMITs	OMITs löschen
+Click on this link, then click on those atoms you would like to 'split'. Move the newly 'generated' atoms to where you would like them to be (by holding the shift key while clicking on them). Then refine.	Diesen Link anklicken, dann die Atome anklicken, die aufgeteilt werden sollen. Die neu erzeugten Atome an die gewünschte Position verschieben (bei gedrückter Umschalttaste anklicken). Dann verfeinern.
+Clicking this link will bring up everything that is known about the currently selected atoms in a text editor. All information displayed in this editor can be edited.	Dieser Link öffnet alles, was über die ausgewählten Atome bekannt ist, in einem Texteditor. Alle dort angezeigten Angaben können bearbeitet werden.
+Close	Schließen
+Collected	Gemessen
+Collection	Datensammlung
+Colour	Farbe
+Colour/White [F2]	Farbe/Weiß [F2]
+Coloured Atoms	Farbige Atome
+Coloured Bonds	Farbige Bindungen
+Colours	Farben
+Coming soon: Information about the States of the Structure	Demnächst: Informationen zu den Zuständen der Struktur
+Compare	Vergleichen
+Complete every fragment on screen, however it was grown. A metal is never added, so bridging ligands end without the metal beyond them.	Jedes Fragment auf dem Bildschirm vervollständigen, gleich wie es vervollständigt wurde. Metalle werden nie hinzugefügt, verbrückende Liganden enden also ohne das Metall dahinter.
+Complete Fragments	Fragmente vervollständigen
+Completed	Abgeschlossen
+Composition	Zusammensetzung
+Console Lines	Konsolenzeilen
+Contact Author:	Kontaktautor:
+Contours	Konturen
+control	Steuerung
+Convergence	Konvergenz
+Convergence presets	Konvergenz-Voreinstellungen
+Convergence tolerance	Konvergenztoleranz
+Coordinate System	Koordinatensystem
+Correct dispersion	Dispersion korrigieren
+Country:	Land:
+Create Branch	Zweig erstellen
+Create Snapshot	Momentaufnahme erstellen
+Crystal	Kristall
+Crystal Image	Kristallbild
+Cumulative Plot	Kumulatives Diagramm
+Current Atomic Volume	Aktuelles Atomvolumen
+Cycles	Zyklen
+Cylinder	Zylinder
+D/order	Fehlord.
+Data	Daten
+Debug Mode:	Debug-Modus:
+Default	Standard
+Degree	Grad
+Delete	Löschen
+DELETE all labels	alle Beschriftungen LÖSCHEN
+DELETE?	LÖSCHEN?
+Delta value	Delta-Wert
+Depth	Tiefe
+Derive symmetry	Symmetrie ableiten
+Deselect	Auswahl aufheben
+Detailled Help	Ausführliche Hilfe
+Diagnostics	Diagnose
+Difference Map Peaks	Peaks der Differenzkarte
+Diffraction	Beugung
+Display	Anzeige
+Display a notification dialogue when module updates available	Benachrichtigen, wenn Modul-Updates verfügbar sind
+Distance	Abstand
+Distance/Å	Abstand/Å
+Distances and Angles	Abstände und Winkel
+do not use temporary emails	keine Wegwerf-E-Mail-Adressen verwenden
+Documentation	Dokumentation
+draw	Zeichnen
+e-mail	E-Mail
+e-mail:	E-Mail:
+ED Dynamical Data	ED: dynamische Daten
+ED Settings	ED-Einstellungen
+ED Testing	ED-Tests
+Edit	Bearbeiten
+Edit Atom (selected atoms)	Atom bearbeiten (ausgewählte Atome)
+Edit CIF Info	CIF-Info bearbeiten
+Edit Reflections	Reflexe bearbeiten
+Electron Density Map	Elektronendichtekarte
+electron density peaks	Elektronendichte-Peaks
+Elemental Analysis: CHN	Elementaranalyse: CHN
+Email	E-Mail
+Enable	Aktivieren
+End	Ende
+Enter Space Group:	Raumgruppe eingeben:
+Entering no values searchs on current structure	Ohne Eingabe wird in der aktuellen Struktur gesucht
+Equivalent Fragments (Z' > 1)	Äquivalente Fragmente (Z' > 1)
+Error:	Fehler:
+Examine &pi-&pi bonding	&pi;-&pi;-Bindungen untersuchen
+Examine H-bonding interactions	Wasserstoffbrücken untersuchen
+Exclude:	Ausschließen:
+Exclusive:	Exklusiv:
+Execution	Ausführung
+exists	vorhanden
+Expand Short Contacts (Hydrogen Bonds)	Kurze Kontakte erweitern (Wasserstoffbrücken)
+Experimental Growing	Vervollständigen (experimentell)
+Experimental Labels	Beschriftungen (experimentell)
+Extended	Erweitert
+Extension Modules	Erweiterungsmodule
+Extract	Extrahieren
+factor	Faktor
+Fast FFT	Schnelle FFT
+File type	Dateityp
+Fill the Unit Cell	Elementarzelle füllen
+Filled Atoms	Gefüllte Atome
+Final data name	Endgültiger Datenname
+Find 2-fold	2-zählige Achse suchen
+Find all Twinning	Alle Verzwillingungen suchen
+Find with...	Suchen mit...
+Finishing	Abschluss
+First Name	Vorname
+Fit	Anpassen
+Fix all	Alle fixieren
+Fix:	Fixieren:
+Flat	Flach
+Flow	Ablauf
+Folder View	Ordneransicht
+Font	Schrift
+for bond thickness	für die Bindungsdicke
+Formula	Formel
+Fourier Maps	Fourier-Karten
+Fraction	Anteil
+Free	Frei
+Free ADP	ADP freigeben
+FREE ALL H	ALLE H FREIGEBEN
+Free H ADP	H-ADP freigeben
+Free Selected:	Auswahl freigeben:
+Free XYZ	XYZ freigeben
+Front	Vorne
+Geometry	Geometrie
+Geometry Index [4- and 5-coordinate]	Geometrie-Index [4- und 5-fach koordiniert]
+Get Info on Current Structure	Informationen zur aktuellen Struktur
+Give the atoms of this model the names they have in the saved model	Den Atomen dieses Modells die Namen aus dem gespeicherten Modell geben
+Go	Los
+Go!	Los!
+Graduated [F4]	Abgestuft [F4]
+Graduated Colours	Abgestufte Farben
+Graphical objects:	Grafische Objekte:
+Graphical Output	Grafische Ausgabe
+Grid/Å	Gitter/Å
+Group Other Orientation	Andere Orientierung gruppieren
+Grow	Vervollständigen
+Growing	Vervollständigen
+GUI Left/Right	GUI links/rechts
+GUI Links	GUI-Links
+GUI Width:	GUI-Breite:
+H Labels	H-Atomnamen
+H-Labels	H-Atomnamen
+Hide	Ausblenden
+Hide C-H hydrogen	C-H-Wasserstoffe ausblenden
+Hide Diff	Differenz ausblenden
+Hide Peanuts	Peanuts ausblenden
+Hide Q	Q ausblenden
+High	Hoch
+History	Verlauf
+History Tree	Verlaufsbaum
+hkl File	hkl-Datei
+home	Start
+HTML Links	HTML-Links
+HTML Report	HTML-Bericht
+hydrogen atoms	Wasserstoffatome
+Hydrogen Bonds (HTAB)	Wasserstoffbrücken (HTAB)
+Icons	Symbole
+If a cell angle is very close to - but not exactrly - 90 degrees, then this is often an indication that the Laue class is wrong. For example, the diffractometer software returned a triclinic cell when the cell is really monoclinic. Of course, sometimes this is correct, but more often it turns out that it is not.	Liegt ein Zellwinkel sehr nahe bei – aber nicht genau bei – 90 Grad, deutet das oft auf eine falsche Laue-Klasse hin. Beispielsweise hat die Diffraktometer-Software eine trikline Zelle geliefert, obwohl die Zelle eigentlich monoklin ist. Manchmal stimmt das natürlich, häufiger stellt sich aber heraus, dass es nicht stimmt.
+Ilia Guzei's Manual	Handbuch von Ilia Guzei
+Ilia's Fragment Library	Ilias Fragmentbibliothek
+Image	Bild
+Image Series	Bildserie
+images	Bilder
+info	Info
+Info Bar:	Infoleiste:
+Install Offline	Offline installieren
+Install offline module in ZIP format.	Offline-Modul im ZIP-Format installieren.
+Institution Name:	Name der Institution:
+Invert	Invertieren
+Invert for matching	Für die Überlagerung invertieren
+Isotropic H atoms	Isotrope H-Atome
+Iterations:	Iterationen:
+keep Olex2's own labels in the image as well	Olex2-Beschriftungen zusätzlich im Bild behalten
+Label Chiral Carbons as R/S	Chirale Kohlenstoffe als R/S beschriften
+Label Font (Olex2)	Beschriftungsschrift (Olex2)
+Label H	H benennen
+Label mode:	Beschriftungsmodus:
+Label:	Beschriftung:
+Labels	Atomnamen
+Labels as Olex2 always drew them	Beschriftungen wie bisher in Olex2
+Last Name	Nachname
+Legend	Legende
+Legend:	Legende:
+Level /eÅ	Niveau /eÅ
+Light	Licht
+Limit resolution	Auflösung begrenzen
+Line	Linie
+Link PARTs & Occupanies +	PARTs & Besetzungen koppeln +
+Link Selected:	Auswahl koppeln:
+List	Liste
+List R/S Designations of Chiral Carbons	R/S-Bezeichnungen chiraler Kohlenstoffe auflisten
+Load	Laden
+Load last:	Zuletzt geladen:
+Load previous structure in Olex2 on startup	Beim Start die vorherige Struktur laden
+local	lokal
+Location	Ort
+Lock all	Alle sperren
+Low	Niedrig
+main toolbar	Haupt-Toolbar
+Make Image	Bild erstellen
+Make POVRAY Image	POVRAY-Bild erstellen
+Manage	Verwalten
+Map	Karte
+Map Scale	Kartenmaßstab
+Map Settings	Karteneinstellungen
+maps	Karten
+Mask	Maske
+Masks	Masken
+Match All Fragments	Alle Fragmente überlagern
+Match Selected Atoms	Ausgewählte Atome überlagern
+Max cycles	Max. Zyklen
+Max. Memory (MB)	Max. Speicher (MB)
+Maximum Refinement Iterations	Maximale Verfeinerungszyklen
+Mean Plane	Beste Ebene
+Merge CIF	CIF zusammenführen
+Merge CIF:	CIF zusammenführen:
+Merge metacif items even if marked for skipping	metacif-Einträge auch dann zusammenführen, wenn sie zum Überspringen markiert sind
+Method	Methode
+Method:	Methode:
+Middle Name	Zweiter Vorname
+Min D-H-A angle	Min. D-H-A-Winkel
+Min. Laws	Min. Gesetze
+Missing Data	Fehlende Daten
+mode	Modus
+Mode Grow	Vervollständigen
+Mode Match	Strukturerkennungsmodus
+Model Disorder	Fehlordnung modellieren
+Modelling and Disorder Tools	Modellierung und Fehlordnung
+Modules	Module
+Modules Update:	Modul-Update:
+Moieties	Baueinheiten
+Moiety	Baueinheit
+Molecular Bounding Box	Molekulare Begrenzungsbox
+Molecular Isotope Pattern: Mass Spec	Molekulares Isotopenmuster: Massenspektrum
+Molecular Volume	Molekülvolumen
+More examples	Weitere Beispiele
+Move to first	An den Anfang
+Multiple Dataset	Mehrere Datensätze
+Name of Department:	Name der Abteilung:
+Names only	Nur Namen
+Naming	Benennung
+Narrow	Schmal
+Network commincation is disabled	Netzwerkkommunikation ist deaktiviert
+Network Operations:	Netzwerkfunktionen:
+News	Was ist neu?
+No H Labels	Keine H-Atomnamen
+No Labels	Keine Atomnamen
+No map loaded!	Keine Karte geladen!
+No Settings Yet.	Noch keine Einstellungen.
+No symm	Keine Symm.
+Non-Centrosymmetric	Nicht zentrosymmetrisch
+None	Keine
+Normalise	Normalisieren
+not	nicht
+Note:	Hinweis:
+Number in Asymmetric Unit	Anzahl in der asymmetrischen Einheit (Z')
+Number of cycles	Anzahl der Zyklen
+Number of Formula Units	Anzahl der Formeleinheiten (Z)
+Number of frames:	Anzahl der Bilder:
+Number of lines in the console	Anzahl der Zeilen in der Konsole
+Number of Residual Peaks	Anzahl der Rest-Peaks
+Number of resolution shells	Anzahl der Auflösungsschalen
+Occ.	Bes.
+Occupancies	Besetzungen
+Olex2 Constraints Restraints	Olex2 Constraints & Restraints
+Olex2 restart required. Only effective when OPENBLAS_NUM_THREADS is not set	Neustart von Olex2 erforderlich. Nur wirksam, wenn OPENBLAS_NUM_THREADS nicht gesetzt ist
+Olex2 update	Olex2-Update
+ON	AN
+On pressing OK, your cif file will be sent to the CCDC. After your structure has been processed in Cambridge, you will receive an e-mail with the CCDC Number of this structure.	Mit OK wird Ihre CIF-Datei an das CCDC gesendet. Nach der Bearbeitung in Cambridge erhalten Sie eine E-Mail mit der CCDC-Nummer dieser Struktur.
+Only one top-level tool tab open at a time	Immer nur einen Tool-Bereich geöffnet halten
+Open	Öffnen
+OpenBlas threads #	OpenBlas-Threads #
+Operator	Bearbeiter
+Optimise extinction	Extinktion optimieren
+Optimise scale	Skalierung optimieren
+ORCID Id	ORCID-ID
+Other Authors:	Weitere Autoren:
+Other names	Weitere Namen
+Output	Ausgabe
+Overlay	Überlagerung
+Overlay Structure	Struktur überlagern
+Pack	Packen
+Pack Limits	Packungsgrenzen
+Pack Radius	Packungsradius
+Packing	Packung
+Padding (%)	Abstand (%)
+Partition model	Partitionsmodell
+PARTs & Occupancies	PARTs & Besetzungen
+Password	Passwort
+PATH:	PFAD:
+Peak & Uiso Sliders	Peak- & Uiso-Regler
+People	Personen
+Person details	Angaben zur Person
+Perspective	Perspektive
+Phone	Telefon
+Place the Selected Atoms/Peaks into PART 1	Ausgewählte Atome/Peaks in PART 1 setzen
+Place the Selected Atoms/Peaks into PART 2	Ausgewählte Atome/Peaks in PART 2 setzen
+Plane	Ebene
+Please click on the PAR file to open in CAP	Bitte die PAR-Datei anklicken, um sie in CAP zu öffnen
+Please do not edit the names in the constraints. Olex2 will take care of this automatically.	Bitte die Namen in den Constraints nicht bearbeiten. Olex2 erledigt das automatisch.
+Please fill in the following details to resolve missing items:	Bitte folgende Angaben ergänzen, um fehlende Einträge zu beheben:
+Polish	Feinschliff
+Polyhedral Volume	Polyedervolumen
+Popout	Auskoppeln
+Post Code:	Postleitzahl:
+PostScript Images	PostScript-Bilder
+Povray Images	POV-Ray-Bilder
+Press the	Drücken Sie
+Previous	Vorherige
+Printed size	Druckgröße
+Probe/Å	Sonde/Å
+Program	Programm
+progress	Fortschritt
+Prune Atoms	Atome entfernen
+Prune Peaks	Peaks entfernen
+publication	Publikation
+Pyridine	Pyridin
+Quality	Qualität
+Quick Drawing Styles	Schnelle Zeichenstile
+recent files	Zuletzt verwendete Dateien
+Recently opened files	Zuletzt geöffnete Dateien
+Reference	Referenz
+Refine	Verfeinern
+Refine and Save e.s.d. Info	Verfeinern und e.s.d.-Angaben speichern
+Refine model and save e.s.d.'s	Modell verfeinern und e.s.d.s speichern
+Refine positions only	Nur Positionen verfeinern
+refinement	Verfeinerung
+Refinement Indicators	Verfeinerungsindikatoren
+Refinement Method	Verfeinerungsmethode
+Refinement Program	Verfeinerungsprogramm
+refinement settings	Verfeinerungseinstellungen
+Refinement Settings Extra	Weitere Verfeinerungseinstellungen
+Reflection File	Reflexdatei
+Reflection Statistics	Reflexstatistik
+Reflection Statistics Summary	Reflexstatistik: Übersicht
+reflections	Reflexe
+Reflections:	Reflexe:
+Reload .ins	.ins neu laden
+REMOVE	ENTFERNEN
+remove all parts	alle PARTs entfernen
+Reorder	Neu ordnen
+Repeat mode	Wiederholungsmodus
+report	Bericht
+Report RTABs	RTABs berichten
+report settings	Berichtseinstellungen
+Report VARs	VARs berichten
+Request CCDC Number	CCDC-Nummer anfordern
+Res/Å	Aufl./Å
+Reset	Zurücksetzen
+Reset Alerts:	Warnungen zurücksetzen:
+Reset All Alerts	Alle Warnungen zurücksetzen
+Reset Legend	Legende zurücksetzen
+Reset with Space Group and Formula above	Mit obiger Raumgruppe und Formel zurücksetzen
+Resolution	Auflösung
+Resolution (DPI)	Auflösung (DPI)
+Resolution limit	Auflösungsgrenze
+Resolution/Å	Auflösung/Å
+Resonant form factor table	Tabelle der resonanten Formfaktoren
+Restrained Split. The selected group will be split and but restraints will be applied to the resulting PARTs	Aufteilen mit Restraints. Die ausgewählte Gruppe wird aufgeteilt, und auf die entstehenden PARTs werden Restraints angewendet
+Rot. Fract'n	Rot.-Anteil
+Rotate	Drehen
+Rotation	Drehung
+Rotation around Axis:	Drehung um Achse:
+Run Rigaku XPlain GUI	Rigaku-XPlain-GUI starten
+Sample ID	Proben-ID
+Save graph	Diagramm speichern
+Save the current view when exiting a structure	Aktuelle Ansicht beim Verlassen einer Struktur speichern
+Save these settings as user default	Diese Einstellungen als Benutzerstandard speichern
+Save View:	Ansicht speichern:
+Saved model	Gespeichertes Modell
+Scale	Skalierung
+Search	Suchen
+Search symmetry	Symmetrie suchen
+Select	Auswählen
+Select a folder	Ordner auswählen
+Select at least three atoms to calculate the mean plane	Mindestens drei Atome für die beste Ebene auswählen
+Select atoms where	Atome auswählen, für die gilt
+Select objects to calculate distances and angles	Objekte für Abstände und Winkel auswählen
+Select one atom of each group disordered by symmetry, in the orientation to keep. The other orientations go into group dp1.	Von jeder symmetriebedingt fehlgeordneten Gruppe ein Atom in der zu behaltenden Orientierung auswählen. Die anderen Orientierungen kommen in Gruppe dp1.
+Select Rings	Ringe auswählen
+Select two or more atoms to calculate best-fit line	Zwei oder mehr Atome für die beste Gerade auswählen
+Selected	Ausgewählt
+selection	Auswahl
+Set	Setzen
+set here, so the trim knows it	hier festlegen, damit der Zuschnitt sie kennt
+Set Legend	Legende setzen
+Settings	Einstellungen
+Shape	Form
+shells	Schalen
+SHELX compatible constraints	SHELX-kompatible Constraints
+SHELX compatible restraints	SHELX-kompatible Restraints
+Show	Anzeigen
+Show AFIX	AFIX anzeigen
+Show bar with structure info	Leiste mit Strukturinfo anzeigen
+Show Diff	Differenz anzeigen
+Show Octants for these atom types	Oktanten für diese Atomtypen anzeigen
+Show PART	PART anzeigen
+Show Peanuts	Peanuts anzeigen
+Show the legend of atom types	Legende der Atomtypen anzeigen
+Show tooltips when hovering	Tooltips beim Überfahren anzeigen
+Shrink truncation R in Å	Schrumpf-Abschneideradius R in Å
+Sidechains	Seitenketten
+Simple disorder in a ring	Einfache Fehlordnung in einem Ring
+Site details	Angaben zum Standort
+Sites	Standorte
+Size	Größe
+Size (px)	Größe (px)
+smaller than	kleiner als
+Solo Mode:	Einzelmodus:
+Solution Method	Lösungsmethode
+Solution Program	Lösungsprogramm
+solution settings	Lösungseinstellungen
+Solution Settings Extra	Weitere Lösungseinstellungen
+Solve	Lösen
+Solvent masking is currently ignored for ED Dynamical Refinement	Lösungsmittelmasken werden bei der dynamischen ED-Verfeinerung derzeit ignoriert
+Solvent R in Å	Lösungsmittel-R in Å
+Sort order	Sortierreihenfolge
+Sort with Current Settings	Mit aktuellen Einstellungen sortieren
+Sorting	Sortierung
+Source	Quelle
+Source Files	Quelldateien
+Source of .tsc:	Quelle der .tsc:
+Sp.Gr.	Rgr.
+Space Group	Raumgruppe
+Space Group determination using ZSGH	Raumgruppenbestimmung mit ZSGH
+Space Group Info	Raumgruppen-Info
+Space Group Search	Raumgruppensuche
+Space Group:	Raumgruppe:
+space groups	Raumgruppen
+Specific order	Bestimmte Reihenfolge
+Speed	Geschwindigkeit
+Spherical	Sphärisch
+Split	Aufteilen
+Split & restrain on click	Aufteilen & Restraints beim Klick
+Start Olex2 in Debug Mode (Restart required)	Olex2 im Debug-Modus starten (Neustart erforderlich)
+Start Olex2 in:	Olex2 starten in:
+starter	Einstieg
+Static	Statisch
+Static PDF	Statisches PDF
+Step	Schritt
+Stereo View	Stereoansicht
+Stop on branch	Bei Verzweigung anhalten
+Stop on part	Bei PART anhalten
+Stop on type	Bei Typ anhalten
+Stop refinement when convergence reaches	Verfeinerung beenden bei Konvergenz von
+Stripes	Streifen
+Structure	Struktur
+Structure refinement package	Verfeinerungsprogramm
+Structure solution method	Strukturlösungsmethode
+Structure solution package	Strukturlösungsprogramm
+Style	Stil
+Styles	Stile
+Submitted	Eingereicht
+Submitter	Einreicher
+Suggest SG	RG vorschlagen
+Symmetry Generation	Symmetrieerzeugung
+Symmetry label	Symmetriebezeichnung
+Symmetry Tools	Symmetrie-Tools
+Table label style:	Tabellenbeschriftung:
+Take	Übernehmen
+Take these from the saved model	Aus dem gespeicherten Modell übernehmen
+The current CIF file contains several datasets:	Die aktuelle CIF-Datei enthält mehrere Datensätze:
+Thermal smearing model	Thermisches Verschmierungsmodell
+This feature is not available yet	Diese Funktion ist noch nicht verfügbar
+This tool can also be used to move Hydrogen atoms to a position inidcated by the presence of residual electron density. Left click on the atom while pressing the SHIFT key - and you can move any atom where you would like it to be. Any constraints and restraints applied to that atom will still apply.	Mit diesem Tool lassen sich auch Wasserstoffatome an eine durch Restelektronendichte angezeigte Position verschieben. Mit gedrückter UMSCHALTTASTE auf das Atom linksklicken – dann kann jedes Atom an die gewünschte Stelle verschoben werden. Constraints und Restraints dieses Atoms gelten weiterhin.
+Threshold for all searches	Schwellenwert für alle Suchen
+Threshold value	Schwellenwert
+TO DELETE?	LÖSCHEN?
+to PART	in PART
+to two PARTs in order	der Reihe nach in zwei PARTs
+Toluene disordered across a symmetry element	Toluol, über ein Symmetrieelement fehlgeordnet
+Toolbox Work	Toolbox Work
+tools	Tools
+Transparency	Transparenz
+Transparent Background	Transparenter Hintergrund
+Treat H atoms independently	H-Atome unabhängig behandeln
+Trim	Zuschneiden
+TWIN Law:	TWIN-Gesetz:
+Twinning	Verzwillingung
+Two binding modes for water ligands and water solvent	Zwei Bindungsarten für Wasserliganden und Lösungsmittelwasser
+Type	Typ
+Uiso Select Atoms	Uiso-Atomauswahl
+Unit	Einheit
+Unit Cell Style:	Stil der Elementarzelle:
+Units	Einheiten
+UnMatch	Überlagerung aufheben
+Unsigned sorting by Error/esd (refine to update)	Vorzeichenlose Sortierung nach Fehler/esd (zum Aktualisieren verfeinern)
+Update	Aktualisieren
+Update Basic Help	Basishilfe aktualisieren
+Update Mask	Maske aktualisieren
+Update SFAC	SFAC aktualisieren
+Update Standard Help	Standardhilfe aktualisieren
+Upper bound	Obergrenze
+Use	Verwenden
+Use a solvent mask (smtbx.mask or SQUEEZE)	Lösungsmittelmaske verwenden (smtbx.mask oder SQUEEZE)
+Use current cell centering	Aktuelle Zellzentrierung verwenden
+Use in olex2.refine	In olex2.refine verwenden
+Use non-spherical atomic scattering factors	Nicht-sphärische Atomformfaktoren verwenden
+Use set completion	Satzvervollständigung verwenden
+Use structure mask	Strukturmaske verwenden
+Use theme colours	Themenfarben verwenden
+Use WSL Adapter and Conda (Restart required)	WSL-Adapter und Conda verwenden (Neustart erforderlich)
+User Database:	Benutzerdatenbank:
+Username	Benutzername
+Value	Wert
+Value (e.g. 520, or 0.3)	Wert (z.B. 520 oder 0.3)
+Various extension modules for Olex2 are currently under development. If you are interested in testing these, please sign up below! Please	Verschiedene Erweiterungsmodule für Olex2 sind in Entwicklung. Wer sie testen möchte, kann sich unten anmelden! Bitte
+Vector	Vektor
+Vector size	Vektorgröße
+View	View
+View cif info	CIF-Angaben anzeigen
+View Rigaku XPlain output	Rigaku-XPlain-Ausgabe anzeigen
+Water	Wasser
+Weak ratio	Anteil schwacher
+Weighting Scheme	Wichtungsschema
+Welcome to basic Tonto interface	Willkommen bei der einfachen Tonto-Oberfläche
+Welcome to Olex2!	Willkommen bei Olex2!
+Which tab Olex2 will open after restart	Welchen Bereich Olex2 nach dem Neustart öffnet
+Wide	Breit
+Width	Breite
+Width:	Breite:
+With Selection:	Mit Auswahl:
+work	Work
+You are in	Sie sind im
+Z and Z'	Z und Z'
+Zooming labels on screen, printed in a real font	Zoombare Beschriftungen auf dem Bildschirm, gedruckt in echter Schrift
+key to exit.	zum Beenden.
+
+# Labels of the Python-built metadata panels (htmlMaker.py, %...% keys)
+Abs Type	Art der Absorptionskorrektur
+Abs Details	Absorption: Details
+Abs T max	Abs. T max
+Abs T min	Abs. T min
+Definition File	Definitionsdatei
+Diffraction T (K)	Messtemperatur (K)
+Cell Measurement T (K)	T der Zellbestimmung (K)
+Refine Special Details	Besonderheiten der Verfeinerung
+Special Details	Besonderheiten
+Systematic Name	Systematischer Name
+Size & Shape	Größe & Form
+Preparation Details	Angaben zur Präparation
+Crystallisation Details	Angaben zur Kristallisation
+Crystal Mounting	Kristallmontage
+Date Submitted	Eingereicht am
+Date Collected	Gemessen am
+Date Completed	Abgeschlossen am
+Status	Status
+Comment	Kommentar
+CSD Refcode	CSD-Refcode
+Journal	Zeitschrift
+Volume	Band
+Pages	Seiten
+Contact Author	Kontaktautor
+Add Author	Autor hinzufügen
+Requested Journal	Gewünschte Zeitschrift
+Journal Style	Zeitschriftenstil
+
+# Older dictionary rows
+toolbox-work	Toolbox Work
+Tooltips	Tooltips
+
+# Tab headers stay English in German (user 2026-11-20); home -> Start

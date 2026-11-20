@@ -63,6 +63,36 @@ class HelpIndexTest(unittest.TestCase):
     html = dict(H.parse_help_file(p, self.base))['MOIETY']
     self.assertIn('{{HELPIMG|util/pyUtil/gui/moiety/images/table.png|0.5|The table}}', html)
 
+  def test_language_folders(self):
+    en = os.path.join(self.root, 'gui', 'help', 'gui', 'EN', 'work', 'naming.help.md')
+    de = os.path.join(self.root, 'gui', 'help', 'gui', 'DE', 'work', 'naming.help.md')
+    mod_de = os.path.join(self.root, 'gui', 'moiety', 'DE', 'moiety.help.md')
+    _write(en, "# Naming\nName atoms\n")
+    _write(de, "# Naming\nAtome benennen\n")
+    _write(os.path.join(self.root, 'gui', 'moiety', 'moiety.help.md'), "# Moiety\nText\n")
+    _write(mod_de, "# Moiety\nText DE\n")
+    # the English help never sees translations
+    index, dups = H.build_index(self.base)
+    self.assertEqual(dups, [])
+    self.assertIn('Name atoms', index['entries']['NAMING']['html'])
+    self.assertEqual(sorted(H.core_help_files(self.base, 'DE')), sorted([de, mod_de]))
+    self.assertEqual(H.core_help_files(self.base, 'FR'), [])
+    entries = dict(H.parse_help_file(de, self.base))
+    self.assertIn('Atome benennen', entries['NAMING'])
+
+  def test_translation_uses_english_images(self):
+    en_dir = os.path.join(self.root, 'gui', 'help', 'gui', 'EN', 'tools')
+    _write(os.path.join(en_dir, 'images', 'x.png'), "png")
+    de = os.path.join(self.root, 'gui', 'help', 'gui', 'DE', 'tools', 'x.help.md')
+    _write(de, "# X\n![0.5 Bild](images/x.png)\n")
+    html = dict(H.parse_help_file(de, self.base))['X']
+    self.assertIn('{{HELPIMG|util/pyUtil/gui/help/gui/EN/tools/images/x.png|0.5|Bild}}', html)
+    _write(os.path.join(self.root, 'gui', 'moiety', 'images', 'm.png'), "png")
+    mod = os.path.join(self.root, 'gui', 'moiety', 'DE', 'moiety.help.md')
+    _write(mod, "# Moiety\n![1 Bild](images/m.png)\n")
+    html = dict(H.parse_help_file(mod, self.base))['MOIETY']
+    self.assertIn('{{HELPIMG|util/pyUtil/gui/moiety/images/m.png|1.0|Bild}}', html)
+
   def test_dollar_escaping(self):
     p = os.path.join(self.root, 'a.help.md')
     _write(p, "# Tool\nCost $5, run $spy.x()\n")

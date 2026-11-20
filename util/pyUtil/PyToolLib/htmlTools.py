@@ -44,9 +44,10 @@ def makeHtmlTable(dlist):
   """
   text = ''
 
+  translate = OlexVFS.html_filter or (lambda s: s)  # gui.lang, non-English GUI
   for input_d in dlist:
     row_d = {}
-    row_d.setdefault('itemName',input_d['itemName'])
+    row_d.setdefault('itemName', translate(input_d['itemName']))
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
 
     if input_d['varName'] == "InfoLine":
@@ -236,6 +237,8 @@ def makeHtmlTableRow(dictionary):
       count += 1
       field_d = dictionary[field]
       field_d.setdefault('itemName', '')
+      if field == 'field1' and OlexVFS.html_filter:  # gui.lang, non-English GUI
+        field_d['itemName'] = OlexVFS.html_filter(field_d['itemName'])
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       if field == 'field1':

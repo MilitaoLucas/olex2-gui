@@ -428,6 +428,7 @@ class initpy_funcs():
       self.olx.stopwatch.exec("import gui.login")
       self.olx.stopwatch.exec("import gui.theme")
       self.olx.stopwatch.exec("import gui.demo")
+      self.olx.stopwatch.exec("import gui.lang")
       if os.environ.get("OLEX2_DEFER_HEAVY_GUI_IMPORTS"):
         self._register_heavy_gui_proxies()
         import olex
