@@ -176,6 +176,19 @@ def _table(folder):
   return rows
 
 
+def _cell_dipole(folder):
+  """Mx My Mz |M| (Debye), Z, V (A^3), dE_dip (kJ/mol per molecule) from the table, None for tables written before it."""
+  path = os.path.join(folder, "interaction_energies.txt")
+  if not os.path.exists(path):
+    return None
+  with open(path) as f:
+    for line in f:
+      t = line.split()
+      if len(t) == 9 and t[:2] == ["#", "cell_dipole"]:
+        return [float(v) for v in t[2:]]
+  return None
+
+
 def _colour(E, kind):
   rgb = KINDS[kind]
   if E > 0:  # repulsive: 60 % of the way to white
@@ -383,6 +396,10 @@ def crystal_energies_draw(quiet=False, block=False):
     print("  %-4d  %d  %d  %-16s %2d %2d %2d %7.3f %8.2f %7.2f %7.2f %7.2f %7.2f %8.2f%s" % (
       i + 1, r["A"] + 1, r["B"] + 1, r["symop"], r["n"][0], r["n"][1], r["n"][2], r["R"],
       r["elst"], r["pol"], r["disp"], r["rep"], r["xc"], r["total"], "  shown" if i in shown else ""))
+  d = _cell_dipole(folder)
+  if d and d[3] > 1e-3:  # zero by symmetry outside polar space groups
+    print("  cell dipole %.2f D (%.2f %.2f %.2f), Z=%d, V=%.1f A^3: dE_dip = %.2f kJ/mol per molecule,"
+          " the correction from a spherical direct lattice sum to tin-foil (Ewald) boundaries" % (d[3], d[0], d[1], d[2], int(d[4]), d[5], d[6]))
   olex.m("html.Update")
   return True
 
