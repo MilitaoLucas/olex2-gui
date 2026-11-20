@@ -54,7 +54,14 @@ class initpy_funcs():
     sys.path.append(os.path.join(self.datadir, "site-packages%s" %py_version))
 
   def onexit(self):
-    sps = self.OV.GetVar("launched_server.ports", "")
+    try:
+      import gui.demo
+      gui.demo.on_exit()  # info box and its font back before Olex2 keeps them
+    except Exception as err:
+      print("Could not switch demo mode off: %s" % err)
+      if hasattr(sys, '_wing_debugger'):
+        raise
+    sps =self.OV.GetVar("launched_server.ports", "")
     host = self.OV.GetParam("user.Server.host")
     share = self.OV.GetParam("user.Server.shared_localhost")
     if not share and host == "localhost" and sps:
@@ -416,6 +423,8 @@ class initpy_funcs():
       self.olx.stopwatch.exec("import gui.moiety")
       self.olx.stopwatch.exec("import gui.proto")
       self.olx.stopwatch.exec("import gui.symdisorder")
+      self.olx.stopwatch.exec("import gui.symsnap")
+      self.olx.stopwatch.exec("import gui.fromoxm")
       self.olx.stopwatch.exec("import gui.login")
       self.olx.stopwatch.exec("import gui.theme")
       self.olx.stopwatch.exec("import gui.demo")

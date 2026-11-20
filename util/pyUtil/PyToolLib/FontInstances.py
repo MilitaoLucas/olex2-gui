@@ -1,5 +1,17 @@
+import os
+import sys
 from ArgumentParser import ArgumentParser
 from PIL import ImageFont
+
+# fonts already reported as not installed (one line per font and session)
+_reported_missing = set()
+# bare font file name -> full path, or None when not installed (per session:
+# a font installed meanwhile is found after a restart)
+_found_fonts = {}
+
+# Fonts Olex2 names but does not ship: the user installs them when needed
+# (drawn labels in translated languages).  Noto: SIL Open Font License.
+NOTO_HINT = "free from https://fonts.google.com/noto"
 #import pickle
 #import shelve
 from PIL import PngImagePlugin
@@ -322,11 +334,67 @@ class FontInstances(ArgumentParser):
         "fontInstance":{}
           },
 
-      "Arial UTF":{
+      ##################################################### Noto (not shipped)
+      # Fallbacks for drawn text the GUI font has no glyphs for
+      # (ImageTools.deal_with_encodings_and_languages).  Not shipped: install
+      # them into the user's fonts folder or the system fonts.  Any of the
+      # file names will do (static, variable or the noto-cjk release).
+      "Noto Sans":{  # Latin, Greek, Cyrillic
         "font_src":(
-          "arialuni.ttf",
-          "arialuni.ttf"
+          "NotoSans-Regular.ttf",
+          "NotoSans-VariableFont_wdth,wght.ttf",
           ),
+        "install":"Noto Sans (Greek, Cyrillic), " + NOTO_HINT,
+        "fontInstance":{}
+          },
+      "Noto Sans Bold":{
+        "font_src":(
+          "NotoSans-Bold.ttf",
+          "NotoSans-Regular.ttf",
+          "NotoSans-VariableFont_wdth,wght.ttf",
+          ),
+        "install":"Noto Sans (Greek, Cyrillic), " + NOTO_HINT,
+        "fontInstance":{}
+          },
+      "Noto Sans Arabic":{
+        "font_src":(
+          "NotoSansArabic-Regular.ttf",
+          "NotoSansArabic-VariableFont_wdth,wght.ttf",
+          ),
+        "install":"Noto Sans Arabic, " + NOTO_HINT,
+        "fontInstance":{}
+          },
+      "Noto Sans Arabic Bold":{
+        "font_src":(
+          "NotoSansArabic-Bold.ttf",
+          "NotoSansArabic-Regular.ttf",
+          "NotoSansArabic-VariableFont_wdth,wght.ttf",
+          ),
+        "install":"Noto Sans Arabic, " + NOTO_HINT,
+        "fontInstance":{}
+          },
+      "Noto Sans SC":{  # Chinese, and Japanese kana and kanji
+        "font_src":(
+          "NotoSansSC-Regular.ttf",
+          "NotoSansSC-Regular.otf",
+          "NotoSansSC-VariableFont_wght.ttf",
+          "NotoSansCJKsc-Regular.otf",
+          "NotoSansCJK-Regular.ttc",
+          ),
+        "install":"Noto Sans SC (Chinese, Japanese), " + NOTO_HINT,
+        "fontInstance":{}
+          },
+      "Noto Sans SC Bold":{
+        "font_src":(
+          "NotoSansSC-Bold.ttf",
+          "NotoSansSC-Bold.otf",
+          "NotoSansCJKsc-Bold.otf",
+          "NotoSansCJK-Bold.ttc",
+          "NotoSansSC-Regular.ttf",
+          "NotoSansSC-Regular.otf",
+          "NotoSansSC-VariableFont_wght.ttf",
+          ),
+        "install":"Noto Sans SC (Chinese, Japanese), " + NOTO_HINT,
         "fontInstance":{}
           },
 
@@ -335,9 +403,10 @@ class FontInstances(ArgumentParser):
         #"font_src":"arialbd.ttf",
         "font_src":(
           r"%s/etc/gui/fonts/HDZB_7.ttf" %self.basedir,
+          r"msyh.ttc",
           r"MSYH.TTF",
           r"simsun.ttc",
-          r"arialuni.ttf"
+          r"NotoSansSC-Regular.ttf",
           ),
         "fontInstance":{}
           },
@@ -345,21 +414,27 @@ class FontInstances(ArgumentParser):
       "Chinese Bold":{
         #"font_src":"arialbd.ttf",
         "font_src":(
+          r"msyhbd.ttc",
           r"MSYHB.TTF",
+          r"NotoSansSC-Bold.ttf",
           ),
         "fontInstance":{}
           },
 
       "YaHei":{
         "font_src":(
+          "msyh.ttc",  # Windows 8 and later; MSYH.TTF before
           "MSYH.TTF",
+          "NotoSansSC-Regular.ttf",
           ),
         "fontInstance":{}
           },
 
       "YaHei Bold":{
         "font_src":(
+          "msyhbd.ttc",
           "MSYHB.TTF",
+          "NotoSansSC-Bold.ttf",
           ),
         "fontInstance":{}
           },
@@ -367,7 +442,7 @@ class FontInstances(ArgumentParser):
       "Simsun TTC":{
         "font_src":(
           "simsun.ttc",
-          "arialuni.ttf"
+          "NotoSansSC-Regular.ttf",
           ),
         "fontInstance":{}
           },
@@ -375,7 +450,7 @@ class FontInstances(ArgumentParser):
       "Simhei TTF":{
         "font_src":(
           "simhei.ttf",
-          "arialuni.ttf"
+          "NotoSansSC-Regular.ttf",
           ),
         "fontInstance":{}
           },
@@ -550,7 +625,6 @@ class FontInstances(ArgumentParser):
 
   def font_dirs(self):
     """Fonts the user added (theme designer, Fonts tab) first, then the shipped ones."""
-    import os
     return [os.path.join(self.datadir, "fonts"),
             os.path.join(self.basedir, "etc", "gui", "fonts")]
 
@@ -578,41 +652,96 @@ class FontInstances(ArgumentParser):
           self.fonts.setdefault("%s Bold" % stem,
                                 {"font_src": (os.path.join(d, fn), fn), "fontInstance": {}})
 
+  def font_search_dirs(self):
+    """Where a font file named without a path is looked for: Olex2's font
+    folders, then the system's (all users and the current user)."""
+    dirs = list(self.font_dirs())
+    home = os.path.expanduser("~")
+    if sys.platform == "win32":
+      windir = os.environ.get("WINDIR")
+      if windir:
+        dirs.append(os.path.join(windir, "Fonts"))
+      local = os.environ.get("LOCALAPPDATA")
+      if local:
+        dirs.append(os.path.join(local, "Microsoft", "Windows", "Fonts"))
+    elif sys.platform == "darwin":
+      dirs += ["/System/Library/Fonts", "/Library/Fonts",
+               os.path.join(home, "Library", "Fonts")]
+    else:
+      dirs += ["/usr/share/fonts", "/usr/local/share/fonts",
+               os.path.join(home, ".local", "share", "fonts"),
+               os.path.join(home, ".fonts")]
+    return dirs
+
+  def find_font(self, src):
+    """Full path of font file 'src' (a path, or a bare file name looked for in
+    font_search_dirs(), case-insensitively), or None when it is nowhere."""
+    if os.path.isabs(src):
+      return src if os.path.isfile(src) else None
+    if src in _found_fonts:
+      return _found_fonts[src]
+    _found_fonts[src] = self._search_font(src)
+    return _found_fonts[src]
+
+  def _search_font(self, src):
+    want = src.lower()
+    for d in self.font_search_dirs():
+      p = os.path.join(d, src)
+      if os.path.isfile(p):
+        return p
+    # Linux and macOS keep fonts in sub-folders, with the case of the name
+    # varying (Windows folders are flat and case-insensitive: done above)
+    if sys.platform == "win32":
+      return None
+    for d in self.font_search_dirs():
+      for root, _dirs, files in os.walk(d):
+        for fn in files:
+          if fn.lower() == want:
+            return os.path.join(root, fn)
+    return None
+
+  def report_missing_font(self, font_name, reason=None):
+    """One line (per font and session) that font 'font_name' is not
+    installed, which files would do, and where to put them."""
+    if font_name in _reported_missing:
+      return
+    _reported_missing.add(font_name)
+    entry = self.fonts.get(font_name, {})
+    files = entry.get("font_src", ())
+    if entry.get("install"):
+      what = entry["install"]
+    elif files:
+      what = "one of %s" % ", ".join(os.path.basename(f) for f in files)
+    else:
+      what = "it"
+    msg = "Font '%s' is not installed. Please install %s" % (font_name, what)
+    msg += " (into %s or the system fonts)." % os.path.normpath(
+      os.path.join(self.datadir, "fonts"))
+    if reason:
+      msg += " Needed for: %s" % reason
+    print(msg)
+
   def registerFontInstance(self, font_name, font_size, encoding='unic'):
-    #font_src = r"%s\etc\gui\fonts\Vera.ttf" %self.basedir
-    #f = open(font_src)
-    #fontInstance = ImageFont.truetype(f, font_size, encoding=self.gui_language_encoding)
-
-    ##IF the selected font is not in the above dictionary, we can try and get the font from the system.
-    ##This doesn't work, because PIL needs the actual filename of the font, and not just the name of it.
-    ##It looks like they might change this sometime soon.
-
-    if font_name not in self.fonts:
-      self.fonts.setdefault(font_name,{})
-      self.fonts[font_name].setdefault("fontInstance",{})
+    """PIL font for key 'font_name' (or a font file name) at font_size: the
+    first of its font_src files that loads; when none does, a line says the
+    font must be installed and the shipped Vera stands in."""
+    entry = self.fonts.setdefault(font_name, {})
+    instances = entry.setdefault("fontInstance", {})
+    fontInstance = instances.get(font_size)
+    if fontInstance:
+      return fontInstance
+    # an unknown name may itself be a font file PIL can find
+    srcs = entry.get("font_src") or (font_name,)
+    for src in srcs:
       try:
-        fontInstance = ImageFont.truetype(font_name, font_size, encoding=encoding)
-      except IOError as err:
-        print(err)
+        fontInstance = ImageFont.truetype(self.find_font(src) or src, font_size,
+                                          encoding=encoding)
+        break
+      except (IOError, OSError, ValueError):
+        continue  # not installed or not readable: try the next one
+    if fontInstance is None:
+      self.report_missing_font(font_name)
       failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
       fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
-      self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
-
-    pleasePickleMe = False
-    font_src_t = self.fonts[font_name]["font_src"]
-    fontInstance = self.fonts[font_name]["fontInstance"].get(font_size, None)
-    if not fontInstance:
-      try:
-        first_choice = font_src_t[0]
-        fontInstance = ImageFont.truetype(first_choice, font_size, encoding=encoding)
-        self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
-      except:
-        try:
-          failsafe = font_src_t[-1]
-          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
-          self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
-        except:
-          failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
-          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
-          self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
+    instances[font_size] = fontInstance
     return fontInstance

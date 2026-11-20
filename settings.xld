@@ -8,6 +8,7 @@
   <shortcut key="Ctrl+T" macro="showStr">
   <shortcut key="Ctrl+A" macro="sel -a">
   <shortcut key="Ctrl+U" macro="sel -u">
+  <shortcut key="Ctrl+L" macro=" spy.gui.theme.legend_place()">
   <shortcut key="Ctrl+I" macro="sel -i">
   <shortcut key="Ctrl+Shift+G" macro="group sel">
   <shortcut key="Ctrl+Shift+Z" macro="lookAt">
@@ -37,6 +38,7 @@
   <shortcut key="Ctrl+Shift+3" macro="echo ++INTERRUPT++>>spy.stopProcess()">
   <shortcut key="Ctrl+Shift+u" macro="echo interrupt!>>spy.SetParam(olex2.stop_current_process,True)">
   <shortcut key="Ctrl+Shift+T" macro="spy.run_autodemo(test)">
+  <shortcut key="Alt+Ctrl+P" macro="spy.gui.images.labels_preview()">
   <shortcut key="Ctrl+Shift+A" macro="spy.gui.About()">
   <shortcut key="Ctrl+Shift+/" macro="conn $M 0">
   <shortcut key="Ctrl+/" macro="conn $M 12">

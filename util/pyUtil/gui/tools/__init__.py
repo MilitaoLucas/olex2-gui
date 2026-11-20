@@ -232,6 +232,17 @@ def _timage_key(img_txt, img_type):
     IT.get_available_width() # what the first resize_image would do anyway
   out = [img_txt, img_type, PIL.__version__, repr(PilTools.TI.width), repr(IT.dpi_scale),
          repr(ImageTools.dpi_scaling), str(IT.gui_language_encoding)]
+  # image labels are translated (PilTools.translate_label): the language and its dictionary
+  try:
+    out.append(str(olx.CurrentLanguage()))
+  except Exception as err:
+    print("Image cache key without the language: %s" % err)
+    if hasattr(sys, '_wing_debugger'):
+      raise
+  dictionary = os.path.join(OV.BaseDir(), 'dictionary.txt')
+  if os.path.exists(dictionary):
+    st = os.stat(dictionary)
+    out.append('%s %d %d' % (dictionary, st.st_mtime_ns, st.st_size))
   out += sorted("%s=%s" % kv for kv in olx.structure_params.items() if kv[0].startswith('gui'))
   def walk(o):
     if isinstance(o, list):

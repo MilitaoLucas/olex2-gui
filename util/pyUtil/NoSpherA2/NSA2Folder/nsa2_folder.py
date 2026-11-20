@@ -12,6 +12,7 @@ OV = OlexFunctions()
 
 import os
 import sys
+import olex
 import olx
 import OlexVFS
 
@@ -51,6 +52,7 @@ _PROGRAM_COLOUR = {
   "ELMOdb": (0xad, 0x14, 0x57),
   "SALTED": (0x00, 0x83, 0x8f),
   "Gaussian": (0x45, 0x5a, 0x64),
+  "XHARPy-QE": (0x9e, 0x3b, 0x2b),
 }
 
 
@@ -183,8 +185,10 @@ class NSA2Folder(PT):
 
   def use_run(self, idx, update=True):
     """Make run `idx` (as shown) the current one: its table becomes the
-    'Source of tsc' (so the next refinement uses it, without recalculating)
-    and NoSpherA2 Options opens on it."""
+    'Source of tsc', NoSpherA2 Options opens on it, and the structure is
+    refined against it at once (without recalculating). A table switched in
+    without a refinement leaves res, CIF and history describing the table
+    before it."""
     d, n, runs = self._scan()
     try:
       run = runs[int(idx)]
@@ -207,13 +211,17 @@ class NSA2Folder(PT):
       from variableFunctions import nsa2_set_param
       nsa2_set_param('source', "  " + name)
       reset_unused_generator_flags(name)
-      nsa2_adopt_tsc_file(name, origin="%s (history %s)" % (run["program"], run["label"]),
+      # the header's own origin keeps the program name the CIF cites (and its version)
+      header = nsa2_runs.read_table_header(table)
+      program = header.get("origin") or (run["program"] if run["program"] != "?" else "unknown program")
+      nsa2_adopt_tsc_file(name, origin="%s (history %s)" % (program, run["label"]),
                           normalise=False)
       nsa2_set_param('Calculate', False)
     except Exception as err:
       _report(err, "select %s in NoSpherA2" % name)
+      return
     self._cache_key = None
-    print("NSA2Folder: now using %s from %s as the source of tsc; refine to use it."
+    print("NSA2Folder: now using %s from %s as the source of tsc; refining against it."
           % (name, run["label"]))
     try:
       # open NoSpherA2 Options on it (closing first rebuilds the block)
@@ -222,6 +230,10 @@ class NSA2Folder(PT):
     except Exception as err:
       _report(err, "open NoSpherA2 Options")
     self._check_h_model(table)
+    try:
+      olex.m("refine")
+    except Exception as err:
+      _report(err, "refine against %s" % name)
     if update:
       OV.UpdateHtml()
 
@@ -317,7 +329,10 @@ class NSA2Folder(PT):
     tip.append(first.strftime("%Y-%m-%d %H:%M") + ("" if first == last else last.strftime(" to %H:%M")))
     if r["method"] or r["basis_name"]:
       tip.append("%s/%s" % (r["method"] or "?", r["basis_name"] or "?"))
-    tip.append("charge %s, mult %s" % (r["charge"] or "?", r["multiplicity"] or "?"))
+    if r.get("extra"):
+      tip.append(r["extra"])
+    if r["charge"] or r["multiplicity"] or r["program"] not in nsa2_runs._OWN_SETTINGS:
+      tip.append("charge %s, mult %s" % (r["charge"] or "?", r["multiplicity"] or "?"))
     if r["qmmm"]:
       tip.append("QM/MM")
     if r["relativistic"]:

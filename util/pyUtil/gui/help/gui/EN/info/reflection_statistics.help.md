@@ -4,7 +4,10 @@ It is possible to specify in Olex2 the particular reflection file against which 
 ## hkl File
 Select the .hkl file to be used for refinement from the drop-down menu.
 
-## Write Graphics File?
+## Use theme colours
+Tick this box to draw the graphs in the colours and fonts of the current theme. Leave it unticked for the original Olex2 look (white background, dark text, Olex2's own fonts), whatever theme is in use: best for reports and papers.
+
+## Save graph
 Tick this box to save the reflection statistics graphs generated from the drop-down menu below. Graphs will be saved as .png files in the current working folder for the structure.
 
 
@@ -13,7 +16,7 @@ The graphs in this menu are meant to diagnose problems in structure determinatio
 <br>
 <br>
 
-Select from the drop-down menu the type of graph desired, then click the **go** button to display the graph. For these graphs, increasing the number of **Bins** creates a more fine-grained plot by dividing the reflections into more data bins, and ticking the **Output csv** box writes a text file in .csv format with the data for the current graph to the working folder. When a graph plots resolution along the *x*-axis, the measure of resolution may be 2&theta;, *d* spacing, square of the reciprocal lattice spacing *d*\*, sin(&theta;)/&lambda;, or (sin(&theta;)/&lambda;)<sup>2</sup>, selected from the drop-down menu. Ticking the **Write graphics file?** box above will save a .png file of the graph in the working folder.
+Select from the drop-down menu the type of graph desired, then click the **go** button to display the graph. For these graphs, increasing the number of **Bins** creates a more fine-grained plot by dividing the reflections into more data bins, and ticking the **Output csv** box writes a text file in .csv format with the data for the current graph to the working folder. When a graph plots resolution along the *x*-axis, the measure of resolution may be 2&theta;, *d* spacing, square of the reciprocal lattice spacing *d*\*, sin(&theta;)/&lambda;, or (sin(&theta;)/&lambda;)<sup>2</sup>, selected from the drop-down menu. Ticking the **Save graph** box above will save a .png file of the graph in the working folder.
 
 ## Wilson Plot
 This plot provides a statistical comparison of the observed intensity data with the theoretical distribution expected for a random atomic arrangement, taking into account that atomic scattering decreases with increasing 2&theta;. It is usually linear. The overall displacement parameter *B* for the structure and scale factor *K* for the data are derived from this plot. The <|*E*<sup>2</sup> - 1|> statistic shown below the plot helps distinguish between centrosymmetric (centric) and non-centrosymmetric (acentric) structures. If <|*E*<sup>2</sup> - 1|> &asymp; 0.968, the structure is likely to be centrosymmetric, but if it is closer to 0.736, the structure is likely non-centrosymmetric. Choose either the built-in Olex2 method or the URL[https://cci.lbl.gov/docs/cctbx/,cctbx] method.

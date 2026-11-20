@@ -1,0 +1,503 @@
+% Olex2's references: every work Olex2 cites, defined once.
+%
+% Read by util/pyUtil/PyToolLib/References.py; the CIF text (IUCr style), the
+% short form "(Sheldrick, 2015)" and the recognition of a work in an existing
+% CIF all come from these fields.  Plain BibTeX, so the file also opens in a
+% reference manager.
+%
+% author   "Surname, I. and Surname, I.", "and others" for et al.; accents as
+%          CIF codes in braces: Pr{\'o}chniak
+% volume   as printed: A71 for Acta Cryst. A
+% doi      checked against Crossref (2026-11-19); a work without one has none
+% markers  only where the default recognition is not enough.  By default a
+%          work is recognised in CIF text by its DOI, or by first author +
+%          year + volume and pages.  Groups separated by '|', the items of a
+%          group (all must occur) by ';'; letters and digits only are compared.
+% note     'in press' prints instead of volume and pages
+% programs names a _computing_* item may give for the program this work is
+%          cited for, ';' between names: whole words, any case, the longest
+%          name wins ('SHELXL-97' is not also 'SHELXL'); read by
+%          References.for_software()
+
+% --- Olex2 ----------------------------------------------------------------
+
+@article{olex2,
+  programs = {Olex2},
+  author  = {Dolomanov, O.V. and Bourhis, L.J. and Gildea, R.J. and Howard, J.A.K. and Puschmann, H.},
+  title   = {{OLEX2}: a complete structure solution, refinement and analysis program},
+  journal = {J. Appl. Cryst.},
+  year    = {2009},
+  volume  = {42},
+  pages   = {339-341},
+  doi     = {10.1107/S0021889808042726},
+}
+
+@article{olex2-dissected,
+  programs = {olex2.refine; olex2.solve},
+  author  = {Bourhis, L.J. and Dolomanov, O.V. and Gildea, R.J. and Howard, J.A.K. and Puschmann, H.},
+  title   = {The anatomy of a comprehensive constrained, restrained refinement program for the modern computing environment - {Olex2} dissected},
+  journal = {Acta Cryst.},
+  year    = {2015},
+  volume  = {A71},
+  pages   = {59-75},
+  doi     = {10.1107/S2053273314022207},
+}
+
+@article{nbeam,
+  author  = {Dolomanov, O.V. and Pr{\'o}chniak, G. and Ste{\'c}, P. and Meyer, M. and Puschmann, H.},
+  title   = {Dynamical refinement against {3D-ED} data in {Olex2-AutoChem} using the {N-Beam} approach},
+  journal = {J. Appl. Cryst.},
+  year    = {2026},
+  volume  = {59},
+  doi     = {10.1107/S1600576726009064},
+  markers = {Dolomanov; ochniak},
+}
+
+@article{dispersion-refinement,
+  author  = {Meurer, F. and Dolomanov, O.V. and Hennig, C. and Peyerimhoff, N. and Kleemiss, F. and Puschmann, H. and Bodensteiner, M.},
+  title   = {Refinement of anomalous dispersion correction parameters in single-crystal structure determinations},
+  journal = {IUCrJ},
+  year    = {2022},
+  volume  = {9},
+  pages   = {604-609},
+  doi     = {10.1107/S2052252522006844},
+}
+
+% --- SHELX ----------------------------------------------------------------
+
+@article{shelx-history,
+  programs = {SHELXS; SHELXS-97; SHELXL-97; XS},
+  author  = {Sheldrick, G.M.},
+  title   = {A short history of {SHELX}},
+  journal = {Acta Cryst.},
+  year    = {2008},
+  volume  = {A64},
+  pages   = {112-122},
+  doi     = {10.1107/S0108767307043930},
+}
+
+@article{shelxt,
+  programs = {SHELXT; XT},
+  author  = {Sheldrick, G.M.},
+  title   = {{SHELXT} - Integrated space-group and crystal-structure determination},
+  journal = {Acta Cryst.},
+  year    = {2015},
+  volume  = {A71},
+  pages   = {3-8},
+  doi     = {10.1107/S2053273314026370},
+}
+
+@article{shelxl,
+  programs = {SHELXL; XL},
+  author  = {Sheldrick, G.M.},
+  title   = {Crystal structure refinement with {SHELXL}},
+  journal = {Acta Cryst.},
+  year    = {2015},
+  volume  = {C71},
+  pages   = {3-8},
+  doi     = {10.1107/S2053229614024218},
+}
+
+@article{shelxle,
+  programs = {ShelXle},
+  author  = {H{\"u}bschle, C.B. and Sheldrick, G.M. and Dittrich, B.},
+  title   = {{ShelXle}: a {Qt} graphical user interface for {SHELXL}},
+  journal = {J. Appl. Cryst.},
+  year    = {2011},
+  volume  = {44},
+  pages   = {1281-1284},
+  doi     = {10.1107/S0021889811043202},
+}
+
+% --- other solution programs ----------------------------------------------
+
+@article{superflip,
+  programs = {Superflip},
+  author  = {Palatinus, L. and Chapuis, G.},
+  title   = {{SUPERFLIP} - a computer program for the solution of crystal structures by charge flipping in arbitrary dimensions},
+  journal = {J. Appl. Cryst.},
+  year    = {2007},
+  volume  = {40},
+  pages   = {786-790},
+  doi     = {10.1107/S0021889807029238},
+}
+
+@article{superflip-symmetry,
+  programs = {Superflip},
+  author  = {Palatinus, L. and van der Lee, A.},
+  title   = {Symmetry determination following structure solution in {P1}},
+  journal = {J. Appl. Cryst.},
+  year    = {2008},
+  volume  = {41},
+  pages   = {975-984},
+  doi     = {10.1107/S0021889808028185},
+}
+
+@article{edma,
+  programs = {EDMA},
+  author  = {Palatinus, L. and Prathapa, S.J. and van Smaalen, S.},
+  title   = {{EDMA}: a computer program for topological analysis of discrete electron densities},
+  journal = {J. Appl. Cryst.},
+  year    = {2012},
+  volume  = {45},
+  pages   = {575-580},
+  doi     = {10.1107/S0021889812016068},
+}
+
+@article{sir92,
+  programs = {SIR92},
+  author  = {Altomare, A. and Cascarano, G.L. and Giacovazzo, C. and Guagliardi, A. and Burla, M.C. and Polidori, G. and Camalli, M.},
+  title   = {{SIR92} - a program for automatic solution of crystal structures by direct methods},
+  journal = {J. Appl. Cryst.},
+  year    = {1994},
+  volume  = {27},
+  pages   = {435},
+  doi     = {10.1107/S002188989400021X},
+}
+
+@article{sir97,
+  programs = {SIR97},
+  author  = {Altomare, A. and Burla, M.C. and Camalli, M. and Cascarano, G.L. and Giacovazzo, C. and Guagliardi, A. and Moliterni, A.G.G. and Polidori, G. and Spagna, R.},
+  title   = {{SIR97}: a new tool for crystal structure determination and refinement},
+  journal = {J. Appl. Cryst.},
+  year    = {1999},
+  volume  = {32},
+  pages   = {115-119},
+  doi     = {10.1107/S0021889898007717},
+}
+
+@article{sir2002,
+  programs = {SIR2002},
+  author  = {Burla, M.C. and Camalli, M. and Carrozzini, B. and Cascarano, G.L. and Giacovazzo, C. and Polidori, G. and Spagna, R.},
+  title   = {{SIR2002}: the program},
+  journal = {J. Appl. Cryst.},
+  year    = {2003},
+  volume  = {36},
+  pages   = {1103},
+  doi     = {10.1107/S0021889803012585},
+}
+
+@article{sir2004,
+  programs = {SIR2004},
+  author  = {Burla, M.C. and Caliandro, R. and Camalli, M. and Carrozzini, B. and Cascarano, G.L. and De Caro, L. and Giacovazzo, C. and Polidori, G. and Spagna, R.},
+  title   = {{SIR2004}: an improved tool for crystal structure determination and refinement},
+  journal = {J. Appl. Cryst.},
+  year    = {2005},
+  volume  = {38},
+  pages   = {381-388},
+  doi     = {10.1107/S002188980403225X},
+}
+
+@article{il-milione,
+  programs = {SIR2019; IL MILIONE},
+  author  = {Burla, M.C. and Caliandro, R. and Camalli, M. and Carrozzini, B. and Cascarano, G.L. and De Caro, L. and Giacovazzo, C. and Polidori, G. and Siliqi, D. and Spagna, R.},
+  title   = {{IL MILIONE}: a suite of computer programs for crystal structure solution of proteins},
+  journal = {J. Appl. Cryst.},
+  year    = {2007},
+  volume  = {40},
+  pages   = {609-613},
+  doi     = {10.1107/S0021889807010941},
+}
+
+@article{sir2011,
+  programs = {SIR2011},
+  author  = {Burla, M.C. and Caliandro, R. and Camalli, M. and Carrozzini, B. and Cascarano, G.L. and Giacovazzo, C. and Mallamo, M. and Mazzone, A. and Polidori, G. and Spagna, R.},
+  title   = {{SIR2011}: a new package for crystal structure determination and refinement},
+  journal = {J. Appl. Cryst.},
+  year    = {2012},
+  volume  = {45},
+  pages   = {357-361},
+  doi     = {10.1107/S0021889812001124},
+}
+
+@article{sir2014,
+  programs = {SIR2014},
+  author  = {Burla, M.C. and others},
+  title   = {Crystal structure determination and refinement via {SIR2014}},
+  journal = {J. Appl. Cryst.},
+  year    = {2015},
+  volume  = {48},
+  pages   = {306-309},
+  doi     = {10.1107/S1600576715001132},
+}
+
+% --- NoSpherA2: the method and its partitions -----------------------------
+
+@article{nosphera2,
+  programs = {NoSpherA2},
+  author  = {Kleemiss, F. and Dolomanov, O.V. and Bodensteiner, M. and Peyerimhoff, N. and Midgley, L. and Bourhis, L.J. and Genoni, A. and Malaspina, L.A. and Jayatilaka, D. and Spencer, J.L. and White, F. and Grundk{\"o}tter-Stock, B. and Steinhauer, S. and Lentz, D. and Puschmann, H. and Grabowsky, S.},
+  title   = {Accurate crystal structures and chemical properties from {NoSpherA2}},
+  journal = {Chem. Sci.},
+  year    = {2021},
+  volume  = {12},
+  pages   = {1675-1692},
+  doi     = {10.1039/D0SC05526C},
+}
+
+@article{thakkar-iam,
+  author  = {Kleemiss, F. and Peyerimhoff, N. and Bodensteiner, M.},
+  journal = {J. Appl. Cryst.},
+  year    = {2024},
+  volume  = {57},
+  pages   = {161-174},
+  doi     = {10.1107/S1600576723010981},
+}
+
+@article{ri-fit,
+  author  = {Seifert, L.M. and Br{\"u}x, D. and Piel, T.M. and Kleemiss, F.},
+  journal = {Z. Kristallogr. Cryst. Mater.},
+  year    = {2026},
+  volume  = {241},
+  pages   = {283-295},
+  doi     = {10.1515/zkri-2026-0013},
+}
+
+@article{mbis-nosphera2,
+  author  = {Nielsen, A.M.H. and Kleemiss, F. and Iversen, B.B. and Jensen, F.},
+  journal = {IUCrJ},
+  year    = {2026},
+  note    = {in press},
+  markers = {Nielsen, A.M.H., Kleemiss; IUCrJ},
+}
+
+@article{mbis,
+  author  = {Verstraelen, T. and Vandenbrande, S. and Heidar-Zadeh, F. and Vanduyfhuys, L. and Van Speybroeck, V. and Waroquier, M. and Ayers, P.W.},
+  title   = {Minimal Basis Iterative Stockholder: Atoms in Molecules for Force-Field Development},
+  journal = {J. Chem. Theory Comput.},
+  year    = {2016},
+  volume  = {12},
+  pages   = {3894-3912},
+  doi     = {10.1021/acs.jctc.6b00456},
+}
+
+@article{embis,
+  author  = {Nielsen, A.M.H. and Jensen, F.},
+  journal = {J. Chem. Theory Comput.},
+  year    = {2025},
+  volume  = {21},
+  pages   = {8753-8761},
+}
+
+@article{xcw-beryllium,
+  author  = {Jayatilaka, D.},
+  title   = {Wave Function for Beryllium from X-Ray Diffraction Data},
+  journal = {Phys. Rev. Lett.},
+  year    = {1998},
+  volume  = {80},
+  pages   = {798-801},
+  doi     = {10.1103/PhysRevLett.80.798},
+}
+
+@article{xcw-theory,
+  author  = {Jayatilaka, D. and Grimwood, D.J.},
+  title   = {Wavefunctions derived from experiment. {I}. Motivation and theory},
+  journal = {Acta Cryst.},
+  year    = {2001},
+  volume  = {A57},
+  pages   = {76-86},
+  doi     = {10.1107/S0108767300013155},
+}
+
+@article{xcw-oxalic-acid,
+  author  = {Grimwood, D.J. and Jayatilaka, D.},
+  title   = {Wavefunctions derived from experiment. {II}. A wavefunction for oxalic acid dihydrate},
+  journal = {Acta Cryst.},
+  year    = {2001},
+  volume  = {A57},
+  pages   = {87-100},
+  doi     = {10.1107/S0108767300013167},
+}
+
+% --- NoSpherA2: the programs that make the wavefunction or density --------
+
+@article{orca5,
+  programs = {ORCA; ORCA 5; ORCA5},
+  author  = {Neese, F.},
+  title   = {Software update: The {ORCA} program system - Version 5.0},
+  journal = {WIREs Comput. Mol. Sci.},
+  year    = {2022},
+  volume  = {12},
+  pages   = {e1606},
+  doi     = {10.1002/wcms.1606},
+}
+
+@article{orca6,
+  programs = {ORCA 6; ORCA6},
+  author  = {Neese, F.},
+  title   = {Software Update: The {ORCA} Program System - Version 6.0},
+  journal = {WIREs Comput. Mol. Sci.},
+  year    = {2025},
+  volume  = {15},
+  pages   = {e70019},
+  doi     = {10.1002/wcms.70019},
+}
+
+@article{pyscf,
+  programs = {PySCF},
+  author  = {Sun, Q. and others},
+  title   = {Recent developments in the {PySCF} program package},
+  journal = {J. Chem. Phys.},
+  year    = {2020},
+  volume  = {153},
+  pages   = {024109},
+  doi     = {10.1063/5.0006074},
+}
+
+@article{xtb,
+  programs = {xTB},
+  author  = {Bannwarth, C. and Ehlert, S. and Grimme, S.},
+  title   = {{GFN2-xTB} - An Accurate and Broadly Parametrized Self-Consistent Tight-Binding Quantum Chemical Method with Multipole Electrostatics and Density-Dependent Dispersion Contributions},
+  journal = {J. Chem. Theory Comput.},
+  year    = {2019},
+  volume  = {15},
+  pages   = {1652-1671},
+  doi     = {10.1021/acs.jctc.8b01176},
+}
+
+@article{tonto,
+  programs = {Tonto},
+  author  = {Jayatilaka, D. and Grimwood, D.J.},
+  title   = {Tonto: A Fortran Based Object-Oriented System for Quantum Chemistry and Crystallography},
+  journal = {Lect. Notes Comput. Sci.},
+  year    = {2003},
+  volume  = {2660},
+  pages   = {142-151},
+  doi     = {10.1007/3-540-44864-0_15},
+}
+
+@article{discamb,
+  programs = {DiSCaMB},
+  author  = {Chodkiewicz, M.L. and others},
+  journal = {J. Appl. Cryst.},
+  year    = {2018},
+  volume  = {51},
+  pages   = {193-199},
+  doi     = {10.1107/S1600576717015825},
+}
+
+@article{salted,
+  programs = {SALTED},
+  author  = {Lewis, A.M. and Grisafi, A. and Ceriotti, M. and Rossi, M.},
+  title   = {Learning Electron Densities in the Condensed Phase},
+  journal = {J. Chem. Theory Comput.},
+  year    = {2021},
+  volume  = {17},
+  pages   = {7203-7214},
+  doi     = {10.1021/acs.jctc.1c00576},
+}
+
+@article{elmodb,
+  programs = {ELMOdb},
+  author  = {Meyer, B. and Genoni, A.},
+  title   = {Libraries of Extremely Localized Molecular Orbitals. 3. Construction and Preliminary Assessment of the New Databanks},
+  journal = {J. Phys. Chem. A},
+  year    = {2018},
+  volume  = {122},
+  pages   = {8965-8981},
+  doi     = {10.1021/acs.jpca.8b09056},
+}
+
+@article{ptb,
+  programs = {pTB},
+  author  = {Grimme, S. and M{\"u}ller, M. and Hansen, A.},
+  journal = {J. Chem. Phys.},
+  year    = {2023},
+  volume  = {158},
+  pages   = {124111},
+  doi     = {10.1063/5.0137838},
+}
+
+@article{xharpy,
+  programs = {XHARPy},
+  author  = {Ruth, P.N. and Herbst-Irmer, R. and Stalke, D.},
+  title   = {Hirshfeld atom refinement based on projector augmented wave densities with periodic boundary conditions},
+  journal = {IUCrJ},
+  year    = {2022},
+  volume  = {9},
+  pages   = {286-297},
+  doi     = {10.1107/S2052252522001385},
+}
+
+@misc{occ,
+  author  = {Spackman, P.R.},
+  title   = {occ},
+  url     = {https://github.com/peterspackman/occ},
+  markers = {Spackman; peterspackman},
+}
+
+% --- validation, graphics and data processing ------------------------------
+
+@article{platon,
+  programs = {PLATON},
+  author  = {Spek, A.L.},
+  title   = {Single-crystal structure validation with the program {PLATON}},
+  journal = {J. Appl. Cryst.},
+  year    = {2003},
+  volume  = {36},
+  pages   = {7-13},
+  doi     = {10.1107/S0021889802022112},
+}
+
+@article{wingx,
+  programs = {WinGX},
+  author  = {Farrugia, L.J.},
+  title   = {{WinGX} suite for small-molecule single-crystal crystallography},
+  journal = {J. Appl. Cryst.},
+  year    = {1999},
+  volume  = {32},
+  pages   = {837-838},
+  doi     = {10.1107/S0021889899006020},
+}
+
+@article{ortep3,
+  programs = {ORTEP-3; ORTEP3; ORTEP},
+  author  = {Farrugia, L.J.},
+  title   = {{ORTEP-3} for Windows - a version of {ORTEP-III} with a Graphical User Interface ({GUI})},
+  journal = {J. Appl. Cryst.},
+  year    = {1997},
+  volume  = {30},
+  pages   = {565},
+  doi     = {10.1107/S0021889897003117},
+}
+
+@article{denzo,
+  programs = {DENZO; SCALEPACK; HKL-2000; HKL2000},
+  author  = {Otwinowski, Z. and Minor, W.},
+  title   = {Processing of X-ray diffraction data collected in oscillation mode},
+  journal = {Methods Enzymol.},
+  year    = {1997},
+  volume  = {276},
+  pages   = {307-326},
+  doi     = {10.1016/S0076-6879(97)76066-X},
+}
+
+% --- residual-density and data-quality plots (the structure dashboard) ------
+
+@article{meindl-henn,
+  author  = {Meindl, K. and Henn, J.},
+  title   = {Foundations of residual-density analysis},
+  journal = {Acta Cryst.},
+  year    = {2008},
+  volume  = {A64},
+  pages   = {404-418},
+  doi     = {10.1107/S0108767308006879},
+}
+
+@article{diederichs,
+  author  = {Diederichs, K.},
+  title   = {Quantifying instrument errors in macromolecular X-ray data sets},
+  journal = {Acta Cryst.},
+  year    = {2010},
+  volume  = {D66},
+  pages   = {733-740},
+  doi     = {10.1107/S0907444910014836},
+}
+
+@misc{cifvis,
+  author  = {Ruth, P.N.},
+  title   = {{CifVis}: crystal structure visualisation in the web browser},
+  year    = {2025},
+  url     = {https://github.com/Niolon/cifvis},
+  programs = {CifVis},
+  markers = {Ruth; cifvis},
+}

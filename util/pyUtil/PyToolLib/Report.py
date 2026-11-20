@@ -99,6 +99,83 @@ def further_references():
   label = '[%d]' % start if start == end else '[%d-%d]' % (start, end)
   return ' Further programs and methods used: %s.' % label
 
+_NOT_KNOWN = ('', '?', '.', 'n/a')
+
+def _cif_value(*names):
+  from olexFunctions import OV
+  for name in names:
+    if name.startswith('snum.'):
+      val = OV.GetParam(name)
+    else:
+      val = OV.get_cif_item(name, '')
+    val = ' '.join(str(val or '').strip().strip("'\"").split()).rstrip('. ')
+    if val.lower() not in _NOT_KNOWN:
+      return val
+  return ''
+
+def _marked(text):
+  return '<span class=replaceThisChar>%s</span>' % _reference_html(text)
+
+def experimental_html():
+  """The opening sentences of the HTML report's Experimental paragraph:
+  crystallisation, mounting, diffractometer and temperature, each only when
+  known, so missing items leave no 'were []' or 'kept at K' behind."""
+  import re
+  import olex
+  from olexFunctions import OV
+  formula = olex.f('xf.getFormula(html,2)')
+  title = OV.GetParam('snum.report.title') or ''
+  compound = formula
+  if title:
+    compound += ' %s' % _marked('[%s]' % title)
+
+  growth = _cif_value('_exptl_crystal_recrystallization_method')
+  mount = _cif_value('_olex2_exptl_crystal_mounting_method',
+                     'snum.report.crystal_mounting_method')
+  diffractometer = _cif_value('_diffrn_measurement_device_type',
+                              'snum.report.diffractometer')
+  temperature = _cif_value('_cell_measurement_temperature',
+                           '_diffrn_ambient_temperature')
+
+  out = []
+  if growth:
+    m = re.match(r"^(?:single\s+)?crystals\b[^.]{0,60}?\bwere\s+(?=\S)", growth, re.I)
+    if m and '. ' not in growth:
+      growth = 'were ' + growth[m.end():]
+    elif growth[0].islower():
+      if not re.match(r"(?:were|was|are|had|have)\b", growth):
+        growth = 'were ' + growth
+    else:
+      out.append('Single crystals of %s were obtained. %s.' % (compound, _marked(growth)))
+      growth = None
+    if growth:
+      out.append('Single crystals of %s %s.' % (compound, _marked(growth)))
+    selected = 'A suitable crystal was selected'
+  else:
+    selected = 'A suitable single crystal of %s was selected' % compound
+
+  mounted = 'mounted'
+  if mount:
+    m = re.match(r"^(?:the|this|that|it|each|a|single)\b[^.]{0,40}?\b"
+                 r"(?:was|were|has been|have been)\s+", mount, re.I)
+    if m and mount[m.end():]:
+      mounted = mount[m.end():]
+    elif mount[0].islower():
+      mounted = mount
+    else:
+      mounted = 'mounted (%s)' % mount
+    mounted = _marked(mounted)
+  if diffractometer:
+    article = 'an' if diffractometer[:1].lower() in 'aeiou' else 'a'
+    out.append('%s and %s on %s %s diffractometer.'
+               % (selected, mounted, article, _marked(diffractometer)))
+  else:
+    out.append('%s and %s.' % (selected, mounted))
+  if temperature:
+    out.append('The crystal was kept at %s&nbsp;K during data collection.'
+               % _reference_html(temperature))
+  return '\n  '.join(out)
+
 def handleNA(val, ifna):
   if 'n/a' in val.lower():
     return ifna
@@ -110,6 +187,7 @@ if not registered:
   olex.registerFunction(makeSpecialCifCharacter, False, "report")
   olex.registerFunction(handleNA, False, "report")
   olex.registerFunction(references_html, False, "report")
+  olex.registerFunction(experimental_html, False, "report")
   olex.registerFunction(further_references, False, "report")
 
 

@@ -1,0 +1,128 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<!-- Experimental Growing from oxm: repeat the picture of a saved model (grown
+     atoms, view, style, planes, lines) on this model; atoms matched by position.
+     Code: util/pyUtil/gui/fromoxm (spy.from_oxm, spy.gui.fromoxm.*)
+     Help: util/pyUtil/gui/fromoxm/fromoxm.help.md -->
+
+<!-- FIRST ROW: the saved model -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_GROW_ROW_1';help_ext=Experimental-Growing-Sample;1 -->
+  <td width='28%' align='left'>
+    Saved model
+  </td>
+  <td width='36%' align='left'>
+    <b>$spy.gui.fromoxm.file_label()</b>
+  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Choose...",
+    "name=EXP_GROW_CHOOSE",
+    "hint=The .oxm to take the picture from (save one with 'save model name')",
+    "onclick=spy.gui.fromoxm.choose()",
+    "td1=<td width=36%>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- SECOND ROW: what to take, and Go -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_GROW_ROW_2';help_ext=Experimental-Growing-What;1 -->
+  <td width='28%' align='left'>
+    Take
+  </td>
+  <td width='36%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="all;grow,view;grow;view;styles;planes;lines;grow,view,planes,lines"
+      name="EXP_GROW_PARTS"
+      value="spy.GetParam('user.fromoxm.parts')"
+      onchange="spy.SetParam('user.fromoxm.parts',html.GetValue('~name~'))>>spy.SaveUserParams()"
+    >
+    </font>
+  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Go!",
+    "name=EXP_GROW_GO",
+    "hint=Take these from the saved model",
+    "onclick=spy.gui.fromoxm.run()",
+    "bgcolor=GetVar(gui.action_colour)",
+    "fgcolor=#ffffff",
+    "td1=<td width=36%>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- ROW: whose colours -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_GROW_ROW_STYLE';help_ext=Experimental-Growing-Style;1 -->
+  <td width='28%' align='left'>
+    Colours
+  </td>
+  <td width='36%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="oxm;current"
+      name="EXP_GROW_STYLE"
+      value="spy.GetParam('user.fromoxm.style')"
+      onchange="spy.SetParam('user.fromoxm.style',html.GetValue('~name~'))>>spy.SaveUserParams()"
+    >
+    </font>
+  </td>
+  <td width='36%' align='left'>
+    &nbsp;atoms, bonds, planes, lines
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- THIRD ROW: names and margin -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_GROW_ROW_3';help_ext=Experimental-Growing-Names;1 -->
+  <td width='28%' align='left'>
+    Other names
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="ask;names;keepnames"
+      name="EXP_GROW_NAMES"
+      value="spy.GetParam('user.fromoxm.names')"
+      onchange="spy.SetParam('user.fromoxm.names',html.GetValue('~name~'))>>spy.SaveUserParams()"
+    >
+    </font>
+  </td>
+  <td width='14%' align='right'>
+    margin&nbsp;
+  </td>
+  <td width='14%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="0.2;0.3;0.5;0.8;1.0"
+      name="EXP_GROW_MARGIN"
+      value="spy.GetParam('user.fromoxm.margin')"
+      onchange="spy.SetParam('user.fromoxm.margin',html.GetValue('~name~'))>>spy.SaveUserParams()"
+    >
+    </font>
+  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Names only",
+    "name=EXP_GROW_NAMES_ONLY",
+    "hint=Give the atoms of this model the names they have in the saved model",
+    "onclick=spy.gui.fromoxm.run(names)",
+    "td1=<td width=22%>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

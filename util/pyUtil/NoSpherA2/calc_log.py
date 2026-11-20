@@ -13,6 +13,9 @@ _entry = None
 _COMMON = ('CHARGE', 'MULTIPLICITY', 'NOSPHERA2_SF', 'BECKE_ACCURACY')
 _QM = ('METHOD', 'BASIS_NAME', 'RELATIVISTIC')
 _BY_SOURCE = (
+  # plugin generator (XHARPy-QE): its settings carry their own prefix in the header
+  ('XHARPY', tuple('XHARPY.' + k for k in ('PACKAGE', 'FUNCTIONAL', 'FAMILY', 'PARTITION', 'ECUTWFC',
+                                           'ECUTRHO', 'KPOINTS', 'ACCURACY_MODE'))),
   ('ORCA', _QM + ('ORCA_RELATIVISTIC', 'ORCA_VERSION', 'ORCA_SCF_CONV', 'ORCA_SCF_STRATEGY', 'ORCA_SOLVATION',
                   'ORCA_USE_CRYSTAL_QMMM', 'ORCA_CRYSTAL_QMMM_TYPE', 'ORCA_CRYSTAL_QMMM_RADIUS')),
   ('PYSCF', _QM + ('PYSCF_DAMPING',)),

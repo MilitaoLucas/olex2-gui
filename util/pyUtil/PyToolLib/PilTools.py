@@ -29,6 +29,34 @@ global isPro
 global timage_blanks
 timage_blanks = {}
 
+
+def translate_label(txt):
+  """The dictionary.txt translation of a GUI image label (h2/h3 headers, tabs,
+  buttons), so these need no %key% markup; None in English or when the
+  dictionary has no different text.  Olex2's lookup ignores case, so
+  'bad reflections' finds 'Bad Reflections'; labels come from image names
+  with '-' turned into spaces, so the dashed form ('recent-files') is tried
+  as well."""
+  import html
+  import re
+  key = ' '.join(txt.split())
+  if not key:
+    return None
+  try:
+    if olx.CurrentLanguage() in ('', 'English'):
+      return None
+    for k in (key, key.replace(' ', '-')):
+      translated = olx.TranslatePhrase(k)
+      # an image shows plain text: no tags or entities
+      translated = ' '.join(html.unescape(re.sub(r'<[^>]*>', ' ', translated or '')).split())
+      if translated and translated.lower() != k.lower():
+        return translated
+  except Exception as err:
+    print("Could not translate the image label %r: %s" % (key, err))
+    if hasattr(sys, '_wing_debugger'):
+      raise
+  return None
+
 global dpi_scaling
 dpi_scaling = OV.GetParam('gui.dpi_scaling')
 
@@ -170,7 +198,7 @@ class ButtonMaker(ImageTools):
             IT.add_vline(draw, height=vline.get('height',10), h_pos=vline.get('position',10), v_pos=vline.get('v_pos',2), colour = font_colour, weight=1,)
 
         if showtxt:
-          IT.write_text_to_draw(draw, txt,
+          IT.write_text_to_draw(draw, translate_label(txt) or txt,
                                         font_name=font_name,
                                         font_size=font_size,
                                         font_colour=font_colour,
@@ -2801,6 +2829,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         txt += bit + " "
     else:
       txt = item
+    title_case = self.titleCase
+    if item_type != 'snumtitle':
+      translated = translate_label(txt)
+      if translated:
+        txt = translated
+        title_case = False  # the dictionary has the case the language wants
 
     ## in case of cif file:
     if OV.FileFull().endswith('.cif') and item_type == 'snumtitle':
@@ -2827,7 +2861,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             valign=valign,
                             align=halign,
                             max_width=width * self.scale,
-                            titleCase=self.titleCase,
+                            titleCase=title_case,
                             font_colour=font_colour)
     return image
 
@@ -3494,6 +3528,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           )
 
     txt = text.replace("-", " ")
+    txt = translate_label(txt) or txt
     IT.write_text_to_draw(draw,
                        txt,
                        font_name=font_name,
@@ -3570,6 +3605,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw = ImageDraw.Draw(image)
     IT.gradient_bgr(draw, width, height)
     txt = item.replace("cbtn-", "")
+    txt = translate_label(txt) or txt
     IT.write_text_to_draw(draw,
                                txt,
                                font_colour=font_colour,

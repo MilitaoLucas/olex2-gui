@@ -3,6 +3,9 @@ user
   demo
     .help = "Demo mode (spy.gui.demo.mode): typed console commands shown large in the info box. Change with spy.gui.demo.set(name, value); saved with the user settings (DataDir/user.phil)"
   {
+    keys = True
+      .type = bool
+      .help = "Also show keys as they are pressed: the command line while it is typed, and shortcuts such as Ctrl+P (Olex2 callbacks onkey and onaccel, builds from 2026-11-20)"
     seconds = 7
       .type = int
       .help = "Seconds before the info box is cleared again"
@@ -12,5 +15,17 @@ user
     prefix = "|>> "
       .type = str
       .help = "Shown before each typed command; the pipe reaches below the baseline, so every line sits the same in the box"
+    text_colour = None
+      .type = str
+      .help = "Text colour of the info box while demo mode is on, e.g. #ffffff. None: the skin's"
+    background_colour = None
+      .type = str
+      .help = "Colour of the shaded box behind the text while demo mode is on, e.g. #202020. None: the skin's"
+    background_opacity = 0
+      .type = float
+      .help = "Opacity of the box behind the text, 0 (none: the default, no flicker of a big box) to 1 (solid); above 0 it takes background_colour, or the skin's colour when that is None"
+    redraw = toggle
+      .type = str
+      .help = "How the info box is redrawn after a change: toggle (hide and show it, which always works but flickers) or refresh (the Refresh macro; try it)"
   }
 }

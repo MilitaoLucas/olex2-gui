@@ -155,9 +155,9 @@
       name = "TRIM_IMAGE"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      onclick="spy.SetParam('user.image.bitmap.trim',html.GetState('~name~'))"
+      onclick="spy.SetParam('user.image.bitmap.trim',html.GetState('~name~'))>>spy.SaveUserParams()"
       manage="true"
-      checked="true"
+      checked="$spy.GetParam(user.image.bitmap.trim)"
     >
     </font>
   </td>

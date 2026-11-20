@@ -1784,24 +1784,33 @@ def nsa2_read_settings_header(path):
   return found or None
 
 
-# (short name for _computing_structure_refinement, reference for _publ_section_references) per generator
+# (short name for _computing_structure_refinement, key of its paper in etc/CIF/references.bib) per generator
 _NSA2_CITATIONS = {
-  'ORCA': ("ORCA", "F. Neese, WIREs Comput. Mol. Sci. 2022, 12, e1606."),
-  'ORCA6': ("ORCA", "F. Neese, WIREs Comput. Mol. Sci. 2025, 15, e70019."),
-  'PYSCF': ("pySCF", "Q. Sun et al., J. Chem. Phys. 2020, 153, 024109."),
-  'XTB': ("xTB", "C. Bannwarth, S. Ehlert, S. Grimme, J. Chem. Theory Comput. 2019, 15, 1652-1671."),
-  'TONTO': ("Tonto", "D. Jayatilaka, D. J. Grimwood, Lect. Notes Comput. Sci. 2003, 2660, 142-151."),
-  'DISCAMB': ("DiSCaMB", "M. L. Chodkiewicz et al., J. Appl. Cryst. 2018, 51, 193-199."),
-  'SALTED': ("SALTED", "A. M. Lewis, A. Grisafi, M. Ceriotti, M. Rossi, J. Chem. Theory Comput. 2021, 17, 7203-7214."),
-  'ELMODB': ("ELMOdb", "B. Meyer, A. Genoni, J. Phys. Chem. A 2018, 122, 8965-8981."),
-  'PTB': ("pTB", "S. Grimme, M. Mueller, A. Hansen, J. Chem. Phys. 2023, 158, 124111."),
-  'XHARPY': ("XHARPy", "P. N. Ruth, R. Herbst-Irmer, D. Stalke, IUCrJ 2022, 9, 286-297."),
-  'OCC': ("occ", "P. R. Spackman, https://github.com/peterspackman/occ"),
+  'ORCA': ("ORCA", 'orca5'),
+  'ORCA6': ("ORCA", 'orca6'),
+  'PYSCF': ("pySCF", 'pyscf'),
+  'XTB': ("xTB", 'xtb'),
+  'TONTO': ("Tonto", 'tonto'),
+  'DISCAMB': ("DiSCaMB", 'discamb'),
+  'SALTED': ("SALTED", 'salted'),
+  'ELMODB': ("ELMOdb", 'elmodb'),
+  'PTB': ("pTB", 'ptb'),
+  'XHARPY': ("XHARPy", 'xharpy'),
+  'OCC': ("occ", 'occ'),
 }
 
 
 def nsa2_generator_citation(settings=None):
-  """(name with version, reference) for the generator that made the active table, or None
+  """(name with version, reference text) for the generator that made the active table, or None"""
+  found = nsa2_generator(settings)
+  if not found:
+    return None
+  import References
+  return found[0], References.cif(found[1])
+
+
+def nsa2_generator(settings=None):
+  """(name with version, reference key) for the generator that made the active table, or None
 
   Taken from the settings recorded in the table; the live source parameter
   stands in for a table that carries none."""
@@ -1827,7 +1836,7 @@ def nsa2_generator_citation(settings=None):
   name, ref = _NSA2_CITATIONS[key]
   if version and version != 'None.None':
     name = "%s %s" % (name, version)
-  return name, ref
+  return name, ref  # ref: the key of the paper
 
 
 def nsa2_table_settings():

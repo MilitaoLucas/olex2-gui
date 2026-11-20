@@ -19,6 +19,29 @@ import sys
 #debug = OV.IsDebugging()
 debug = False
 
+_font_codepoints = {}
+
+
+def font_codepoints(path):
+  '''Set of code points font file 'path' has glyphs for (first font of a
+  .ttc), read once with fontTools; None when it cannot be read.'''
+  if path in _font_codepoints:
+    return _font_codepoints[path]
+  cmap = None
+  try:
+    from fontTools.ttLib import TTFont
+    font = TTFont(path, lazy=True, fontNumber=0)
+    cmap = set(font.getBestCmap() or ())
+    font.close()
+  except ImportError as err:
+    print("fontTools missing, font coverage is guessed: %s" % err)
+  except Exception as err:
+    print("Cannot read the glyphs of %s: %s" % (path, err))
+    if hasattr(sys, '_wing_debugger'):
+      raise
+  _font_codepoints[path] = cmap
+  return cmap
+
 global dpi_scale
 global dpi_scaling
 
@@ -791,40 +814,76 @@ class ImageTools(FontInstances):
     return im
 
   def deal_with_encodings_and_languages(self):
-    ''' Determines the font and some font settings for various encodings '''
-
-    encoding = 'unic'
-    original_font_size = self.font_size
-    if self.gui_language_encoding not in self.good_encodings:
-      self.gui_language_encoding = "unic"
-      encoding = 'unic'
-      if self.gui_current_language == "Chinese":
-        self.font_name = OV.GetParam('gui.chinese_font_name')
-      else:
-        self.font_name = 'Arial UTF'
-      if not self.translate:
-        self.font_name = "DefaultFont"
-        self.font_size = original_font_size
-
+    '''Picks a font that has every character of self.txt: the one asked for
+    when it does, else gui.chinese_font_name (Chinese only), else one of the
+    Noto fonts (FontInstances; not shipped).  Decided by the text, so a
+    translated label or an English one with a Greek sigma both get glyphs,
+    whatever the encoding row of dictionary.txt says.  When no installed font
+    has the characters, a line names the Noto font to install.'''
     try:
-      self.txt.encode('ascii')
-    except:
-      if self.gui_current_language != "Chinese":
-        self.font_name = 'DefaultFont'
-        # self.top -= 3
-      else:
-        pass
-
+      self.gui_current_language = olx.CurrentLanguage() if OV.HasGUI() else 'English'
+    except Exception as err:  # keep the language read at start
+      print("Current language not read: %s" % err)
+      if hasattr(sys, '_wing_debugger'):
+        raise
+    if self.font_covers(self.font_name, self.txt):
+      return
+    bold = self.font_name.endswith(' Bold')
+    fallbacks = list(self.noto_fonts_for(self.txt))
     if self.gui_current_language == "Chinese":
-      self.font_peculiarities.setdefault("Arial UTF", {"top_adjust":-0.7,
-                                                 "rel_adjust":+0.4})
-    elif self.gui_current_language == "Greek":
-      self.font_peculiarities.setdefault("Arial UTF", {"top_adjust":-1,
-                                                 "rel_adjust":+0.4})
-    elif self.gui_current_language == "Russian":
-      self.font_peculiarities.setdefault("Arial UTF", {"top_adjust":-1,
-                                                 "rel_adjust":+0.4})
+      fallbacks.insert(0, OV.GetParam('gui.chinese_font_name'))
+    for name in fallbacks:
+      if name and bold and self.font_covers(name + ' Bold', self.txt):
+        self.font_name = name + ' Bold'
+        return
+      if name and self.font_covers(name, self.txt):
+        self.font_name = name
+        return
+    for name in self.noto_fonts_for(self.txt):
+      if not self.font_installed(name):
+        self.report_missing_font(name, reason=self.txt)
 
+  @staticmethod
+  def noto_fonts_for(txt):
+    '''The Noto fonts (FontInstances keys) with the scripts of txt.'''
+    names = []
+    for c in txt:
+      o = ord(c)
+      if o <= 0x24F or c.isspace():
+        continue
+      if 0x370 <= o <= 0x52F or 0x1E00 <= o <= 0x1FFF:
+        name = 'Noto Sans'  # Greek, Cyrillic, more Latin
+      elif 0x600 <= o <= 0x6FF or 0x750 <= o <= 0x77F or 0xFB50 <= o <= 0xFEFF:
+        name = 'Noto Sans Arabic'
+      else:
+        name = 'Noto Sans SC'  # CJK, kana, full-width forms and the rest
+      if name not in names:
+        names.append(name)
+    return names
+
+  def font_installed(self, font_name):
+    '''True when a file of font key 'font_name' can be found.'''
+    return any(self.find_font(src)
+               for src in self.fonts.get(font_name, {}).get('font_src', ()))
+
+
+  def font_covers(self, font_name, txt):
+    '''True when the font behind key 'font_name' has a glyph for every
+    character of txt.  ASCII is taken as covered; a font file that cannot be
+    found or read counts as covering only Latin (up to U+024F).'''
+    needed = set(c for c in txt if ord(c) > 127 and not c.isspace())
+    if not needed:
+      return True
+    cmap = None
+    for src in self.fonts.get(font_name, {}).get('font_src', ()):
+      path = self.find_font(src)
+      if path:
+        cmap = font_codepoints(path)
+        if cmap is not None:
+          break
+    if cmap is None:
+      return all(ord(c) <= 0x24F for c in needed)
+    return all(ord(c) in cmap for c in needed)
 
   def get_font_peculiarities(self):
     self.font_peculiarities = {

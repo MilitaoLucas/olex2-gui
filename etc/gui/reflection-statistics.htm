@@ -23,11 +23,20 @@
     <!--$--->
   <!--</td>-->
 
-  <td align='right' width="25%">
+  <td align='right' width="20%">
+  Use theme colours
   </td>
 
-  <td align='right' width="25%">
-  Write graphics file?
+  <td name=USE_SKIN_COLOURS align='left' width="5%">
+    $+
+    html.Snippet("gui/snippets/input-checkbox", "name=USE_SKIN_COLOURS",
+    "checked=spy.GetParam('user.graphs.use_theme_bg_colour')",
+    "onclick=spy.SetParam('user.graphs.use_theme_bg_colour', html.GetState('~name~'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))")
+    $-
+  </td>
+
+  <td align='right' width="20%">
+  Save graph
   </td>
 
   <td name=SAVE_FILE align='left' width="5%">

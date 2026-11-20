@@ -1,0 +1,153 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<!-- Experimental Labels: vector mode (labels zoom on screen, printed in a real
+     font where they are) and the trim from the geometry.
+     Code: util/pyUtil/gui/images/labelmode.py, screenbox.py
+     Help: util/pyUtil/gui/images/labelmode.help.md -->
+
+<!-- FIRST ROW: the mode -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_LABELS_ROW_1';help_ext=Experimental-Labels-Mode;1 -->
+  <td width='28%' align='left'>
+    Label mode: <b>$spy.GetParam(user.image.labels.mode)</b>
+  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Normal",
+    "name=EXP_LABELS_NORMAL",
+    "hint=Labels as Olex2 always drew them",
+    "onclick=spy.gui.images.label_mode(normal)>>html.Update",
+    "td1=<td width=36%>",
+    )
+  $-
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Vector",
+    "name=EXP_LABELS_VECTOR",
+    "hint=Zooming labels on screen, printed in a real font",
+    "onclick=spy.gui.images.label_mode(vector)>>html.Update",
+    "td1=<td width=36%>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- SECOND ROW: vector font sizes -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_LABELS_ROW_2';help_ext=Experimental-Labels-Sizes;1 -->
+  <td width='28%' align='left'>
+    Vector size
+  </td>
+  <td width='14%' align='right'>
+    atoms @&nbsp;
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="6;7;8;9;10;11;12;14;16;18;20"
+      name="EXP_LABELS_ATOM_SIZE"
+      value="spy.GetParam('user.image.labels.vector_atom_size')"
+      onchange="spy.SetParam('user.image.labels.vector_atom_size',html.GetValue('~name~'))>>spy.gui.images.label_reapply(true)"
+    >
+    </font>
+  </td>
+  <td width='14%' align='right'>
+    bonds @&nbsp;
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="3;4;5;6;7;8;10;12"
+      name="EXP_LABELS_BOND_SIZE"
+      value="spy.GetParam('user.image.labels.vector_bond_size')"
+      onchange="spy.SetParam('user.image.labels.vector_bond_size',html.GetValue('~name~'))>>spy.gui.images.label_reapply(true)"
+    >
+    </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- THIRD ROW: printed size and calibration -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_LABELS_ROW_3';help_ext=Experimental-Labels-Print;1 -->
+  <td width='28%' align='left'>
+    Printed size
+  </td>
+  <td width='14%' align='right'>
+    factor&nbsp;
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="0.9;1.0;1.05;1.1;1.15;1.18;1.2;1.25;1.3"
+      name="EXP_LABELS_TTF_SCALE"
+      value="spy.GetParam('user.image.labels.ttf_scale')"
+      onchange="spy.SetParam('user.image.labels.ttf_scale',html.GetValue('~name~'))>>spy.SaveUserParams()"
+    >
+    </font>
+  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Calibrate",
+    "name=EXP_LABELS_CALIBRATE",
+    "hint=Measure where and how big Olex2 draws the labels (vector mode, labels shown)",
+    "onclick=spy.gui.images.label_calibrate()",
+    "td1=<td width=36%>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- ROW: both label sets in the image (comparison) -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_LABELS_ROW_5';help_ext=Experimental-Labels-Both;1 -->
+  <td width='28%' align='left'>
+    Compare
+  </td>
+  <td width='72%' align='left'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name="EXP_LABELS_BOTH"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      onclick="spy.SetParam('user.image.labels.vector_both',html.GetState('~name~'))>>spy.SaveUserParams()"
+      manage="true"
+      checked="$spy.GetParam(user.image.labels.vector_both)"
+    >
+    </font>
+    &nbsp;keep Olex2's own labels in the image as well
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- FOURTH ROW: perspective -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXP_LABELS_ROW_4';help_ext=Experimental-Labels-Perspective;1 -->
+  <td width='28%' align='left'>
+    Perspective
+  </td>
+  <td width='14%' align='right'>
+    angle&nbsp;
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="off;10;20;30;45;60"
+      name="EXP_LABELS_PERSPECTIVE"
+      value="spy.GetParam('user.image.perspective')"
+      onchange="spy.gui.images.perspective(html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+  <td width='36%' align='left'>
+    &nbsp;set here, so the trim knows it
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

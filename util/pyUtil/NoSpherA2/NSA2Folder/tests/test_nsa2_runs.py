@@ -272,5 +272,59 @@ class TestDisorder(Base):
                       "s_part2.wfnlog", "s_part2.xtb"])
 
 
+def _binary_table(path, header_lines, data):
+  """A .tscb as written: 4-byte header length, header, binary data straight after."""
+  header = "\n".join("NSA2_%s" % h for h in header_lines).encode()
+  with open(path, "wb") as f:
+    f.write(len(header).to_bytes(4, "little") + header + data)
+
+
+XHQE = ["source: XHARPy-QE", "origin: XHARPy-QE xharpy-qe-0.1.0",
+        "XHARPY.functional: r2scan", "XHARPY.family: nc", "XHARPY.ecutwfc: 80.0",
+        "XHARPY.ecutrho: 320.0", "XHARPY.kpoints: gamma"]
+
+
+class TestXHARPyQE(Base):
+  """A periodic generator: no log, no wavefunction, settings only in the header."""
+
+  def add(self, when, partition):
+    stamp = when.strftime("%Y-%m-%d_%H-%M-%S")
+    d = os.path.join(R.history_root(self.dir), "%s_%s" % (self.name, stamp))
+    os.makedirs(d)
+    _binary_table(os.path.join(d, self.name + ".tscb"),
+                  XHQE + ["XHARPY.partition: %s" % partition],
+                  b"\x18\x00\x00\x00O1 C2\xc3!\x00binary")
+
+  def test_last_line_does_not_run_into_the_data(self):
+    p = os.path.join(self.dir, "t.tscb")
+    _binary_table(p, XHQE + ["XHARPY.partition: mbis"], b"\x18\x00binary")
+    self.assertEqual(R.read_table_header(p)["XHARPY.partition"], "mbis")
+
+  def test_runs_and_series(self):
+    t0 = datetime.datetime(2026, 11, 16, 14, 0, 0)
+    self.add(t0, "embis_fixed_core")
+    self.add(t0 + datetime.timedelta(minutes=5), "embis_fixed_core")
+    self.add(t0 + datetime.timedelta(minutes=10), "mbis")
+    runs = R.scan(self.dir, self.name)
+    self.assertEqual([r["program"] for r in runs], ["XHARPy-QE"] * 3)
+    self.assertEqual((runs[0]["method"], runs[0]["basis_name"], runs[0]["extra"]),
+                     ("r2scan", "NC", "fc-EMBIS 80Ry"))
+    series = R.describe(R.group(runs))
+    self.assertEqual(len(series), 2)
+    self.assertEqual(series[0]["changes"], ["r2scan/NC", "fc-EMBIS 80Ry"])
+    self.assertEqual(series[1]["changes"], ["MBIS 80Ry"])
+
+  def test_leftover_orca_files_are_not_its_own(self):
+    # an ORCA run's .wfnlog and .gbw left beside an XHARPy-QE table
+    _binary_table(os.path.join(self.dir, "s.tscb"), XHQE + ["XHARPY.partition: mbis"], b"\x00data")
+    with open(os.path.join(self.dir, "s.wfnlog"), "w") as f:
+      f.write(ORCA_LOG)
+    with open(os.path.join(self.dir, "s.gbw"), "wb") as f:
+      f.write(b"gbw")
+    run = R._make_run(self.dir, "s", "live", datetime.datetime(2026, 11, 16, 16, 4))
+    self.assertEqual(run["program"], "XHARPy-QE")
+    self.assertEqual((run["energy"], run["log"], run["wfn"]), ("", None, None))
+
+
 if __name__ == "__main__":
   unittest.main()

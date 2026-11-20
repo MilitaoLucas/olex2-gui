@@ -33,7 +33,15 @@ _STAMP = "%Y-%m-%d_%H-%M-%S"
 # programs whose method and basis set mean something; the others (pTB, xTB,
 # DiSCaMB, Thakkar, ELMOdb, SALTED ...) have their own fixed model, while the
 # table header still records whatever the GUI had selected
-_QM_PROGRAMS = ("ORCA", "pySCF", "Psi4", "Tonto", "Gaussian", "fragHAR", "Hybrid")
+_QM_PROGRAMS = ("ORCA", "pySCF", "Psi4", "Tonto", "Gaussian", "fragHAR", "Hybrid", "XHARPy")
+
+# generators that keep their own settings in the header (NSA2_<prefix><key>):
+# program -> (prefix, header key for 'method', for 'basis_name', keys of the
+# rest of the level of theory). XHARPy-QE: periodic DFT, no charge or
+# multiplicity; the 'basis' is the kind of atomic datasets.
+_OWN_SETTINGS = {
+  "XHARPy-QE": ("XHARPY.", "functional", "family", ("partition", "ecutwfc", "ecutrho", "kpoints")),
+}
 
 # banner text in a .wfnlog -> program
 _BANNERS = (
@@ -68,11 +76,24 @@ def _read_head(path, size=65536):
     return ""
 
 
+def _binary_header(path):
+  """The header text of a .tscb/.tshb: it is length-prefixed and the binary
+  data follow straight after it, without a line break."""
+  try:
+    with open(path, "rb") as f:
+      f.read(8 if path.endswith(".tshb") else 0)
+      n = int.from_bytes(f.read(4), "little")
+      return f.read(min(n, 1 << 20)).decode("latin-1")
+  except (IOError, OSError):
+    return ""
+
+
 def read_table_header(path):
   """The NSA2_<key>: value lines of a table header as {key: value}; {} when the
   table carries none (tables made before the settings were recorded)."""
   found = {}
-  for line in _read_head(path).splitlines():
+  head = _binary_header(path) if path.endswith((".tscb", ".tshb")) else _read_head(path)
+  for line in head.splitlines():
     s = line.strip()
     if s.startswith("SOURCE_LABELS") or s.startswith("DATA:"):
       break
@@ -153,7 +174,7 @@ def program_name(source):
   'ORCA', 'discambMATTS2021' -> 'DiSCaMB')."""
   s = str(source or "").strip()
   low = s.lower()
-  for key, name in (("orca", "ORCA"), ("ptb", "pTB"), ("xtb", "xTB"),
+  for key, name in (("xharpy", "XHARPy-QE"), ("orca", "ORCA"), ("ptb", "pTB"), ("xtb", "xTB"),
                     ("pyscf", "pySCF"), ("psi4", "Psi4"), ("tonto", "Tonto"),
                     ("elmo", "ELMOdb"), ("discamb", "DiSCaMB"),
                     ("thakkar", "Thakkar"), ("salted", "SALTED"),
@@ -221,6 +242,11 @@ def _make_run(folder, name, label, when):
   loginfo = read_wfnlog(log)
   program = program_name(header.get("source") or header.get("origin")
                          or loginfo.get("program") or "")
+  if program in _OWN_SETTINGS:
+    # writes no .wfnlog and no wavefunction: any beside its table are left
+    # over from an earlier run (an ORCA energy must not be shown for it)
+    log = wfn = None
+    loginfo = read_wfnlog(None)
   if not program and wfn:
     program = {".gbw": "ORCA", ".xtb": "pTB"}.get(os.path.splitext(wfn)[1], "")
   run = dict(label=label, folder=folder, table=table, log=log, wfn=wfn,
@@ -229,6 +255,13 @@ def _make_run(folder, name, label, when):
   for key in ("method", "basis_name", "charge", "multiplicity"):
     # the log says what really ran; the header what the GUI had set
     run[key] = loginfo.get(key) or header.get(key, "")
+  run["extra"] = ""
+  own = _OWN_SETTINGS.get(run["program"])
+  if own:
+    prefix, m_key, b_key, rest = own
+    run["method"] = header.get(prefix + m_key, "")
+    run["basis_name"] = header.get(prefix + b_key, "").upper()
+    run["extra"] = " ".join(x for x in (_short(k, header.get(prefix + k, "")) for k in rest) if x)
   if not uses_basis(run["program"]):
     run["method"] = run["basis_name"] = ""
   run["energy"] = loginfo.get("energy", "")
@@ -242,6 +275,25 @@ def _make_run(folder, name, label, when):
   run["parts"] = _parts(folder, name)
   run["fp"] = _fingerprint(folder, name)
   return run
+
+
+def _short(key, value):
+  """A setting as a chip has room for: 'embis_fixed_core' -> 'fc-EMBIS',
+  ecutwfc 80.0 -> '80Ry'; k-points 'gamma' leave nothing."""
+  v = str(value).strip()
+  if key == "partition":
+    return {"embis_fixed_core": "fc-EMBIS", "embis": "EMBIS", "mbis": "MBIS",
+            "hirshfeld": "Hirshfeld"}.get(v.lower(), v)
+  if key == "ecutwfc":
+    try:
+      return "%gRy" % float(v)
+    except ValueError:
+      return v
+  if key == "ecutrho":
+    return ""   # follows the wavefunction cutoff; the tip of the chip has it
+  if key == "kpoints":
+    return "" if v.lower() == "gamma" else "k" + v.replace(" ", "x")
+  return v
 
 
 def history_root(struct_dir):
@@ -335,7 +387,7 @@ def active_index(runs, struct_dir, name):
 def _signature(run):
   return (run["program"], run["method"], run["basis_name"], run["charge"],
           run["multiplicity"], run["qmmm"], run["relativistic"], run["solvation"],
-          run["parts"])
+          run["parts"], run.get("extra", ""))
 
 
 def _comparable(run):
@@ -343,7 +395,8 @@ def _comparable(run):
   electrons -- everything of the signature but the multiplicity, so that the
   spin states of one level of theory are told apart by their energies."""
   return (run["program"], run["method"], run["basis_name"], run["charge"],
-          run["qmmm"], run["relativistic"], run["solvation"], run["parts"])
+          run["qmmm"], run["relativistic"], run["solvation"], run["parts"],
+          run.get("extra", ""))
 
 
 def group(runs, gap=None):
@@ -377,11 +430,16 @@ def _changes(prev, run):
   short items ("m=2", "def2-TZVP"); the whole setting when the program
   changed or there is no series before -- charge and multiplicity first, a
   chip has room for little more."""
-  q_m = ["q=%s" % (run["charge"] or "?"), "m=%s" % (run["multiplicity"] or "?")]
+  # a generator without charge and multiplicity (periodic XHARPy-QE) gets no "q=? m=?"
+  q_m = (["q=%s" % (run["charge"] or "?"), "m=%s" % (run["multiplicity"] or "?")]
+         if run["charge"] or run["multiplicity"] or run["program"] not in _OWN_SETTINGS else [])
+  extra = run.get("extra", "")
   if prev is None or prev["program"] != run["program"]:
     level = "/".join(x for x in (run["method"], run["basis_name"]) if x)
-    return q_m + ([level] if level else [])
+    return q_m + ([level] if level else []) + ([extra] if extra else [])
   out = []
+  if extra != prev.get("extra", ""):
+    out.append(extra or "-")
   for key in ("method", "basis_name"):
     if run[key] != prev[key]:
       out.append(run[key] or "-")

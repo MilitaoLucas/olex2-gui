@@ -1,42 +1,28 @@
 """References the CIF carries for the NoSpherA2 methods a refinement used.
 
-CifInfo asks nsa2_cif_references() once per CIF: the references to add, and the
-markers of every reference this module manages. An entry of an existing CIF that
-matches a marker is dropped before the active ones are added, so a method that is
-no longer used loses its reference, and one typed differently (by hand, an older
-Olex2, an in-press entry since published) is replaced by the current text.
+CifInfo asks nsa2_cif_reference_keys() once per CIF: the works to cite, and every
+work this module manages. A managed work that is no longer used leaves the CIF;
+the texts, and the recognition of a work however it was typed (by hand, an older
+Olex2, an in-press entry since published), come from References
+(etc/CIF/references.bib).
 
-A new method is one line in _METHOD_REFERENCES; a new way of using one is a line
-in methods_used().
+A new method is one line in _METHOD_REFERENCES (and its paper in
+references.bib); a new way of using one is a line in methods_used().
 """
+import References
 
 
-def _norm(text):
-  return ''.join(str(text).replace('\r', '').split())
-
-
-# (method tag, reference, markers). The markers identify the entry in a CIF however
-# it was typed; an in-press entry leaves "in press" out of them so that its
-# published form later replaces it.
+# (method tag, key of the paper in etc/CIF/references.bib)
 _METHOD_REFERENCES = (
-  ('NoSpherA2', """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, L.,
-Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B., Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692.""", ("1675-1692", "2021")),
-  ('Thakkar IAM', """Kleemiss, F., Peyerimhoff, N., Bodensteiner, M. (2024),
-J. Appl. Cryst., 57, 161-174.""", ("161-174", "2024")),
-  ('RI-fit', """Seifert, L.M., Br\\"ux, D., Piel, T.M., Kleemiss, F. (2026),
-Z. Kristallogr. Cryst. Mater., 241, 283-295.""", ("Seifert,L.M.", "283-295")),
-  ('MBIS', """Nielsen, A.M.H., Kleemiss, F., Iversen, B.B., Jensen, F. (2026),
-IUCrJ, in press.""", ("Nielsen,A.M.H.,Kleemiss", "IUCrJ")),
-  ('MBIS', """Verstraelen, T., Vandenbrande, S., Heidar-Zadeh, F., Vanduyfhuys, L.,
-Van Speybroeck, V., Waroquier, M., Ayers, P.W. (2016),
-J. Chem. Theory Comput., 12, 3894-3912.""", ("Verstraelen", "3894-3912")),
-  ('EMBIS', """Nielsen, A.M.H., Jensen, F. (2025), J. Chem. Theory Comput., 21,
-8753-8761.""", ("Nielsen", "8753-8761")),
-  ('XCW', """Jayatilaka, D. (1998), Phys. Rev. Lett., 80, 798-801.""", ("Jayatilaka", "798-801")),
-  ('XCW', """Jayatilaka, D., Grimwood, D.J. (2001), Acta Cryst. A, 57, 76-86.""", ("Jayatilaka", "76-86")),
-  ('XCW', """Grimwood, D.J., Jayatilaka, D. (2001), Acta Cryst. A, 57, 87-100.""", ("Grimwood", "87-100")),
+  ('NoSpherA2', 'nosphera2'),
+  ('Thakkar IAM', 'thakkar-iam'),
+  ('RI-fit', 'ri-fit'),
+  ('MBIS', 'mbis-nosphera2'),
+  ('MBIS', 'mbis'),
+  ('EMBIS', 'embis'),
+  ('XCW', 'xcw-beryllium'),
+  ('XCW', 'xcw-theory'),
+  ('XCW', 'xcw-oxalic-acid'),
 )
 
 # generators whose own partition replaces NoSpherA2's, so its partition settings say nothing
@@ -75,14 +61,12 @@ def methods_used(get, table=''):
   return used
 
 
+def reference_keys_for(used):
+  return [key for tag, key in _METHOD_REFERENCES if tag in used]
+
+
 def references_for(used):
-  return [ref for tag, ref, _ in _METHOD_REFERENCES if tag in used]
-
-
-def is_managed(ref, markers):
-  """whether a CIF reference entry is one of `markers`' (each a tuple, all must occur)"""
-  ref = _norm(ref)
-  return any(all(m in ref for m in mk) for mk in markers)
+  return [References.cif(key) for key in reference_keys_for(used)]
 
 
 def computing_with(computing, name, generators):
@@ -95,17 +79,16 @@ def computing_with(computing, name, generators):
   return '; '.join(parts + ([name] if name else []))
 
 
-def nsa2_cif_references(aspherical):
-  """(references to add, markers of every managed reference, generator citation or None, generator names)
+def nsa2_cif_reference_keys(aspherical):
+  """(keys to cite, keys of every managed work, (generator name, key) or None, generator names)
 
   The settings come from the active table's header; a table made before a key was
   recorded falls back to the live parameter."""
-  from NoSpherA2.utilities import _NSA2_CITATIONS, nsa2_table_settings, nsa2_generator_citation
-  markers = [tuple(_norm(m) for m in mk) for _, _, mk in _METHOD_REFERENCES]
-  markers += [(_norm(ref),) for _, ref in _NSA2_CITATIONS.values()]
+  from NoSpherA2.utilities import _NSA2_CITATIONS, nsa2_table_settings, nsa2_generator
+  managed = [key for _, key in _METHOD_REFERENCES] + [key for _, key in _NSA2_CITATIONS.values()]
   generators = [name for name, _ in _NSA2_CITATIONS.values()]
   if not aspherical:
-    return [], markers, None, generators
+    return [], managed, None, generators
   from variableFunctions import nsa2_get_param
   settings = nsa2_table_settings() or {}
   def get(key):
@@ -114,7 +97,7 @@ def nsa2_cif_references(aspherical):
       v = nsa2_get_param('file_origin' if key == 'origin' else key)
     return v
   used = methods_used(get, nsa2_get_param('file') or '')
-  return references_for(used), markers, nsa2_generator_citation(settings), generators
+  return reference_keys_for(used), managed, nsa2_generator(settings), generators
 
 
 if __name__ == '__main__':
@@ -131,15 +114,13 @@ if __name__ == '__main__':
   assert run(origin='XCW', XCW_partition='ri', RI_restraint='Off') == {'NoSpherA2', 'XCW', 'RI-fit'}
   assert run(origin='XCW', XCW_partition='embis') == {'NoSpherA2', 'XCW', 'MBIS', 'EMBIS'}
   assert len(references_for({'NoSpherA2', 'XCW'})) == 4
-  markers = [tuple(_norm(m) for m in mk) for _, _, mk in _METHOD_REFERENCES]
-  # every reference is recognised by its own markers and by no other entry's
-  for tag, ref, mk in _METHOD_REFERENCES:
-    assert is_managed(ref, [tuple(_norm(m) for m in mk)]), tag
-    assert sum(is_managed(ref, [m]) for m in markers) == 1, tag
-  # the published IUCrJ entry and a re-wrapped hand-typed one still count as managed
-  assert is_managed("Nielsen, A. M. H., Kleemiss, F., Iversen, B. B., Jensen, F. (2027), IUCrJ, 14, 1-12.", markers)
-  assert is_managed("Kleemiss, F. et al.\n(2021), Chem. Sci., 12,\n1675-1692.", markers)
-  assert not is_managed("Sheldrick, G.M. (2015), Acta Cryst. C71, 3-8.", markers)
+  # every reference is recognised as its own work and as no other
+  for tag, key in _METHOD_REFERENCES:
+    assert References.identify(References.cif(key)) == [key], tag
+  # the published IUCrJ entry and a re-wrapped hand-typed one are still recognised
+  assert References.identify("Nielsen, A. M. H., Kleemiss, F., Iversen, B. B., Jensen, F. (2027), IUCrJ, 14, 1-12.") == ['mbis-nosphera2']
+  assert References.identify("Kleemiss, F. et al.\n(2021), Chem. Sci., 12,\n1675-1692.") == ['nosphera2']
+  assert References.identify("Sheldrick, G.M. (2015), Acta Cryst. C71, 3-8.") == ['shelxl']
   olex = "olex2.refine 1.5 (Bourhis et al., 2015)"
   assert computing_with(olex + "; ORCA 5.0", "pySCF", ["ORCA", "pySCF"]) == olex + "; pySCF"
   assert computing_with(olex + "; ORCA 6.1", None, ["ORCA"]) == olex

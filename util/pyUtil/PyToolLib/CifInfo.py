@@ -18,6 +18,7 @@ from olexFunctions import OV
 imer = debug = OV.IsDebugging()
 
 import ExternalPrgParameters
+import References
 
 import iotbx.cif
 from iotbx.cif import model
@@ -25,14 +26,13 @@ from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
-# the paper to cite for a dynamical (N-Beam) ED refinement
-ED_NBEAM_DOI = "10.1107/S1600576726009064"
-ED_NBEAM_REFERENCE = """Dolomanov, O.V., Pr\\'ochniak, G., Ste\\'c, P., Meyer, M., Puschmann, H. (2026),
-J. Appl. Cryst., 59, doi:%s.""" % ED_NBEAM_DOI
+# the paper to cite for a dynamical (N-Beam) ED refinement (etc/CIF/references.bib)
+ED_NBEAM_DOI = References.doi('nbeam')
+ED_NBEAM_REFERENCE = References.cif('nbeam')
 
 def is_ed_nbeam_reference(ref):
-  """ by authors, so that the form with page numbers replaces this one; 'ochniak' takes the unaccented Prochniak too """
-  return "Dolomanov" in ref and "ochniak" in ref
+  """ any form of it: in press, with page numbers, accented or not """
+  return 'nbeam' in References.identify(ref)
 
 import time
 global now
@@ -122,9 +122,8 @@ class CifTools(ArgumentParser):
       except:
         self.update_cif_block({'_publ_section_references' : ''}, force=True)
     version = OV.GetProgramVersionByName('Olex2')
-    self.olex2_reference_brief = "Olex2 %s (Dolomanov et al., 2009)" %version
-    self.olex2_reference = """Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
- (2009), J. Appl. Cryst. 42, 339-341."""
+    self.olex2_reference_brief = "Olex2 %s (%s)" %(version, References.brief('olex2'))
+    self.olex2_reference = References.cif('olex2')
     olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
     olx.SetVar('olex2_reference_long', self.olex2_reference)
 
@@ -525,7 +524,7 @@ class ExtractCifInfo(CifTools):
       except iotbx.cif.CifParserError as err:
         print("Failed to parse the CIF for conflicts analysis: %s")
 
-    full_references = [self.olex2_reference]
+    cited = ['olex2']  # keys in etc/CIF/references.bib of the works this structure cites
     if active_solution is not None and active_solution.is_solution:
       ## Backwards Compatibility
       active_solution.program = OV.getCompatibleProgramName(active_solution.program)
@@ -546,7 +545,7 @@ class ExtractCifInfo(CifTools):
             solution_reference = "%s %s (%s)" %(pname, version, prg.brief_reference)
         else:
           solution_reference = str_solstion_from_cif
-        full_references.append(prg.reference)
+        cited.extend(prg.references)
         olx.SetVar('solution_reference_short', prg.brief_reference)
         olx.SetVar('solution_reference_long', prg.reference)
         atom_sites_solution_primary = prg.methods[active_solution.method].atom_sites_solution
@@ -573,7 +572,7 @@ class ExtractCifInfo(CifTools):
         if prg.name.lower().startswith("shelx"):
           pname = prg.name.upper()
         refinement_reference = "%s %s (%s)" %(pname, version, prg.brief_reference)
-        full_references.append(prg.reference)
+        cited.extend(prg.references)
         olx.SetVar('refinement_reference_short', prg.brief_reference)
         olx.SetVar('refinement_reference_long', prg.reference)
         force = True
@@ -700,64 +699,31 @@ class ExtractCifInfo(CifTools):
       })
 
     self.update_manageable()
-    # NoSpherA2's method and generator references: added while used, dropped from the CIF once not
+    # NoSpherA2's method and generator references: cited while used
     try:
-      from NoSpherA2.cif_references import nsa2_cif_references, is_managed, computing_with
-      nsa2_refs, nsa2_markers, citation, generators = nsa2_cif_references(OV.IsNoSpherA2())
+      from NoSpherA2.cif_references import nsa2_cif_reference_keys, computing_with
+      nsa2_keys, nsa2_managed, generator, generators = nsa2_cif_reference_keys(OV.IsNoSpherA2())
     except Exception as error:
       print("Note: the NoSpherA2 references were not updated (%s)." % error)
-      nsa2_refs, nsa2_markers, citation, generators = [], [], None, []
-      is_managed = lambda ref, markers: False
-    full_references += nsa2_refs
+      nsa2_keys, nsa2_managed, generator, generators = [], [], None, []
+    cited += nsa2_keys
     # the program that made the wavefunction is part of the refinement method, so it is cited with it
-    if citation:
-      full_references.append(citation[1])
+    if generator:
+      cited.append(generator[1])
     if generators:
       computing = str(self.cif_block.get('_computing_structure_refinement', '') or '').strip()
-      new = computing_with(computing, citation[0] if citation else None, generators)
+      new = computing_with(computing, generator[0] if generator else None, generators)
       if new != computing:
         self.update_cif_block({'_computing_structure_refinement': new}, force=True)
-    disp_refine = 'current_cif' in locals() and "_atom_site_dispersion_real" in current_cif
-    if disp_refine:
-      disp_ref = """Meurer, F., Dolomanov, O.V., Hennig, C., Peyerimhoff, N., Kleemiss, F.,
-Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
-      full_references.append(disp_ref)
-    # merge references
-    full_references = [x for x in set(full_references)] #make unique
-    current_refs = self.cif_block.get('_publ_section_references', '')
-    ref = ""
-    full_references_set =\
-     set([''.join(x.replace('\r', '').split()) for x in full_references])\
-      | ExternalPrgParameters.get_managed_reference_set()
-    def keep(ref):
-      ref_t = ''.join(ref.replace('\r', '').split())
-      if ref_t not in full_references_set and not is_managed(ref_t, nsa2_markers):
-        full_references.append(ref)
-        full_references_set.add(ref_t)
-    for l in current_refs.split('\n'):
-      if not l.strip():
-        if ref:
-          keep(ref)
-          ref = ""
-      else:
-        if ref:
-          ref = "%s\n%s" %(ref, l)
-        else:
-          ref = l
-    if ref:
-      keep(ref)
-
-    # clean up if has been inserted previosly but also if added by the user
-    # through CifMerge or by hand...
-    if not disp_refine:
-      full_references = [x for x in full_references if not ("604-609" in x and "2022" in x)]
-    # the N-Beam paper: present while the refinement is dynamical, in the current wording
-    full_references = [x for x in full_references if not is_ed_nbeam_reference(x)]
+    if 'current_cif' in locals() and "_atom_site_dispersion_real" in current_cif:
+      cited.append('dispersion-refinement')
     if OV.IsEDRefinement():
-      full_references.append(ED_NBEAM_REFERENCE)
-    full_references.sort()
+      cited.append('nbeam')
     self.update_cif_block({
-      '_publ_section_references': '\n\n'.join(full_references)}, force=True)
+      '_publ_section_references': References.merge_references(
+        self.cif_block.get('_publ_section_references', ''), cited,
+        managed=set(nsa2_managed) | ExternalPrgParameters.get_managed_reference_set()
+                | {'olex2', 'dispersion-refinement', 'nbeam'})}, force=True)
 
     self.write_metacif_file()
     self.all_sources_d = all_sources_d

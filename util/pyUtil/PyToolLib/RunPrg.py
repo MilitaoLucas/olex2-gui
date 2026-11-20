@@ -28,7 +28,8 @@ black = "#000000"
 table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
 from CifInfo import MergeCif, ED_NBEAM_DOI
-NOSPHERA2_DOI = "10.1039/D0SC05526C"
+import References
+NOSPHERA2_DOI = References.doi('nosphera2')
 import time
 import shutil
 from contextlib import contextmanager

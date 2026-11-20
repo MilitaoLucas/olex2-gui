@@ -4,6 +4,7 @@ import olex
 import olex_core
 from olexFunctions import OV
 import phil_interface
+import References
 import libtbx.utils
 
 from method_imp import *
@@ -36,19 +37,29 @@ class ExternalProgramDictionary(object):
 
 
 class Program(object):
-  def __init__(self, name, program_type, author, reference, brief_reference,
+  def __init__(self, name, program_type, author, references,
                execs=None,
                versions=None, phil_entry_name=None):
+    """references: keys of the papers to cite, in etc/CIF/references.bib"""
     self.name = name
     self.program_type = program_type
     self.author = author
-    self.reference = reference
-    self.brief_reference = brief_reference
+    self.references = tuple(references)
     self.execs = execs
     self.versions = versions
     self.methods = {}
     self.counter = 0
     self.phil_entry_name = phil_entry_name
+
+  @property
+  def reference(self):
+    """the papers as CIF text, ';'-separated"""
+    return ";\n".join(References.cif(k) for k in self.references)
+
+  @property
+  def brief_reference(self):
+    """'Sheldrick, 2015'; several papers '; '-separated"""
+    return "; ".join(References.brief(k) for k in self.references)
 
   def __contains__(self, name):
     if type(name) == str:
@@ -108,78 +119,67 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122.",
-    brief_reference="Sheldrick, 2008",
+    references=('shelx-history',),
     execs=["shelxs.exe", "shelxs"],
     phil_entry_name="ShelXS")
   ShelXS97 = Program(
     name='ShelXS-1997',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxs97.exe", "shelxs97"])
   ShelXS86 = Program(
     name='ShelXS-1986',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["xs.exe", "xs"],
     phil_entry_name="XS")
   XT = Program(
     name='XT',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="Sheldrick, G.M. (2015). Acta Cryst. A71, 3-8.",
-    brief_reference="Sheldrick, 2015",
+    references=('shelxt',),
     execs=["xt.exe", "xt"],
     phil_entry_name="XT")
   ShelXT = Program(
     name='ShelXT',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=XT.reference,
-    brief_reference=XT.brief_reference,
+    references=XT.references,
     execs=["shelxt.exe", "shelxt"],
     phil_entry_name="ShelXT")
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxd.exe", "shelxd"],
     phil_entry_name="ShelXD")
   ShelXD97 = Program(
     name='ShelXD-1997',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxd97.exe", "shelxd97"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["xm.exe", "xm"],
     phil_entry_name="XM")
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis et al",
-    reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2015). Acta Cryst. A71, 59-75.""",
-    brief_reference="Bourhis et al., 2015",
+    references=('olex2-dissected',),
     )
 
   SIR97 = Program(
@@ -188,21 +188,20 @@ def defineExternalPrograms():
     author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini,"+
         "Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori,"+
         "Dritan Siliqi, Riccardo Spagna",
-    reference="""Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
- De Caro, L., Giacovazzo, C., Polidori, G., Siliqi, D., Spagna, R.
- (2007). J. Appl. Cryst. 40, 609-613.""",
-    brief_reference="Burla et al.,  2007",
+    references=('sir97',),
     versions = '97',
     execs=["sir97.exe", "sir97"])
 
   SIRs = [SIR97]
+  # each version its own paper; SIR2008 is part of IL MILIONE, SIR2019 has none in the list yet
+  sir_papers = {'2002': 'sir2002', '2004': 'sir2004', '2008': 'il-milione',
+                '2011': 'sir2011', '2014': 'sir2014', '2019': 'il-milione'}
   for year in ('2002', '2004', '2008', '2011', '2014', '2019'):
     SIR_year = Program(
       name='SIR%s' %year,
       program_type='solution',
       author=SIR97.author,
-      reference=SIR97.reference,
-      brief_reference=SIR97.brief_reference,
+      references=(sir_papers[year],),
       versions = year,
       execs=["sir%s.exe" %year, "sir%s" %year])
     SIRs.append(SIR_year)
@@ -210,12 +209,7 @@ def defineExternalPrograms():
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="""Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
-Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
-Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
- 575-580.""",
-    brief_reference="""Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;
-Palatinus et al., 2012""",
+    references=('superflip', 'superflip-symmetry', 'edma'),
     versions='260711',
     execs=["superflip.exe", "superflip"])
 
@@ -254,64 +248,56 @@ Palatinus et al., 2012""",
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.",
-    brief_reference="Sheldrick, 2015",
+    references=('shelxl',),
     execs=["shelxl.exe", "shelxl"],
     phil_entry_name="ShelXL")
   ShelXL97 = Program(
     name='ShelXL-1997',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxl97.exe", "shelxl97"],
     phil_entry_name="ShelXL97")
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["xl.exe", "xl"],
     phil_entry_name="ShelXL97")
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["xlmp.exe", "xlmp"],
     phil_entry_name="XLMP")
   ShelXH97 = Program(
     name='ShelXH-1997',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxh.exe", "shelxh"],
     phil_entry_name="ShelXL97")
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["xh.exe", "xh"],
     phil_entry_name="ShelXL97")
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    references=ShelXS.references,
     execs=["shelxl_ifc"],
     phil_entry_name="ShelXL97")
   smtbx_refine = Program(
     name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference=smtbx_solve.reference,
-    brief_reference=smtbx_solve.brief_reference,
+    references=smtbx_solve.references,
     phil_entry_name="cctbx"
   )
   #tonto_refine = Program(
@@ -391,13 +377,12 @@ def get_program_dictionaries(cRPD=None, cSPD=None):
   return SPD, RPD
 
 def get_managed_reference_set():
+  """keys of every paper a solution or refinement program cites: the CIF carries
+  only those of the programs actually used"""
   global managed_references
   if managed_references: return managed_references
   sd, rd = get_program_dictionaries()
-  rl = []
-  for p in sd: rl.append(p.reference)
-  for p in rd: rl.append(p.reference)
-  managed_references = set([''.join(x.replace('\r', '').split()) for x in rl])
+  managed_references = set(k for p in list(sd) + list(rd) for k in p.references)
   return managed_references
 
 def get_known(kind):
