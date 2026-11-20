@@ -1694,9 +1694,10 @@ user
     .short_caption = Analysis Graphs
     {
 
-    use_theme_bg_colour = True
+    use_theme_bg_colour = False
       .type = bool
-      .help = "Graphs (GUI and reports) in the colours of the skin; off: white background, dark text"
+      .short_caption = Use theme colours
+      .help = "Graphs (GUI and reports) in the colours and fonts of the theme; off: Olex2's own colours and fonts as shipped in gui.params (white background, dark text), so graphs made in a dark theme still read on a white page"
 
     non_highlight_colour = "#ababab"
       .type = str
@@ -2873,6 +2874,25 @@ user
         .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
     }
   }
+  fromoxm
+    .help = "Experimental Growing from oxm (gui/fromoxm, View > Symmetry Generation)"
+  {
+    file = ""
+      .type = str
+      .help = "The saved model (.oxm) to take the picture from"
+    parts = "all"
+      .type = str
+      .help = "What to take: all, grow, view, styles, planes, lines (comma separated)"
+    names = "ask"
+      .type = str
+      .help = "Atoms with other names than in the oxm: ask, names (take them) or keepnames"
+    margin = 0.5
+      .type = float
+      .help = "How far (Angstrom) an atom may be from the sample's to count as the same"
+    style = "oxm"
+      .type = str
+      .help = "Colours of atoms, bonds, planes and lines: oxm (from the saved model) or current (the style in use)"
+  }
   image{
     if_file_exists = *ask increment replace
       .type = choice
@@ -2913,7 +2933,89 @@ user
          .type = float
        trim_border = 0
          .type = float
+       trim_reach = 0.5
+         .type = float
+         .help = "Trim: how far (Angstrom) the drawn atoms reach beyond their centres"
      }
+    perspective = 0
+      .type = float
+      .help = "Perspective angle set with spy.gui.images.perspective, 0 = off; Olex2 cannot be asked, the trim of vector mode needs it"
+    labels
+      .help = "Atom labels drawn by Python into saved images (gui.images.labels)"
+    {
+      smart = False
+        .type = bool
+        .help = "Place the atom labels automatically and draw them in a real font when an image is saved, labels moved by hand keep their place"
+      height = 0.26
+        .type = float
+        .help = "Height of the atom label text in Angstrom for the vector label font @20, other sizes in proportion, so the image follows the screen"
+      bond_scale = 0.75
+        .type = float
+        .help = "Bond labels as a fraction of the atom label height"
+      font = ""
+        .type = str
+        .help = "Font file for the labels, empty: the default font of the GUI"
+      colour = ""
+        .type = str
+        .help = "Label colour as #rrggbb, empty: black on light, white on dark backgrounds"
+      gap = 0.12
+        .type = float
+        .help = "Space in Angstrom between an atom and its label, and at both ends of a leader line"
+      leader_width = 0.025
+        .type = float
+        .help = "Width of leader lines in Angstrom"
+      shift_scale = 1.0
+        .type = float
+        .help = "Calibration of hand-moved label positions, see spy.gui.images.labels_probe"
+      moved_min = 3.0
+        .type = float
+        .help = "A label dragged less than this many pixels counts as not moved and is placed automatically"
+      leader_after = 0.15
+        .type = float
+        .help = "A label moved by hand further than this (Angstrom) from its atom gets a line along the move"
+      legend_size = 0
+        .type = float
+        .help = "Point size of the legend font in saved images, 0 follows the atom labels"
+      bonds = True
+        .type = bool
+        .help = "Also place and draw the bond labels"
+      mode = normal
+        .type = str
+        .help = "normal: labels as Olex2 always drew them. vector: zooming labels on screen, drawn in a real font where they are on screen when an image is saved. See spy.gui.images.label_mode"
+      vector_atom_size = 12
+        .type = int
+        .help = "Vector font size of atom labels in vector mode"
+      vector_bond_size = 7
+        .type = int
+        .help = "Vector font size of bond labels in vector mode"
+      normal_atom_font = ""
+        .type = str
+        .help = "The atom label font before vector mode, back in normal mode"
+      normal_bond_font = ""
+        .type = str
+        .help = "The bond label font before vector mode, back in normal mode"
+      calib_size_per_pt = 0
+        .type = float
+        .help = "Measured label height in Angstrom per vector font point, spy.gui.images.label_calibrate, 0 = estimate"
+      calib_drag_scale = 0
+        .type = float
+        .help = "Measured Angstrom per unit of a label drag, 0 = estimate"
+      calib_offset_x = 0
+        .type = float
+        .help = "Measured label offset from its anchor, Angstrom"
+      calib_offset_y = 0
+        .type = float
+        .help = "Measured label offset from its anchor, Angstrom"
+      calib_size_k = 0
+        .type = float
+        .help = "Measured label size constant: height = k * font size / CalcZoom, right for grown structures too"
+      ttf_scale = 1.18
+        .type = float
+        .help = "Size of the printed labels against Olex2's printed vector labels"
+      vector_both = False
+        .type = bool
+        .help = "Vector mode images: keep Olex2's own vector labels under the printed ones, for comparing"
+    }
     ps
       {
       type = *eps

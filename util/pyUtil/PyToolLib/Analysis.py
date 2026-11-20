@@ -55,9 +55,18 @@ def graph_colours(gui_params):
   """Colours for the graphs: the skin's gui.graph, or, with
   user.graphs.use_theme_bg_colour off, the plain ones of gui.params (white
   background, dark text), so dark skins give no light text on white."""
-  if OV.GetParam('user.graphs.use_theme_bg_colour', True):
+  if OV.GetParam('user.graphs.use_theme_bg_colour', False):
     return gui_params.graph
   return olx.gui_phil_handler.master_phil.extract().gui.graph
+
+
+def graph_fonts():
+  """Regular and bold font for the graphs: the theme's (DefaultFont), or, with
+  user.graphs.use_theme_bg_colour off, Olex2's own fonts from gui.params as
+  shipped (NativeFont, FontInstances), like the colours above."""
+  if OV.GetParam('user.graphs.use_theme_bg_colour', False):
+    return "DefaultFont", "DefaultFont Bold"
+  return "NativeFont", "NativeFont Bold"
 
 class ReciprocalResolutionAxis(object):
   """x-axis transform for plots against d-spacing.
@@ -91,6 +100,10 @@ class ReciprocalResolutionAxis(object):
     return rv
 
 class Graph(ArgumentParser):
+  # set per graph in __init__ from graph_fonts(); these cover a subclass
+  # that does not run it
+  font_name, font_name_bold = "DefaultFont", "DefaultFont Bold"
+
   def __init__(self, scale=4):
     super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
@@ -158,6 +171,7 @@ class Graph(ArgumentParser):
 
     self.guiParams = OV.GuiParams()
     self.graphColours = graph_colours(self.guiParams)
+    self.font_name, self.font_name_bold = graph_fonts()
 
     self.graphInfo = {
       "TopRightTitle":self.TopRightTitle,
@@ -351,7 +365,7 @@ class Graph(ArgumentParser):
     fontsize *= self.scale
     fontscale *= self.scale
 
-    font_name = "DefaultFont"
+    font_name = self.font_name
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
     self.font_size_normal = int(1.0 * fontscale)
@@ -360,7 +374,7 @@ class Graph(ArgumentParser):
     self.font_small = IT.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
     self.font_tiny = IT.registerFontInstance(font_name, self.font_size_tiny)
-    font_name = "DefaultFont Bold"
+    font_name = self.font_name_bold
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
@@ -463,11 +477,11 @@ class Graph(ArgumentParser):
 
     i = 0
     for item in yAxis:
-      wX, wY = IT.textsize(self.draw, OV.correct_rendered_text(item), font_size=self.font_size_small)
+      wX, wY = IT.textsize(self.draw, OV.correct_rendered_text(item), font_size=self.font_size_small, font_name=self.font_name)
       x = int(self.bSides + i * barX + (barX - wX)/2)
       y = self.graph_bottom
       top_left = (x,y)
-      IT.write_text_to_draw(self.draw, item, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
+      IT.write_text_to_draw(self.draw, item, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour, font_name=self.font_name)
       i += 1
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
@@ -554,9 +568,9 @@ class Graph(ArgumentParser):
     txt = "y = %.3fx %s %.3f" %(slope,sign,abs(y_intercept))
 
 
-    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small, )
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small, font_name=self.font_name)
 
-    font = IT.registerFontInstance("DefaultFont", self.font_size_small)
+    font = IT.registerFontInstance(self.font_name, self.font_size_small)
     a = IT.text_bbox(font=font, text=txt)
     wX = a[2]
     wY = a[3]
@@ -569,19 +583,19 @@ class Graph(ArgumentParser):
       y = self.graph_top + self.imY * 0.1
       top_left = (x,y)
       IT.write_text_to_draw(
-        self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+        self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey, font_name=self.font_name)
       if R is not None:
         txt = "R = %.3f" %float(R)
         top_left = (top_left[0], top_left[1] + wY*1.2)
         IT.write_text_to_draw(
-          self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+          self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey, font_name=self.font_name)
 
     if write_text:
       txt = self.metadata.get("y_label", "y Axis Label")
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
       wX_axis, wY_axis = get_text_size(self.draw, txt, font=self.font_small)
       text = OV.correct_rendered_text(write_text)
-      wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
+      wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny, font_name=self.font_name)
       if rotate_text:
         gap = 6 * self.scale
         x = 0
@@ -619,7 +633,7 @@ class Graph(ArgumentParser):
           adj_y = -20 * self.scale
         top_left = (x1 + adj_x,y1 + adj_y)
         IT.write_text_to_draw(
-          self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
+          self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey, font_name=self.font_name)
 
 
   def test_plotly(self):
@@ -958,11 +972,11 @@ class Graph(ArgumentParser):
     n_bars = len(dataset.x)
     bar_width = math.floor((width-2*self.bSides)/n_bars)
     if title is not None:
-      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
+      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large, font_name=self.font_name)
       x = width - 2*self.bSides - wX
       y = wY + 6
       top_left = (x,y)
-      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey, font_name=self.font_name)
 
     for i, xy in enumerate(dataset.xy_pairs()):
       last = len(dataset.x)
@@ -1005,7 +1019,7 @@ class Graph(ArgumentParser):
           txt = bar_labels[i]
         else:
           txt = "%.3f" %y_value
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name=self.font_name)
 
         if wX < bar_width:
           x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
@@ -1015,16 +1029,16 @@ class Graph(ArgumentParser):
           else:
             y = bar_top + 6
           top_left = (x,y)
-          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey, font_name=self.font_name)
 
         if y_value < 0.003:
           txt = "OK"
-          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name=self.font_name)
           x = width - 2*self.bSides - wX
           y = wY + 30
           top_left = (x, y - 10)
           top_left = (x,y)
-          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green, font_name=self.font_name)
 
 
   def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None,
@@ -1050,11 +1064,11 @@ class Graph(ArgumentParser):
       bar_width = int(width/max_bars)
 
     if title is not None:
-      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
+      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large, font_name=self.font_name)
       x = width - 2*self.bSides - wX
       y = wY + 6
       top_left = (x,y)
-      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey, font_name=self.font_name)
 
     i, j = 0, 0
     pairs, img_no = dataset.xy_pairs(), 0
@@ -1119,7 +1133,7 @@ class Graph(ArgumentParser):
           txt = bar_labels[i]
         else:
           txt = "%.3f" %y_value
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name=self.font_name)
 
         if wX < bar_width:
           x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
@@ -1129,16 +1143,16 @@ class Graph(ArgumentParser):
           else:
             y = bar_top + 6
           top_left = (x,y)
-          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey, font_name=self.font_name)
 
         if y_value < 0.003:
           txt = "OK"
-          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name=self.font_name)
           x = width - 2*self.bSides - wX
           y = wY + 30
           top_left = (x, y - 10)
           top_left = (x,y)
-          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green, font_name=self.font_name)
 
       j += 1
       i += 1
@@ -1244,10 +1258,10 @@ class Graph(ArgumentParser):
     self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
-    wX, wY = IT.textsize(self.draw, txt, font_size=font_size * 1.5)
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size * 1.5, font_name=self.font_name)
     x = width - wX - self.bSides
     top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size * 1.5, font_colour=self.axislabelColour)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size * 1.5, font_colour=self.axislabelColour, font_name=self.font_name)
 
   def draw_info(self, txt, font_size=None):
     #Draws text into top right corner of the plot
@@ -1255,7 +1269,7 @@ class Graph(ArgumentParser):
       font_size = self.font_size_large
     #height = self.graph_bottom - self.graph_top
     width = self.params.size_x
-    wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size, font_name=self.font_name)
     legend_top = self.graph_top + 20
     #legend_bottom = legend_top + 1.2*wY
     x = width - 0.4 * wX - self.bSides
@@ -1263,7 +1277,7 @@ class Graph(ArgumentParser):
     #box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
     #self.draw.rectangle(box, fill=(255,255,255,0))
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour, font_name=self.font_name)
 
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None,
                        hrefs=None, targets=None, lt=None, gt=None, no_negatives=False,
@@ -1563,7 +1577,7 @@ class Graph(ArgumentParser):
         top_left = (x, y - self._ink_top(txt)/2)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour, font_name=self.font_name)
         x = self.graph_left
         y = y + int(wY/2)
         self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=self.outlineColour)
@@ -2333,7 +2347,7 @@ class WilsonPlot(Analysis):
     for txt in text:
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
       #unicode_txt = IT.get_unicode_characters(txt)
-      wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
+      wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny, font_name=self.font_name)
       if i == 0:
         first_wX = wX
       colour = self.graphColours.grey.hexadecimal
@@ -2343,7 +2357,7 @@ class WilsonPlot(Analysis):
         elif float(estats) > float(self.wilson_grad_end):
           colour = "#ff0000"
       top_left = (left, top)
-      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
+      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour, font_name=self.font_name)
 
       top += 18 * self.scale
       i += 1
@@ -2428,9 +2442,9 @@ class WilsonPlot(Analysis):
         txt = "acentric"
         txt = OV.TranslatePhrase(txt)
         txt = f"{txt} (0.736)"
-        wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
+        wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny, font_name=self.font_name)
         top_left = (i - int(wX / 2), -5)
-        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
+        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey, font_name=self.font_name)
         #txt = "0.736"
         #wX, wY = get_text_size(draw, txt, font=self.font_tiny)
         #draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
@@ -2440,7 +2454,7 @@ class WilsonPlot(Analysis):
         txt = f"{txt} (0.968)"
         wX, wY = get_text_size(draw, txt, font=self.font_tiny)
         top_left = (i-int(wX/2), -5)
-        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
+        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey, font_name=self.font_name)
         #txt = "0.968"
         #wX, wY = get_text_size(draw, txt, font=self.font_small)
         #draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
@@ -2527,10 +2541,10 @@ class ChargeFlippingPlot(PrgAnalysis):
     if solving.state is solving.guessing_delta:
       if previous_state is not solving.guessing_delta:
         txt = "%s" %self.attempt
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "DefaultFont Bold")
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = self.font_name_bold)
         x = self.counter + marker_width + 5
         top_left = (x, self.graph_bottom -wY -3)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "DefaultFont Bold", font_colour=self.light_grey)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = self.font_name_bold, font_colour=self.light_grey)
         self.attempt += 1
         if self.counter != 0:
           self.counter += 1
@@ -2546,10 +2560,10 @@ class ChargeFlippingPlot(PrgAnalysis):
         self.draw = ImageDraw.Draw(self.im)
         self.counter = self.bSides
         txt = "...continued"
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_normal)
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_normal, font_name=self.font_name)
         x = width - wX - self.bSides - 3
         top_left = (x, 20)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey, font_name=self.font_name)
       x = self.counter
 
       ## Draw CC
@@ -2570,7 +2584,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       R1 = height*(1-R1) + top
       box = (x,R1,x+marker_width,R1+2)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
-      font_name = "DefaultFont"
+      font_name = self.font_name
       font_size = 10
       font = IT.registerFontInstance(font_name, font_size)
 
@@ -2586,7 +2600,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(int(ccR/2), int(ccG/2), 0))
       tt = "CC"
       top_left = (10+marker_width+3, legend_top)
-      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
+      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey, font_name=self.font_name)
 
 
       ## Draw R1 Legend
@@ -3795,6 +3809,9 @@ class HistoryGraph(Analysis):
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
+    # the bar sits in the panel, so it always takes the skin's colours, not
+    # the plain white of graph_colours() for the stand-alone graphs
+    self.graphColours = self.guiParams.graph
     self.green = OV.GetParam('gui.green').rgb[1]
     self.red = OV.GetParam('gui.red').rgb[0]
     self.blue = 0

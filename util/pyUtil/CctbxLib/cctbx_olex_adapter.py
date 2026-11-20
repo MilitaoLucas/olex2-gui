@@ -4363,11 +4363,16 @@ def make_DISP_Table():
   tables_H = henke
   from brennan import brennan
   tables_B = brennan()
-  def row(rowdata, color='white', color2="black"):
+  # follow the skin, so a dark theme gets no white cells
+  row_bg = OV.GetVar('HtmlTableRowBgColour', '') or 'white'
+  row_fg = OV.GetVar('HtmlFontColour', '') or 'black'
+  def row(rowdata, color=None, color2=None):
     """
     creates a table row for the restraints list.
     :type rowdata: list
     """
+    color = color or row_bg
+    color2 = color2 or row_fg
     td = []
     for num, item in enumerate(rowdata):
       if num == 0:

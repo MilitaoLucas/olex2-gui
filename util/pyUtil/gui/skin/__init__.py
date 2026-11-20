@@ -34,6 +34,56 @@ def adjust_skin_colours():
                 IT.adjust_colour(base_colour.rgb, luminosity=OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
 
 
+APPEARANCES = ('skin', 'light', 'dark', 'system')
+
+
+def skin_is_dark():
+  """True when the skin's HTML panel background (gui.html.bg_colour) is dark."""
+  from gui.theme.glcolours import to_hex
+  c = to_hex(OV.GetParam('gui.html.bg_colour'))
+  if not c:
+    return False
+  r, g, b = (int(c[i:i + 2], 16) for i in (1, 3, 5))
+  return 0.299 * r + 0.587 * g + 0.114 * b < 128
+
+
+def appearance_wanted():
+  """light, dark or system, from gui.appearance; 'skin' follows the skin."""
+  value = str(OV.GetParam('gui.appearance', 'skin') or 'skin').strip().lower()
+  if value not in APPEARANCES:
+    print("gui.appearance: '%s' is not one of %s; following the skin"
+          % (value, ', '.join(APPEARANCES)))
+    value = 'skin'
+  if value == 'skin':
+    return 'dark' if skin_is_dark() else 'light'
+  return value
+
+
+def appearance_function():
+  """Olex2's get/set function for light/dark/system native controls, or None
+  in builds before it existed.  The 2026-11-20 build spells it 'Appearence';
+  'Appearance' is accepted too, should the name be corrected."""
+  for name in ('Appearance', 'Appearence'):
+    if hasattr(olx, name):
+      return getattr(olx, name)
+  return None
+
+
+def apply_appearance():
+  """Native controls light or dark, on the fly, as gui.appearance says."""
+  fn = appearance_function()
+  if fn is None:
+    return
+  want = appearance_wanted()
+  try:
+    if fn() != want:
+      fn(want)
+  except Exception as err:
+    print("Could not set the appearance to '%s': %s" % (want, err))
+    if hasattr(sys, '_wing_debugger'):
+      raise
+
+
 def adjust_skin_luminosity():
   base_colour = OV.GetParam('gui.base_colour')
 
@@ -408,6 +458,7 @@ class Skin():
       SetMaterials()
       OV.setAllMainToolbarTabButtons()
       olex.m('htmlpanelswap %s' % OV.GetParam('gui.htmlpanel_side'))
+      apply_appearance()
 
     if OV.FileFull() != "none":
       from History import hist
@@ -445,9 +496,9 @@ class Skin():
       pass
 
     try:
-      olex.m(f"console.offset {OV.GetParam('gui.console_offset', 6)}")
-    except:
-      pass
+      olex.m(f"console.offset {OV.GetParam('gui.console_offset', 10)}")
+    except Exception as err:
+      print("Could not set the console indent: %s" % err)
 
     olx.FlushFS()
 

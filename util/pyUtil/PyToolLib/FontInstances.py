@@ -39,6 +39,7 @@ class FontInstances(ArgumentParser):
     from olexFunctions import OV
     default_font_name = OV.GetParam("gui.default_font_name")
     default_font_name_bold = OV.GetParam("gui.default_font_name_bold")
+    native_font_name, native_font_name_bold = self.native_font_names()
     self.fonts = {
       ##################################################### texgyretermes
       "Serif":{
@@ -200,6 +201,22 @@ class FontInstances(ArgumentParser):
         "font_src":(
           self.font_file(default_font_name_bold),
           default_font_name_bold,
+          ),
+        "fontInstance":{}
+          },
+      # Olex2's own fonts (gui.params as shipped), whatever skin or theme is in
+      # use: graphs drawn without the theme colours (Analysis.graph_fonts)
+      "NativeFont":{
+        "font_src":(
+          self.font_file(native_font_name),
+          native_font_name,
+          ),
+        "fontInstance":{}
+          },
+      "NativeFont Bold":{
+        "font_src":(
+          self.font_file(native_font_name_bold),
+          native_font_name_bold,
           ),
         "fontInstance":{}
           },
@@ -520,6 +537,16 @@ class FontInstances(ArgumentParser):
       #self.registerFontInstance(font_name, 10)
     self.add_font_files()
     return self.fonts
+
+  def native_font_names(self):
+    """Regular and bold font files of gui.params as shipped (the master phil),
+    not the skin's or the theme's."""
+    import olx
+    fallback = ("Signika-Regular.ttf", "Signika-Bold.ttf")
+    if not hasattr(olx, 'gui_phil_handler'):  # no GUI phil yet (headless)
+      return fallback
+    gui = olx.gui_phil_handler.master_phil.extract().gui
+    return (gui.default_font_name or fallback[0], gui.default_font_name_bold or fallback[1])
 
   def font_dirs(self):
     """Fonts the user added (theme designer, Fonts tab) first, then the shipped ones."""
