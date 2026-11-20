@@ -1,6 +1,7 @@
 """gui.demo with Olex2 stubbed: only typed commands are shown in the info box,
 newer ones replace older ones, the file information comes back after its time,
-the info box font is the console's while on and its own again when off."""
+the info box font is demo.font while on and its own again when off; the key
+mirror shows the console's own input line."""
 import importlib.util
 import os
 import sys
@@ -78,6 +79,7 @@ def _install():
     m=lambda cmd: W.cmds.append(cmd), f=_f)
   sys.modules['olx'] = types.SimpleNamespace(
     Schedule=_schedule, GetFont=lambda name: W.fonts[name],
+    SetFont=lambda name, desc: W.cmds.append('olx.SetFont %s %s' % (name, desc)),
     IsFileLoaded=lambda: 'true', GetWindowSize=lambda which='': '0,0,1400,900',
     info_box=types.SimpleNamespace(Clear=lambda: W.cmds.append('Clear'),
                                    PostText=lambda t: W.cmds.append('Post:' + t),
@@ -102,16 +104,29 @@ class DemoTest(unittest.TestCase):
     for fn in list(W.callbacks.get('onlog', [])):
       fn(text)
 
-  def test_on_uses_the_console_font_and_off_restores_it(self):
+  def test_on_uses_the_demo_font_and_off_restores_it(self):
     W.params['user.demo.font_size'] = 30
-    demo.mode('on')
-    self.assertIn("SetFont Notes '%s' -ps=30" % W.fonts['Default'], W.cmds)
-    self.assertIn('Post:Demo mode', [c.rstrip(' ,') for c in W.cmds])
+    demo.mode('on')  # no demo.font: the platform's monospace font, regular weight
+    face = demo._font_face()
+    self.assertIn(face, ('Consolas', 'Menlo', 'DejaVu Sans Mono'))
+    self.assertIn('olx.SetFont Notes 1;30;-40;0;0;0;400;0;0;0;0;3;2;1;34;%s' % face, W.cmds)
+    self.assertIn('Post:Demo mode', [c.rstrip(' ,|') for c in W.cmds])
     del W.cmds[:]
     demo.mode('off')
-    self.assertIn("SetFont Notes '#olex2.fnt:frb_12'", W.cmds)
+    self.assertIn('olx.SetFont Notes #olex2.fnt:frb_12', W.cmds)
     self.assertIn('Post:sucrose.res', W.cmds)  # the file is back
     self.assertEqual(W.callbacks['onlog'], [])
+
+  def test_font_setting(self):
+    W.params.update({'user.demo.font': 'JetBrains Mono', 'user.demo.font_size': 24})
+    demo.mode('on')  # a face name with a space: olx.SetFont, not the macro
+    self.assertIn('olx.SetFont Notes 1;24;-32;0;0;0;400;0;0;0;0;3;2;1;34;JetBrains Mono', W.cmds)
+    demo.mode('off')
+    W.params['user.demo.font'] = 'console'  # the old way: the console's font scaled up
+    del W.cmds[:]
+    demo.mode('on')
+    self.assertIn("SetFont Notes '%s' -ps=24" % W.fonts['Default'], W.cmds)
+    demo.mode('off')
 
   def test_only_what_is_in_the_input_line_is_shown(self):
     demo.mode('on')
@@ -125,9 +140,9 @@ class DemoTest(unittest.TestCase):
     # functions, with brackets: as macros they do nothing; then a redraw, or
     # the text shows only after the next click
     # padded with spaces so the shading spans the whole width; no Fit
-    posted = [c for c in W.cmds if c.startswith('Post:|>> grow -w')][-1]
+    posted = [c for c in W.cmds if c.startswith('Post: grow -w')][-1]
     self.assertGreater(len(posted), 60)
-    self.assertEqual(posted.rstrip(), 'Post:|>> grow -w')
+    self.assertEqual(posted.rstrip(' |'), 'Post: grow -w')
     self.assertEqual(W.cmds[-2:], ['ShowWindow info', 'ShowWindow info'])
     self.assertNotIn('Fit', W.cmds)
     # cleared after 7 s (the default), once
@@ -151,9 +166,9 @@ class DemoTest(unittest.TestCase):
   def test_quotes_and_commas_in_a_command(self):
     demo.mode('on')
     demo.show("echo 'a b'")
-    self.assertIn("Post:echo 'a b'", [c.rstrip(' ,') for c in W.cmds])
+    self.assertIn("Post:echo 'a b'", [c.rstrip(' ,|') for c in W.cmds])
     demo.show('sel C1,C2 $C')  # raw string: commas and $ untouched
-    self.assertIn('Post:sel C1,C2 $C', [c.rstrip(' ,') for c in W.cmds])
+    self.assertIn('Post:sel C1,C2 $C', [c.rstrip(' ,|') for c in W.cmds])
 
   def test_shortcuts_show_their_keys(self):
     demo._shortcuts.clear()
@@ -162,7 +177,7 @@ class DemoTest(unittest.TestCase):
     del W.scheduled[:]
     self.log("CreateShortcut Alt+L 'spy.gui.theme.legend_place()'")
     self.log('spy.gui.theme.legend_place()')  # nothing typed: a shortcut ran
-    self.assertIn('Post:|Alt+L   spy.gui.theme.legend_place()', [c.rstrip(' ,') for c in W.cmds])
+    self.assertIn('Post: Alt+L   spy.gui.theme.legend_place()', [c.rstrip(' ,|') for c in W.cmds])
     W.typed = 'sel'  # while typing, a shortcut macro the GUI runs is not shown
     del W.scheduled[:]
     self.log('sel -u')
@@ -175,7 +190,7 @@ class DemoTest(unittest.TestCase):
     demo.mode('on')
     W.typed = 'fuse'
     self.log('fuse')
-    self.assertIn('Post:> fuse', [c.rstrip(' ,') for c in W.cmds])
+    self.assertIn('Post:> fuse', [c.rstrip(' ,|') for c in W.cmds])
 
   def test_a_load_puts_the_demo_text_back(self):
     olx = sys.modules['olx']
@@ -189,7 +204,7 @@ class DemoTest(unittest.TestCase):
       l('structure')
     self.assertEqual(W.cmds[0], 'Clear')
     posted = [c for c in W.cmds if c.startswith('Post:')]
-    self.assertEqual([p.rstrip() for p in posted], ['Post:reap sucrose.res'])
+    self.assertEqual([p.rstrip(' |') for p in posted], ['Post:reap sucrose.res'])
     self.assertGreater(len(posted[0]), 60)  # full width again
     self.assertIn((1, 'spy.gui.demo.after_load()'), W.scheduled)
     demo.hide(demo._state['serial'])
@@ -229,7 +244,7 @@ class DemoTest(unittest.TestCase):
     del W.cmds[:]
     demo.on_exit()
     self.assertFalse(demo._state['on'])
-    self.assertIn("SetFont Notes '#olex2.fnt:frb_12'", W.cmds)
+    self.assertIn('olx.SetFont Notes #olex2.fnt:frb_12', W.cmds)
     del W.cmds[:]
     demo.on_exit()  # already off: nothing
     self.assertEqual(W.cmds, [])
@@ -301,17 +316,22 @@ class DemoTest(unittest.TestCase):
     demo.show('   ')  # nothing to show
     self.assertEqual(demo._state['text'], '    |>> fuse')
 
-  def test_keys_build_the_command_line_and_shortcuts_show(self):
+  def press(self, key, line):
+    """A key, and the console's input line once the console has taken it."""
+    W.typed = line
+    W.callbacks['onkey'][0](key)
+
+  def test_keys_show_the_command_line_and_shortcuts_show(self):
     demo.mode('on')
     self.assertEqual(len(W.callbacks.get('onkey', [])), 1)
     on_key, on_accel = W.callbacks['onkey'][0], W.callbacks['onaccel'][0]
-    for c in 'fuss':
-      on_key(c)
-    on_key('Backspace')
+    for i, c in enumerate('fuss'):
+      self.press(c, 'fuss'[:i + 1])
+    self.press('Backspace', 'fus')
     self.assertEqual(demo._state['typing'], 'fus')
     self.assertEqual(demo._state['text'], demo.prefix() + 'fus')
     on_accel('Ctrl+P')
-    self.assertEqual(demo._state['text'], '|Ctrl+P')
+    self.assertEqual(demo._state['text'], ' Ctrl+P')
     self.assertTrue(demo._state['accel_seen'])
     on_key('Enter')
     self.assertEqual(demo._state['typing'], '')
@@ -330,15 +350,16 @@ class DemoTest(unittest.TestCase):
     self.assertEqual(k('\x1b'), ('edit', 'Esc'))
     self.assertEqual(k('\x10'), ('key', 'Ctrl+P'))
     demo.mode('on')
-    on_key = W.callbacks['onkey'][0]
-    for c in 'fuse':
-      on_key(c)
-    on_key('\b')
+    for i, c in enumerate('fuse'):
+      self.press(c, 'fuse'[:i + 1])
+    self.press('\b', 'fus')
     self.assertEqual(demo._state['typing'], 'fus')
-    for _ in range(3):
-      on_key('\b')
+    for n in (2, 1, 0):
+      self.press('\b', 'fus'[:n])
     self.assertEqual(demo._state['typing'], '')
-    self.assertEqual(demo._state['text'].strip(), demo.prefix().strip())  # last letter gone
+    on_key = W.callbacks['onkey'][0]
+    # last letter gone: with a blank prefix nothing is left, the box is cleared
+    self.assertFalse(demo._state['shown'])
     on_key('\r')
     self.assertEqual(demo._state['typing'], '')
     demo.mode('off')
@@ -388,8 +409,27 @@ class DemoTest(unittest.TestCase):
     W.hold_idle = False
     demo.show_pending()
     self.assertEqual(demo._state['typing'], 'refine')
-    self.assertEqual(demo._state['text'], '|Ctrl+P')  # the newest text
+    self.assertEqual(demo._state['text'], ' Ctrl+P')  # the newest text
     self.assertFalse(demo._state['pending_scheduled'])
+    demo.mode('off')
+
+  def test_the_mirror_is_the_consoles_line(self):
+    """Tab completion and history change the line without typed letters, and
+    keys the console does not insert (PgUp came as ';') must not pile up."""
+    demo.mode('on')
+    self.press('r', 'r')
+    self.press('e', 're')
+    self.press('\t', 'refine')  # Tab: the console completed the word
+    self.assertEqual(demo._state['text'], ' refine')
+    self.press('317', 'fuse')  # Down: history
+    self.assertEqual(demo._state['text'], ' fuse')
+    for _ in range(3):  # a key the console ignores, reported as a character
+      self.press(';', 'fuse')
+    self.assertEqual(demo._state['text'], ' fuse')
+    self.press('366', 'fuse')  # PgUp as a wx key code: shown by name
+    self.assertEqual(demo._state['text'], ' PageUp')
+    self.press('367 0', 'fuse')
+    self.assertEqual(demo._state['text'], ' PageDown')
     demo.mode('off')
 
 if __name__ == '__main__':

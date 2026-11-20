@@ -6,8 +6,8 @@ info box (ShowWindow info), for presentations and screen recordings.
 
 Display: the info box (core TGlTextBox, library 'info_box': Clear, PostText,
 Fit; its font is the scene font 'Notes').  While demo mode is on, 'Notes' is
-the console's font ('Default') at demo.font_size points; switching off
-puts the old font back.  A command stays demo.seconds, then the box gets
+demo.font (a system font; by default the platform's monospace font) at
+demo.font_size points; switching off puts the old font back.  A command stays demo.seconds, then the box gets
 the file information back that Olex2 normally shows there.
 
 Which command was typed: Olex2 has no event for it, and its log carries every
@@ -35,14 +35,22 @@ from gui import toolphil
 
 toolphil.load(__file__, 'demo')  # gui/demo/demo.phil (user.demo), values in DataDir/user.phil
 
-# shown before typed commands (demo.prefix): the console's '>>' and a
-# pipe, which reaches below the baseline, so every line's box has the same depth
-PROMPT = '|>> '
+# shown before typed commands and keys (demo.prefix)
+PROMPT = ' '
+FONT_SIZE = 24
 
 
 def prefix():
   p = OV.GetParam('user.demo.prefix')
   return PROMPT if p is None else str(p)
+
+
+def _font_size():
+  try:
+    return int(OV.GetParam('user.demo.font_size', FONT_SIZE) or FONT_SIZE)
+  except (TypeError, ValueError) as err:
+    _report("read font_size", err)
+    return FONT_SIZE
 
 _state = {'on': False, 'typed': '', 'serial': 0, 'shown': False, 'notes_font': None,
           'typing': '', 'accel_seen': False, 'keys': False}
@@ -126,16 +134,40 @@ def _file_lines():
     return []
 
 
+# a system font as wxWidgets describes it (as the theme package writes them):
+# version;points;-pixels;0;0;0;weight;italic;0;0;0;3;2;1;34;face
+_SYSTEM_FONT = '1;%d;%d;0;0;0;400;0;0;0;0;3;2;1;34;%s'
+MONOSPACE = {'win': 'Consolas', 'darwin': 'Menlo'}  # anything else: Linux
+
+
+def _font_face():
+  """demo.font: a system font's face name; empty for the platform's
+  monospace font; 'console' for the console's own (Olex2) font."""
+  face = str(OV.GetParam('user.demo.font') or '').strip()
+  if face in ('', 'None'):
+    for key, name in MONOSPACE.items():
+      if sys.platform.startswith(key):
+        return name
+    return 'DejaVu Sans Mono'
+  return face
+
+
 def _use_console_font(on):
-  """The info box in the console's font at demo.font_size, or its own again."""
+  """The info box in demo.font at demo.font_size, or its own font again.
+  olx.SetFont, not the SetFont macro: that splits face names with spaces."""
   try:
     if on:
       if _state['notes_font'] is None:  # not again on a restyle: keep Olex2's own
         _state['notes_font'] = olx.GetFont('Notes')
-      size = int(OV.GetParam('user.demo.font_size', 34) or 34)
-      olex.m('SetFont Notes %s -ps=%i' % (_quoted(olx.GetFont('Default')), size))
+      size = _font_size()
+      face = _font_face()
+      if face.lower() == 'console':
+        # the console's font scaled up (an Olex2 font such as frb_12 is bold)
+        olex.m('SetFont Notes %s -ps=%i' % (_quoted(olx.GetFont('Default')), size))
+      else:
+        olx.SetFont('Notes', _SYSTEM_FONT % (size, -int(round(size * 96 / 72.0)), face))
     elif _state['notes_font']:
-      olex.m('SetFont Notes %s' % _quoted(_state['notes_font']))
+      olx.SetFont('Notes', _state['notes_font'])
       _state['notes_font'] = None
   except (AttributeError, RuntimeError) as err:
     _report("set the info box font", err)
@@ -205,7 +237,13 @@ def restyle():
 # a space in the console font, as a part of its point size (an estimate:
 # Olex2 cannot say how wide a text is)
 SPACE_WIDTH = 0.35
-DESCENDER = ''  # a trailing comma did not help (2026-11-12)
+# Olex2 sizes a line by its ink, so 'demo' and 'ppp' sit at different heights.
+# A '|' reaches above the ascenders and below the descenders: at the end of
+# the padding, past the right edge of the 3D view (OVERSHOOT), it gives every
+# line the same height without being seen.  (A comma, 2026-11-12, did not:
+# it is neither tall nor as deep as a 'p'.)
+DESCENDER = '|'
+OVERSHOOT = 1.3  # the padding reaches this many window widths
 
 
 def _full_width(text):
@@ -216,10 +254,9 @@ def _full_width(text):
   except (AttributeError, RuntimeError, ValueError, IndexError) as err:
     _report("read the window width", err)
     return text
-  size = int(OV.GetParam('user.demo.font_size', 34) or 34) * 96 / 72.0  # points -> px
-  spaces = int(width / (SPACE_WIDTH * size)) - int(len(text) * 0.6)
-  # the box is as tall as the ink: a comma at the far end (past the window's
-  # edge, or small at it) gives every line the same depth below the baseline
+  size = _font_size() * 96 / 72.0  # points -> px
+  spaces = int(OVERSHOOT * width / (SPACE_WIDTH * size)) - int(len(text) * 0.6)
+  # DESCENDER at the far end, off screen: the same line height for every text
   return text + ' ' * max(0, spaces) + DESCENDER
 
 
@@ -228,7 +265,7 @@ def _indent():
   demo font size, so the demo text starts where the console text does."""
   try:
     offset = float(OV.GetParam('gui.console_offset', 10) or 0)
-    size = int(OV.GetParam('user.demo.font_size', 34) or 34) * 96 / 72.0  # points -> px
+    size = _font_size() * 96 / 72.0  # points -> px
     return ' ' * max(0, int(round(offset / (SPACE_WIDTH * size))))
   except (TypeError, ValueError) as err:
     _report("read the console indent", err)
@@ -319,7 +356,7 @@ def on_log(text):
     if not typed and not _state['accel_seen']:  # real shortcut events beat the guess
       key = shortcuts().get(line)
       if key:  # nothing typed, a shortcut's macro ran: show the keys
-        _pending('|%s   %s' % (key, line))
+        _pending('%s%s   %s' % (prefix(), key, line))
         return
 
 
@@ -393,7 +430,10 @@ def _learn_shortcut(line):
 # wxWidgets key codes (wx/defs.h, 3.x) and modifier flags (wxMOD_*)
 WXK_NAMES = {8: 'Backspace', 9: 'Tab', 13: 'Enter', 27: 'Esc', 32: 'Space', 127: 'Del',
              312: 'End', 313: 'Home', 314: 'Left', 315: 'Up', 316: 'Right', 317: 'Down',
-             322: 'Insert', 366: 'PgUp', 367: 'PgDn', 370: 'Enter'}
+             322: 'Insert', 366: 'PageUp', 367: 'PageDown', 370: 'Enter'}
+# keys that change the console's input line (completion, history, cursor):
+# the mirror shows the line again instead of the key's name
+LINE_KEYS = ('Tab', 'Up', 'Down', 'Left', 'Right', 'Home', 'End', 'Del', 'Insert')
 WXK_NAMES.update((340 + i, 'F%i' % (i + 1)) for i in range(24))
 MODIFIERS = ((2, 'Ctrl'), (1, 'Alt'), (4, 'Shift'), (8, 'Win'))
 MODIFIER_NAMES = ('ctrl', 'alt', 'shift', 'cmd', 'win', 'meta')
@@ -449,8 +489,14 @@ def _unknown(kind, arg_str):
   del seen[:-20]
 
 
+LINE = object()  # _pending: show the console's input line as it is then
+
+
 def on_key(arg_str):
-  """The 'onkey' callback: the command line as it is typed."""
+  """The 'onkey' callback: the command line as it is typed.  The mirror
+  shows the console's own input line once Olex2 is idle (show_pending), not
+  a line put together from the keys: keys the console does not insert (PgUp
+  came as ';') would pile up, and Tab completion would be missed."""
   if not _state['on']:
     return ""
   try:
@@ -458,7 +504,7 @@ def on_key(arg_str):
     if kind == 'unknown':
       _unknown('onkey', arg_str)
       return ""
-    line = _state['typing']
+    line = _state['typing']  # kept only for when the input line cannot be read
     if kind == 'char':
       _state['typing'] = line + text
     elif kind == 'edit':
@@ -467,15 +513,25 @@ def on_key(arg_str):
       else:  # Enter: on_log shows the whole command; Esc: dropped
         _state['typing'] = ''
         return ""
+    elif text in LINE_KEYS:
+      pass
     else:
-      _pending('|%s' % text)
+      _pending('%s%s' % (prefix(), text))
       return ""
-    # also when Backspace emptied the line: the bare prompt replaces the last
-    # letter (with no prompt at all, the box is cleared)
-    _pending('%s%s' % (prefix(), _state['typing']))
+    _pending(LINE)
   except Exception as err:
     _report("show the key '%s'" % arg_str, err)
   return ""
+
+
+def _input_line():
+  """The console's input line; the line put together from the keys if Olex2
+  cannot say."""
+  try:
+    return str(olex.f('console.Command()') or '')
+  except Exception as err:
+    _report("read the console's input line", err)
+    return _state['typing']
 
 
 def on_accel(arg_str):
@@ -489,7 +545,7 @@ def on_accel(arg_str):
       _unknown('onaccel', arg_str)
       return ""
     _state['accel_seen'] = True
-    _pending('|%s' % text)
+    _pending('%s%s' % (prefix(), text))
   except Exception as err:
     _report("show the shortcut '%s'" % arg_str, err)
   return ""
@@ -540,6 +596,10 @@ def show_pending():
   text = _state.pop('pending')
   if not _state['on']:
     return
+  if text is LINE:
+    # also when Backspace emptied the line: the bare prompt replaces the last
+    # letter (with no prompt at all, the box is cleared)
+    text = '%s%s' % (prefix(), _input_line())
   if text.strip():
     show(text)
   else:
