@@ -85,6 +85,8 @@ def _structure_hash(cell, atoms, ops):
 def _key(cell, atoms, ops, model, cutoff):
   h = _structure_hash(cell, atoms, ops)
   h.update(("%s %.3f" % (os.path.normcase(os.path.abspath(model)), cutoff)).encode())
+  if _lattice_radius() > 0:  # contacts-only keys stay as before
+    h.update((" lattice %.1f" % _lattice_radius()).encode())
   return h.hexdigest()[:16]
 
 
@@ -131,6 +133,14 @@ def _molecules(cell, atoms, ops):
   return molecules
 
 
+def _lattice_radius():
+  """CE_lattice > 0 (A) adds the molecule-centred lattice sum to the table, 0 the contacts only."""
+  try:
+    return float(nsa2_get_param("CE_lattice") or 0.0)
+  except (TypeError, ValueError):
+    return 0.0
+
+
 def _write_inputs(folder, cell, atoms, ops, cutoff):
   molecules = _molecules(cell, atoms, ops)
   a, b, c = cell[:3]
@@ -144,6 +154,8 @@ def _write_inputs(folder, cell, atoms, ops, cutoff):
       f.write("'%s'\n" % olex_core.MatrixToString(m))
   with open(os.path.join(folder, "job.txt"), "w") as f:
     f.write("cif structure.cif\ncutoff %.3f\noutput interaction_energies.txt\n" % cutoff)
+    if _lattice_radius() > 0:
+      f.write("lattice %.1f\n" % _lattice_radius())
     for i, mol in enumerate(molecules):
       name = "molecule_%d.xyz" % (i + 1)
       with open(os.path.join(folder, name), "w") as x:
@@ -185,6 +197,19 @@ def _cell_dipole(folder):
     for line in f:
       t = line.split()
       if len(t) == 9 and t[:2] == ["#", "cell_dipole"]:
+        return [float(v) for v in t[2:]]
+  return None
+
+
+def _lattice(folder):
+  """R (A), pairs, E_elst E_pol E_disp E_rep E_xc E_total E_total+dE_dip (kJ/mol per molecule), None without a lattice sum."""
+  path = os.path.join(folder, "interaction_energies.txt")
+  if not os.path.exists(path):
+    return None
+  with open(path) as f:
+    for line in f:
+      t = line.split()
+      if len(t) == 11 and t[:2] == ["#", "lattice"]:
         return [float(v) for v in t[2:]]
   return None
 
@@ -400,6 +425,10 @@ def crystal_energies_draw(quiet=False, block=False):
   if d and d[3] > 1e-3:  # zero by symmetry outside polar space groups
     print("  cell dipole %.2f D (%.2f %.2f %.2f), Z=%d, V=%.1f A^3: dE_dip = %.2f kJ/mol per molecule,"
           " the correction from a spherical direct lattice sum to tin-foil (Ewald) boundaries" % (d[3], d[0], d[1], d[2], int(d[4]), d[5], d[6]))
+  L = _lattice(folder)
+  if L:
+    print("  lattice energy within %.1f A (%d pairs, kJ/mol per molecule): E_elst %.2f E_pol %.2f E_disp %.2f E_rep %.2f E_xc %.2f"
+          " E_total %.2f, with dE_dip %.2f" % (L[0], int(L[1]), L[2], L[3], L[4], L[5], L[6], L[7], L[8]))
   olex.m("html.Update")
   return True
 
