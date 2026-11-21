@@ -1,0 +1,2 @@
+# Platon
+Im Menü rechts eine ~Platon~-Routine zum Ausführen wählen. Dazu muss die Software ~Platon~ installiert und die Umgebungsvariable PATH richtig gesetzt sein. Ist ~Platon~ korrekt installiert, erscheint oben in der Olex2-GUI die Schaltfläche **Pton**. Eine genaue Anleitung zur Installation von ~Platon~ für Olex2 steht in **Ilia Guzeis Handbuch**, verlinkt im Bereich **Start**. Wie eine bestimmte ~Platon~-Routine verwendet wird, steht auf der URL[http://www.platonsoft.nl/platon/pl000000.html, Platon-Webseite].
