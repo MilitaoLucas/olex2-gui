@@ -912,6 +912,40 @@ class ImageTools(FontInstances):
     top += round(top * (0.02 * scale))
     return top
 
+  # --- string-independent text placement (gui.theme.fontfiles) -------------
+  @staticmethod
+  def _font_measure(name, font, *args):
+    try:
+      from gui.theme import fontfiles
+      return getattr(fontfiles, name)(font, *args)
+    except Exception as err:
+      print("Font measure %s of %s failed: %s" % (name, getattr(font, 'path', font), err))
+      if hasattr(sys, '_wing_debugger'):
+        raise
+    ascent, descent = font.getmetrics()
+    return {'shift_px': 0, 'fine_px': 0, 'baseline_px': ascent, 'line_px': ascent + descent,
+            'middle_px': ascent / 2}[name]
+
+  def font_fine_px(self, font):
+    """Pixels up from the font's fine adjustment (percent in <stem>.font.json)."""
+    return self._font_measure('fine_px', font)
+
+  def font_shift_px(self, font, text=''):
+    """Pixels text in font is moved up so its capitals sit where Signika's do."""
+    return self._font_measure('shift_px', font, text)
+
+  def baseline_px(self, font):
+    """Drawing point to baseline, the same for every text in font."""
+    return self._font_measure('baseline_px', font)
+
+  def line_px(self, font):
+    """Height of one line of text in font, the same for every text."""
+    return self._font_measure('line_px', font)
+
+  def middle_px(self, font, text=''):
+    """Drawing point to the middle of the capitals: draw at y - middle_px to centre on y."""
+    return self._font_measure('middle_px', font, text)
+
   def get_text_modifications(self):
     if self.translate:
       self.txt = OV.Translate(self.txt.strip())  # #Language
@@ -925,7 +959,8 @@ class ImageTools(FontInstances):
       self.txt_top += self.top_adjust + OV.GetParam('gui.font_top_system_adjust', 0)
       return
     try:
-      letting_width, lettering_height = get_text_size(self.draw, self.txt, font=self.font)
+      # the height of the font, not of this text's ink (descenders made labels jump)
+      lettering_height = self.baseline_px(self.font)
       rel_size = self.valign[1]
       position = self.valign[0]
       self.font_size = int(rel_size * self.image_size[1])
@@ -980,7 +1015,11 @@ class ImageTools(FontInstances):
                          valign=None,
                          translate=True,
                          getXY_only=False,
-                         scale=1):
+                         scale=1,
+                         centre_height=None):
+    """centre_height: the capitals are centred in an image of this height
+    (pixels, as drawn) from the font's own measures; top_left[1] and the old
+    top adjustments are then not used."""
 
     # if max_width < 100:
     #  max_width = OV.GetParam('gui.htmlpanelwidth')
@@ -992,13 +1031,6 @@ class ImageTools(FontInstances):
     self.translate = translate
     self.txt = txt
     self.txt_top = top_left[1]
-    try:  # per-font vertical shift set in the theme designer
-      from gui.theme import fontfiles
-      self.txt_top -= int(round(fontfiles.offset_for_key(font_name) * (self.scale or scale or 1)))
-    except Exception as err:
-      print("Font shift for '%s' not applied: %s" % (font_name, err))
-      if hasattr(sys, '_wing_debugger'):
-        raise
     self.txt_left = top_left[0]
     self.titleCase = titleCase
     self.lowerCase = lowerCase
@@ -1011,12 +1043,21 @@ class ImageTools(FontInstances):
     txt = self.txt = OV.correct_rendered_text(self.txt)
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
+    # capitals where Signika's would be: from the font actually drawn (after a
+    # fallback font was chosen for the text), see gui.theme.fontfiles
+    if centre_height:
+      self.txt_top = int(round(centre_height / 2.0 - self.middle_px(font, txt)
+                               - self.font_fine_px(font)))
+    else:
+      self.txt_top -= int(round(self.font_shift_px(font, txt)))
+    line_height = self.line_px(font)
 
     if txt == "%%":
       txt = "%"
     self.font_colour = font_colour
 
-    self.get_valign_font_modifications()
+    if not centre_height:  # the old per-font top adjustments
+      self.get_valign_font_modifications()
 
     if align == "centre" or align == 'middle':
       self.txt_left = (self.centre_text(draw, txt, font, max_width))
@@ -1070,7 +1111,7 @@ class ImageTools(FontInstances):
         i = 0
         for txt in txt_l:
           left = self.txt_left
-          top_n = self.txt_top + wY * i
+          top_n = self.txt_top + line_height * i
           if '<sub>' in txt:
             t = txt.split('<sub>')
             _ = t[1].split('</sub>')
@@ -1653,7 +1694,7 @@ class ImageTools(FontInstances):
 
       wX, wY = self.textsize(draw, var, font_size, font_name)
       left = (center[0] + math.sin(angle) * rad_width / rad_factor) - wX / 2
-      top = ((center[1] + (math.cos(angle) * -1) * rad_height / 3.2)) - wY / 2
+      top = ((center[1] + (math.cos(angle) * -1) * rad_height / 3.2)) - self.middle_px(font, var)
 
       draw.text((int(left), int(top)), var, font=font, fill=font_colour)
       curr_end = end

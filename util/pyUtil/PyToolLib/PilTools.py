@@ -2695,6 +2695,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       bg_colour = '#229922'
 
     self.font_colour = font_colour
+    # the text is centred from the font's own measures (gui.theme.fontfiles);
+    # the skin's top is used only where a caller places the text itself
+    centre = bool(OV.GetParam('gui.centre_image_text', True)) and not (
+      item_type == 'tinybutton' and e_top_left)
 
 
     if "GB" in IT.gui_language_encoding: #--!--
@@ -2710,7 +2714,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if type_key in timage_blanks[self.params.skin.name]:
         if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
-          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre)
           nam = item
           if outside_name:
             nam = outside_name
@@ -2725,14 +2729,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       #filefullinfo_colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
+      info_top = self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
       
       top = (IT.sys_top_adjust(1, self.scale)) + OV.GetParam('gui.font_top_system_adjust', 0)
       image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
       top -= 1 * self.scale
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
+      # centred above the file path line, not in the whole image
+      title_height = int(info_top) if (centre and info_top) else None
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type, centre=centre, centre_height=title_height)
       if OV.IsDebugging():
         image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type="")
 
@@ -2788,7 +2794,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre)
 
     nam = item
     if outside_name:
@@ -2817,7 +2823,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
 
-  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type):
+  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=False, centre_height=None):
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
     ## be replaced with a space and the parts will be made into title case.
     draw = ImageDraw.Draw(image)
@@ -2862,7 +2868,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             align=halign,
                             max_width=width * self.scale,
                             titleCase=title_case,
-                            font_colour=font_colour)
+                            font_colour=font_colour,
+                            centre_height=(centre_height or image.size[1]) if centre else None)
     return image
 
   def make_timage_border (self, image, weight=1, fill='#ababab'):
@@ -3067,11 +3074,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if txt == "none":
       return
     font = IT.registerFontInstance(font_name, font_size)
-    tw = (get_text_size(draw, txt, font)[0])
-
-    wX, wY  = get_text_size(draw, txt, font)
-    #left_start =  (self.width-wX) - right_margin
-    top = height - wY + IT.sys_top_adjust(-8, self.scale)
+    # by the font's baseline, not this path's ink: a 'g' or 'y' made it jump up
+    top = height - IT.baseline_px(font) + IT.sys_top_adjust(-8, self.scale)
     IT.write_text_to_draw(draw,
                        txt,
                        top_left=(left_start, top),
@@ -3080,6 +3084,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        font_colour=colour,
                        max_width=width
                        )
+    # where this line's capitals start (as drawn, after the font's shift):
+    # the title is centred in the space above it
+    return (top - IT.font_shift_px(font, txt)
+            + 2 * IT.middle_px(font, txt) - IT.baseline_px(font))
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif", max_height=50):
     dr = draw

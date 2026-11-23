@@ -14,6 +14,9 @@ gui
     .type = strings
   font_top_system_adjust = 0
     .type = int
+  centre_image_text = True
+    .type = bool
+    .help = "Centre the text of panel images (tabs, buttons, headers) from the font's own measures, instead of the skin's top values"
   console_offset = 10
     .type = int
     .help = Left indent of the console text in pixels (macro console.offset)
