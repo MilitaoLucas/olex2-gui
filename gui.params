@@ -442,6 +442,9 @@ gui
         .type = str
       arrows = "bar:top:4"
         .type = str
+      gap = 0
+        .type = int
+        .help = "Pixels of panel colour to the right of each tab image, so neighbours do not run together (dark skins)"
 
       off_L = 0.9
         .type = float
@@ -490,6 +493,9 @@ gui
         .type = str
       arrows = "bar:right:26,arrow_right:onup:offdown:hoverdown:hoveronup"
         .type = str
+      gap = 0
+        .type = int
+        .help = "Pixels of panel colour to the right of each Solve/Refine/Draw/Report image, so neighbours do not run together (dark skins)"
       buttonmark = None
         .type = str
 
@@ -515,6 +521,9 @@ gui
       arrow_disc = True
         .type = bool
         .help = "Fill only the disc behind the open/close arrow with the state colour; the rest of the arrow box shows the button background. False: solid square as before."
+      outline = 0.3
+        .type = float
+        .help = "The button outline, 1 screen pixel: the button colour mixed this far towards the font colour (0 = no outline)."
       shadow = False
         .type = bool
       border = 1

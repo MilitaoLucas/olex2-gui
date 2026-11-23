@@ -376,6 +376,10 @@ class Skin():
     # a normal start does not run SetMaterials either; the theme's console and
     # label fonts (theme font files are registered by now, gui.theme import)
     set_gl_fonts()
+    # nor apply_appearance: a dark skin or theme (gui.appearance) left the
+    # native controls light after every restart
+    if OV.HasGUI():
+      apply_appearance()
     OV.registerFunction(self.change_skin)
     OV.registerFunction(self.adjust_font_size_for_ppi, True, 'gui.skin')
     rebuild_stale_gui_images(self)

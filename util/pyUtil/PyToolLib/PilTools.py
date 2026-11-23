@@ -2083,6 +2083,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 #      cut = width - OV.GetParam('gui.timage.cbtn.vline') * self.scale
       cut = width - int(OV.GetParam('gui.timage.cbtn.arrows').split('bar:')[1].split(',')[0].split(':')[1])
 
+      # the arrow part keeps its width; a gap (make_timage) goes to its right
+      cut -= self.image_gap(self.params.timage.cbtn)
       cut = int(cut * IT.dpi_scale)
 
       if cut > width:
@@ -2682,23 +2684,31 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         grad_colour = IT.adjust_colour('#b40000', luminosity = 0.95)
 
     elif item_type =='cbtn':
+      if not font_colour:
+        font_colour = IT.adjust_colour(grad_colour, luminosity = OV.GetParam('gui.timage.font_colour_L'))
+      # outline: one screen pixel (the image is drawn at self.scale), the
+      # button colour mixed towards the text colour, so it shows on light and
+      # dark skins alike (gui.timage.cbtn.outline)
+      outline = OV.GetParam('gui.timage.cbtn.outline', 0.3) or 0
+      border = int(self.scale) if outline > 0 else False
+      border_colour = self.mix_colours(grad_colour, font_colour, outline)
       if state == 'on':
         font_colour = self.highlight_colour
-      else:
-        if not font_colour:
-          font_colour = IT.adjust_colour(grad_colour, luminosity = OV.GetParam('gui.timage.font_colour_L'))
-      border = True
-      border_weight = 1
-      border_colour = IT.adjust_colour(grad_colour, luminosity = 0.8)
       arrow_scale = 0.7 * self.scale
       arrow_scale = self.scale
       bg_colour = '#229922'
 
     self.font_colour = font_colour
+    # gap: the button is drawn this much narrower and the panel colour fills
+    # the rest on the right, so neighbours do not run together (dark skins)
+    gap = self.image_gap(pams)
+    width -= gap
     # the text is centred from the font's own measures (gui.theme.fontfiles);
     # the skin's top is used only where a caller places the text itself
     centre = bool(OV.GetParam('gui.centre_image_text', True)) and not (
       item_type == 'tinybutton' and e_top_left)
+    # a highlight bar on top (tabs) is not part of the space the text sits in
+    centre_top = self.top_bar_px(arrows) * self.scale if centre else 0
 
 
     if "GB" in IT.gui_language_encoding: #--!--
@@ -2714,11 +2724,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if type_key in timage_blanks[self.params.skin.name]:
         if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
-          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre)
+          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre, centre_top=centre_top)
           nam = item
           if outside_name:
             nam = outside_name
-          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s+%s" %(nam,item_type, state))
+          return self.finally_make_image(image=image, width=width + gap, height=height, name = "%s+%s+%s" %(nam,item_type, state))
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2784,6 +2794,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       bg = w[2]
       image = IT.add_whitespace(image, side, weight, bg)
 
+    if gap:
+      image = IT.add_whitespace(image=image, side='right', weight=gap * self.scale, colour=underground)
 
     filename = item
     if item_type == 'snumtitle':
@@ -2794,13 +2806,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=centre, centre_top=centre_top)
 
     nam = item
     if outside_name:
       nam = outside_name
 
-    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s+%s" %(nam,item_type, state))
+    return self.finally_make_image(image=image, width=width + gap, height=height, name = "CACHE %s+%s+%s" %(nam,item_type, state))
 
   def finally_make_image(self, image, width, height, name):
     if "snumtitle" in name:
@@ -2823,7 +2835,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
 
-  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=False, centre_height=None):
+  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type, centre=False, centre_height=None, centre_top=0):
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
     ## be replaced with a space and the parts will be made into title case.
     draw = ImageDraw.Draw(image)
@@ -2869,7 +2881,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             max_width=width * self.scale,
                             titleCase=title_case,
                             font_colour=font_colour,
-                            centre_height=(centre_height or image.size[1]) if centre else None)
+                            centre_height=((centre_height or image.size[1]) - centre_top) if centre else None,
+                            centre_top=centre_top)
     return image
 
   def make_timage_border (self, image, weight=1, fill='#ababab'):
@@ -2947,6 +2960,32 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
+
+  @staticmethod
+  def mix_colours(colour, towards, fraction):
+    """colour moved this fraction of the way to towards (hex or rgb tuples)"""
+    a = IT.HTMLColorToRGB(colour) if isinstance(colour, str) else colour
+    b = IT.HTMLColorToRGB(towards) if isinstance(towards, str) else towards
+    return tuple(int(round(a[i] + (b[i] - a[i]) * fraction)) for i in range(3))
+
+  @staticmethod
+  def image_gap(pams):
+    """gui.timage.<type>.gap: pixels (unscaled) of panel colour right of the button"""
+    try:
+      return max(0, int(getattr(pams, 'gap', 0) or 0))
+    except (TypeError, ValueError):  # a skin with a bad value: no gap, said
+      print("gui.timage.*.gap must be a whole number of pixels")
+      return 0
+
+  @staticmethod
+  def top_bar_px(arrows):
+    """height (unscaled) of a 'bar:top:N' highlight bar, else 0"""
+    if not arrows or 'bar:top' not in arrows:
+      return 0
+    try:
+      return int(arrows.split('bar:top:')[1].split(',')[0].split(':')[0])
+    except (IndexError, ValueError):
+      return 2  # make_arrows' default weight
 
   def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, scale=1.0):
     draw = None

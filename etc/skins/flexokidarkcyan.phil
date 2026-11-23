@@ -78,6 +78,7 @@ gui {
       shadow = False
     }
     tab {
+      gap = 3
       base_colour = #403E3C
       grad_colour = #403E3C
       font_colour = #B7B5AC
@@ -91,6 +92,7 @@ gui {
       shadow = False
     }
     cbtn {
+      gap = 3
       base_colour = #575653
       grad_colour = #343331
       font_colour = #B7B5AC

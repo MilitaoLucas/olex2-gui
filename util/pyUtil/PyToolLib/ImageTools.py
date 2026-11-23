@@ -1016,10 +1016,12 @@ class ImageTools(FontInstances):
                          translate=True,
                          getXY_only=False,
                          scale=1,
-                         centre_height=None):
+                         centre_height=None,
+                         centre_top=0):
     """centre_height: the capitals are centred in an image of this height
     (pixels, as drawn) from the font's own measures; top_left[1] and the old
-    top adjustments are then not used."""
+    top adjustments are then not used. centre_top: that space starts this
+    far down (e.g. below a tab's highlight bar)."""
 
     # if max_width < 100:
     #  max_width = OV.GetParam('gui.htmlpanelwidth')
@@ -1046,7 +1048,8 @@ class ImageTools(FontInstances):
     # capitals where Signika's would be: from the font actually drawn (after a
     # fallback font was chosen for the text), see gui.theme.fontfiles
     if centre_height:
-      self.txt_top = int(round(centre_height / 2.0 - self.middle_px(font, txt)
+      self.txt_top = int(round(centre_top + centre_height / 2.0
+                               - self.middle_px(font, txt)
                                - self.font_fine_px(font)))
     else:
       self.txt_top -= int(round(self.font_shift_px(font, txt)))
