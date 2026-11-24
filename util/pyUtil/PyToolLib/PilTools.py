@@ -801,11 +801,15 @@ class timage(ArgumentParser):
     self.params = OV.GuiParams()
     self.width = IT.skin_width
 
-    timage_blanks.setdefault(self.params.skin.name,{})
+    # The blank backgrounds (make_timage) are keyed by skin name, but a theme
+    # or the designer changes the colours under the same name: themes built on
+    # 'default' got the previous theme's header backgrounds with their own text
+    # colour (CLASSIC after CLASSIC_DARK: dark headers, dark text).  run_timage
+    # runs on every skin load and redraw, so start afresh each time.
+    timage_blanks.clear()
+    timage_blanks[self.params.skin.name] = {}
 
     self.force_images = force_images
-    if force_images:
-      timage_blanks[self.params.skin.name] = {}
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
 
     do_these = []
