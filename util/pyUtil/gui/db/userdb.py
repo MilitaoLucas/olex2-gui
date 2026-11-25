@@ -20,9 +20,28 @@ class UsersDB:
   def setMessage(self, txt=""):
     OV.SetControlLabel(self.ctrl("message"), txt)
 
+  _opened = 0  # Manage() calls this session: each gets a popup of its own
+
   def Manage(self, clear_label=None):
     """The picked person (OK), CLEAR (clear_label button) or None."""
-    w, h = 760, 760
+    # A popup name used before froze Olex2: on the second Manage() of a
+    # session (Submitter, then Operator) ShowModal returned at once and Olex2
+    # then waited modally for the window, which it never showed (seen
+    # 2026-11-25 with a user's database; the hidden window was there).  A new
+    # name each time gives a fresh window; the page refers to itself only
+    # through ~popup_name~ and ~name~.
+    UsersDB._opened += 1
+    self.pop_name = "users-db-%d" % UsersDB._opened
+    # taller than the form needs at 1x, so OK is always in view (people who
+    # could not see it pressed 'Add as new' instead: duplicates); grows with
+    # the GUI scale, never taller than the Olex2 window
+    from gui.theme import scale
+    s = scale.current()
+    w, h = int(760 * s), int(900 * s)
+    try:
+      h = min(h, int(olx.GetWindowSize().split(',')[3]) - 40)
+    except (ValueError, IndexError) as err:
+      print("Users window: Olex2 window size not read: %s" % err)
     x, y = gui.GetBoxPosition(w, h)
     # built in the style of the Help window (form.py), written to OlexFS;
     # it replaces etc/gui/tools/users-db.htm

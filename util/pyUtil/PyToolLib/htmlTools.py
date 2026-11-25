@@ -751,8 +751,27 @@ def reg_command(self, txt):
     s = txt
   return s
 
+MISSING_INPUT_LIGHT = "#FFDCDC"
+
+def missing_input_colour():
+  """Background of an input box that still needs a value: the light pink
+  #FFDCDC on light skins; on dark skins the input background with a share of
+  gui.red mixed in, so the box stays dark and its text readable."""
+  from gui.theme.glcolours import to_hex
+  base = to_hex(OV.GetParam('gui.html.input_bg_colour')) or '#ffffff'
+  r, g, b = (int(base[i:i + 2], 16) for i in (1, 3, 5))
+  if 0.299 * r + 0.587 * g + 0.114 * b >= 128:
+    return MISSING_INPUT_LIGHT
+  red = to_hex(OV.GetParam('gui.red')) or '#ff0000'
+  share = 0.3
+  mixed = [int(round(c * (1 - share) + int(red[i:i + 2], 16) * share))
+           for c, i in zip((r, g, b), (1, 3, 5))]
+  return '#%02x%02x%02x' % tuple(mixed)
+
 def changeBoxColour(ctrl_name,colour):
   if OV.GetControlValue(ctrl_name) in ('?',''):
+    if colour.upper() == MISSING_INPUT_LIGHT:
+      colour = missing_input_colour()
     OV.SetControlBG(ctrl_name,colour)
   else:
     OV.SetControlBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
@@ -774,7 +793,7 @@ OV.registerFunction(switchButton)
 def bgcolor(ctrl_name):
   value = OV.GetControlValue(ctrl_name)
   if value in ('?',''):
-    colour = "#FFDCDC"
+    colour = missing_input_colour()
   else:
     #colour = '#ff0000'
     colour = OV.GetParam('gui.html.input_bg_colour').hexadecimal

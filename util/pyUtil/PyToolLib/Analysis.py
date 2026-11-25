@@ -1792,7 +1792,8 @@ class Graph(ArgumentParser):
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
-    x = self.graph_right - wX - self.bSides + 6 * self.scale
+    # same gap to the box's right edge as the y label has to its top edge (wY/2)
+    x = self.graph_right - wX - wY/2
     y = self.boxY - self.imY * -0.002 * self.scale
 
     # blank out the grid under the label, in the graph's colour like the y label
@@ -2014,15 +2015,23 @@ class Analysis(Graph):
     if olx.GetVar('no_diagnostics_pop', 'False') == 'True':
       return
 
+    # the window is a little larger than the picture (frame allowance below):
+    # give the space around it the picture's own page colour, not the skin's
+    page = self.im.getpixel((0, 0))
+    if isinstance(page, int):
+      page = (page, page, page)
+    page = '#%02x%02x%02x' % tuple(page[:3])
     s = '''
 <html>
-<body>
+<body bgcolor="%s">
+<center>
 <zimg border="0" src="%s.png">
 %s
 </zimg>
+</center>
 </body>
 </html>
-''' %(self.item, self.map_txt)
+''' %(page, self.item, self.map_txt)
     if not htm_location:
       htm_location = "%s.htm" %pop_html
       pop_name = htm_location
@@ -4199,12 +4208,23 @@ class HealthOfStructure():
       import time
       t1 = time.time()
 
+    # The refinement row needs a model; after a reset or a solution there are
+    # no atoms (or only Q-peaks), so show the data row only.
+    has_model = self.has_model()
+    if has_model != getattr(self, '_hos_had_model', None):
+      force = True
+    self._hos_had_model = has_model
+    if not has_model and self.scope == "refinement":
+      self.scope = "hkl"
+
     res = self.initialise_HOS(force=force)
 
     self.hos_text = ""
     if res[0]:
       if OV.GetParam('user.diagnostics.pin_scopes'):
         for scope in self.scopes:
+          if scope == "refinement" and not has_model:
+            continue
           self.scope = scope
           self.summarise_HOS()
           self.make_HOS_html()
@@ -4219,6 +4239,15 @@ class HealthOfStructure():
     self.stats = None
     if timing:
       print("HOS took %.4f seconds" %(time.time() - t1))
+
+  def has_model(self):
+    """True if the loaded structure has at least one atom that is not a Q-peak."""
+    if olx.IsFileLoaded() != 'true':
+      return False
+    for i in range(int(olx.xf.au.GetAtomCount())):
+      if olx.xf.au.IsPeak(i) == "false":
+        return True
+    return False
 
   def get_info_from_hkl_stats(self):
     #hkl_src = olx.HKLSrc() cannot rely purely on HklSrc as the file might have data (as CIF does)
@@ -4797,12 +4826,15 @@ class HealthOfStructure():
     return txt + "</tr></table>"
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    width = self.width
     scale = self.scale
     font_name = OV.GetParam('gui.timage.hos.font_name', None) or "DefaultFont"
     font_size =  round(OV.GetParam('gui.timage.hos.font_size'))
     value_display_extra = ""
-    targetWidth = round(width/n)
+    # gui.timage.hos.gap: the same space between the boxes and below them.  The
+    # table shares what the images leave of the panel width out evenly over
+    # its cells, so boxes that leave n gaps stand one gap apart.
+    gap = self.hos_gap()
+    targetWidth = max(10, (int(IT.skin_width) - n * gap) // n)
     targetHeight = round(OV.GetParam('gui.timage.hos.height'))
 
 
@@ -4836,14 +4868,12 @@ class HealthOfStructure():
     cache_image_large = self.im_cache.get(cache_entry_large,None)
 
     if cache_image and cache_image_large:
-      im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
-      OlexVFS.save_image_to_olex(im, item, 0)
+      OlexVFS.save_image_to_olex(self.hos_finish(cache_image, targetWidth, targetHeight, gap, cache_entry), item, 0)
       return txt
 
     boxWidth = int(targetWidth * scale)
     boxHeight = int(targetHeight * scale)
 
-    bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
 
@@ -5019,15 +5049,27 @@ class HealthOfStructure():
     if self.supplied_cif:
       OlexVFS.save_image_to_olex(IT.add_whitespace(im, 'left', 4*scale, "#ffffff"), "%s_large" %item, 0)
 
-    #if self.image_position != "last":
-      #im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
-
     self.im_cache[cache_entry] = im
-    im = IT.resize_image(im, ((targetWidth),(targetHeight+2)), name=cache_entry)
-
-    OlexVFS.save_image_to_olex(im, item, 0)
+    OlexVFS.save_image_to_olex(self.hos_finish(im, targetWidth, targetHeight, gap, cache_entry), item, 0)
     return txt
+
+  @staticmethod
+  def hos_gap():
+    try:
+      return max(0, int(OV.GetParam('gui.timage.hos.gap', 4)))
+    except (TypeError, ValueError):
+      print("gui.timage.hos.gap must be a whole number of pixels")
+      return 4
+
+  @staticmethod
+  def hos_finish(im, width, height, gap, name):
+    """The box at panel size, the gap below it added after resizing so it is
+    sharp, in the colour the table shows between the boxes."""
+    im = IT.resize_image(im, (width, height), name=name)
+    if gap:
+      im = IT.add_whitespace(im, side='bottom', weight=gap,
+                             colour=OV.GetParam('gui.html.table_bg_colour').hexadecimal)
+    return im
 
   def get_bg_colour(self, item, val):
     return gui.tools.get_diagnostics_colour(self.scope, item, val)

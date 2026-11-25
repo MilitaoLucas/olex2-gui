@@ -63,8 +63,12 @@ def _save():
 
 
 def _literal(value):
+  if value is None:  # phil's 'no value' (buttonmark = None), not the text 'None'
+    return 'None'
   if isinstance(value, (bool, int, float)):
     return str(value)
+  if isinstance(value, (list, tuple)):  # .type = strings
+    return ' '.join(_literal(v) for v in value)
   return "'%s'" % str(value).replace("'", "")
 
 
@@ -100,6 +104,14 @@ def phil_for(skin_name):
 
 def values():
   return dict(_load()['gui'])
+
+
+def value_for(skin_name, key, default=None):
+  """One kept value ('skin.scale'), if the values belong to this skin."""
+  d = _load()
+  if d['skin'] != skin_name:
+    return default
+  return d['gui'].get(key, default)
 
 
 def theme():

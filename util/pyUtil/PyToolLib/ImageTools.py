@@ -1048,9 +1048,15 @@ class ImageTools(FontInstances):
     # capitals where Signika's would be: from the font actually drawn (after a
     # fallback font was chosen for the text), see gui.theme.fontfiles
     if centre_height:
+      # gui.timage.text_nudge: screen pixels up for all centred image text
+      # (set per GUI scale by gui.theme.scale: rounding at 1.25x)
+      try:
+        nudge = float(OV.GetParam('gui.timage.text_nudge', 0) or 0) * float(OV.GetParam('gui.internal_scale', 1) or 1)
+      except (TypeError, ValueError):
+        nudge = 0
       self.txt_top = int(round(centre_top + centre_height / 2.0
                                - self.middle_px(font, txt)
-                               - self.font_fine_px(font)))
+                               - self.font_fine_px(font) - nudge))
     else:
       self.txt_top -= int(round(self.font_shift_px(font, txt)))
     line_height = self.line_px(font)
@@ -1335,7 +1341,7 @@ class ImageTools(FontInstances):
     image.paste(Image.new('RGBA', (size, size), colour), (l, t), mask)
     return image
 
-  def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y=0, char_pos=(0, 0), char_char="+", width=10, align='left', scale=1.0, disc_colour=None):
+  def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y=0, char_pos=(0, 0), char_char="+", width=10, align='left', scale=1.0, disc_colour=None, top_bar=0):
     if align == 'right':
       adval_parameter = OV.GetParam('gui.timage.adval')
       adval = int(round(adval_parameter * scale, 0))
@@ -1425,10 +1431,21 @@ class ImageTools(FontInstances):
 
       mark = self.get_PIL_image_from_olex_VFS('%s_raw.png' % direction)
 
+      # the mark's square: the image height less the pads; under a bar on top
+      # (top_bar, image pixels) its bottom stays and its top sits right under
+      # the bar, the same share of the button at every GUI scale
+      mark_size = int(image.size[1] - (pad*scale*2))
+      if top_bar:
+        bottom = t + mark_size
+        new_size = max(4, int(bottom - top_bar))
+        l += (mark_size - new_size) / 2.0  # same middle across
+        t = bottom - new_size
+        mark_size = new_size
+
       if disc_colour:
         # the ring of the mark is transparent inside and out: the disc gives
         # it its fill, outside the disc the button background stays
-        _ = int(image.size[1] - (pad*scale*2))
+        _ = mark_size
         box = (int(round(l)), int(round(t)), _)
         if mark:
           # the ring is not centred in its sprite cell: fit the disc to the
@@ -1445,7 +1462,7 @@ class ImageTools(FontInstances):
       if mark:
         watermark = True
         if watermark:
-          _ = image.size[1] - (pad*scale*2)
+          _ = mark_size
           mark = mark.resize((_,_), Image.LANCZOS)
           image = self.watermark(image, mark, (int(round(l)), int(round(t))), opacity=1)
         else:

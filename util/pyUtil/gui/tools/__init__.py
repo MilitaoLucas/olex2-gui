@@ -856,7 +856,10 @@ def makeFormulaForsNumInfo():
       bgcolor="%(bgcolor)s"
     >''' % d
 
-  update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>' % (formula_string, refresh_button)
+  # the formula starts where the sNum title's text does (gui.timage.snumtitle.left)
+  indent = int(OV.GetParam('gui.timage.snumtitle.left') or 0)
+  spacer = "<td width='%i'><font size='1'>&nbsp;</font></td>" % indent if indent else ""
+  update = '<table border="0" cellpadding="0" cellspacing="0"><tr>%s<td>%s</td><td>%s</td></tr></table>' % (spacer, formula_string, refresh_button)
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
   fn = "snumformula.htm"
   OV.write_to_olex(fn, update)
@@ -1008,9 +1011,10 @@ def weightGuiDisplay():
       else:
         prec = min(3, max(0, 2 - int(math.floor(math.log10(_curr)))))
 
-      ## Sort out colours, black if upate is disabled
+      ## Sort out colours; no rating if the update is disabled: plain text in
+      ## a colour that reads on the button (was #000000, invisible on dark themes)
       if OV.GetParam('snum.refinement.update_weight') == False:
-        colour = "#000000"
+        colour = plain_text_on(gui_light_grey)
       else:
         if sugg >= curr * (1 - tol_green) and sugg <= curr * (1 + tol_green):
           colour = gui_green
@@ -1047,6 +1051,28 @@ def weightGuiDisplay():
   return weight_display
 
 OV.registerFunction(weightGuiDisplay, True, "gui.tools")
+
+def _luminance(colour):
+  try:
+    r, g, b = colour.rgb[:3]
+  except AttributeError:
+    c = str(colour).lstrip('#')
+    r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
+
+def plain_text_on(bg):
+  """The theme's text colour if it reads on bg, else black or white."""
+  fg = OV.GetParam('gui.html.font_colour')
+  try:
+    lb = _luminance(bg)
+    if abs(_luminance(fg) - lb) >= 0.4:
+      return fg.hexadecimal
+    return '#000000' if lb > 0.5 else '#ffffff'
+  except (ValueError, IndexError, AttributeError, TypeError) as err:
+    print("Weight text colour: %s" % err)
+    if hasattr(sys, '_wing_debugger'):
+      raise
+    return '#000000'
 
 def user_input_weight():
   current_weight = olx.Ins("weight")
@@ -1174,32 +1200,68 @@ def refine_swat():
 
 OV.registerFunction(refine_swat, True, "gui.tools")
 
-def refine_extinction():
+def parse_value_su(text):
+  """'0.00123(5)' -> (0.00123, 0.00005); '12.3' -> (12.3, None); None if no number.
+  The digits in brackets count in units of the value's last decimal."""
+  text = (text or '').strip()
+  value, _, su = text.partition('(')
+  try:
+    v = float(value)
+  except ValueError:
+    return None
+  su = su.rstrip(')').strip()
+  if not su:
+    return v, None
+  decimals = len(value.split('.')[1]) if '.' in value else 0
+  try:
+    return v, int(su) * 10.0 ** -decimals
+  except ValueError:
+    return v, None
 
+def format_value_su(value, su, eng_from=1000.0):
+  """value(su) by the crystallographic rule: the su keeps two digits if they
+  are 19 or less, else one; the value is rounded to the su's last digit.  From
+  eng_from on, engineering notation: the exponent a multiple of 3, the digits
+  in brackets counting in units of the mantissa's last digit (123(2)e3)."""
+  import math
+  if su is None or not (su > 0) or math.isinf(su) or math.isnan(value):
+    if abs(value) >= eng_from:
+      e = 3 * int(math.floor(math.log10(abs(value)) / 3))
+      return '%.4ge%d' % (value / 10.0 ** e, e)
+    return '%g' % value
+  p = int(math.floor(math.log10(su)))
+  n = int(round(su / 10.0 ** (p - 1)))
+  if n <= 19:
+    last = p - 1
+  else:
+    last = p
+    n = int(round(su / 10.0 ** p))  # 2 to 10
+  value = round(value / 10.0 ** last) * 10.0 ** last
+  e = 0
+  if value and abs(value) >= eng_from:
+    e = 3 * int(math.floor(math.log10(abs(value)) / 3))
+  shift = last - e
+  if shift >= 0:
+    txt = '%d(%d)' % (int(round(value / 10.0 ** e)), n * 10 ** shift)
+  else:
+    txt = '%.*f(%d)' % (-shift, value / 10.0 ** e, n)
+  return txt + ('e%d' % e if e else '')
+
+def refine_extinction():
   retVal = ""
   _ = olx.xf.rm.Exti()
 
   if "n/a" not in _.lower() and _ != '0':
-    if "(" in _:
-      _ = _.split('(')
-      exti = _[0]
-      esd = _[1].rstrip(')')
-      exti_f = float(exti)
-      _ = len(exti) - len(esd) - 2
-      esd_f = float("0.%s%s" % (_ * "0", esd))
-    else:
-      exti = _
-      esd = ""
+    parsed = parse_value_su(_)
+    if parsed is None:
+      return _
+    exti, su = parsed
+    if su is None:
       OV.SetParam('snum.refinement.refine_extinction', 1)
       OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-
-    exti = float(exti)
-    if exti > 99:
-      exti = int(exti)
-    if esd:
-      retVal = "%s(%i)" % (exti, int(esd))
-    else:
-      retVal = "%s" % (exti)
+    # ED structures can have very large EXTI values and su's: rounded to the
+    # su, engineering notation from 1000 on (format_value_su)
+    retVal = format_value_su(exti, su)
   else:
     OV.SetParam('snum.refinement.refine_extinction', 0)
     OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
@@ -1269,8 +1331,11 @@ def deal_with_gui_phil(action):
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
-    from gui.theme import overlay
+    # same layers as gui.skin.deal_with_gui_phil: skin, extension, overlay,
+    # scale (each plugin reloads the gui scope through here at start-up)
+    from gui.theme import overlay, scale
     skin_phils.append(overlay.phil_for(skin_name))
+    skin_phils = scale.with_scaled(olx.gui_phil_handler, skin_name, skin_phils)
     olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     olx.gui_phil_handler.save_param_file(
@@ -1518,8 +1583,10 @@ def get_battery_image(colour, colourize=True):
     left = int((width - boxWidth) / 2)
     box = (left, top, boxWidth + left, boxHeight + top)
     draw.rectangle(box, fill=col)
-  new_width = 18
-  new_height = int(im.size[1] / im.size[0] * 20)
+  # gui.battery_width (grows with the GUI scale, gui/theme/scale.py); the
+  # source is drawn a little squat, hence 20/18
+  new_width = max(8, int(OV.GetParam('gui.battery_width', 18) or 18))
+  new_height = int(im.size[1] / im.size[0] * new_width * 20 / 18)
   IM = im.resize((new_width, new_height), Image.LANCZOS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name

@@ -52,23 +52,24 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 </tr>
 #ignoreif -->
 
-<tr align='left'>
-  <table border="0" cellpadding="1" cellspacing="1" align='center' bgcolor=$GetVar(HtmlTableBgColour) width='100%%' >
+<tr align='left'><td>
+  <!-- cell | data/parameter battery | R factors.  The cell takes what it
+       needs (its values do not break), the battery its own size, the R
+       factors the rest; the widths add up to the whole -->
+  <table border="0" cellpadding="1" cellspacing="1" align='center' bgcolor=$GetVar(HtmlTableBgColour) width='100%' >
     <tr bgcolor=$GetVar(HtmlTableBgColour)>
-      <td width='60%'>
+      <td width='60%' valign='middle'>
 $spy.gui.tools.make_cell_dimensions_display()
       </td>
-          
-      <td align='center' width='12%'>
+      <td align='center' valign='middle'>
           $spy.GetDPRInfo()
       </td>
-    
-      <td width='35%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
+      <td width='30%' align='right' valign='middle' bgcolor=$GetVar(HtmlTableBgColour)>
           $spy.GetRInfo()
       </td>
     </tr>
   </table>
-</tr>  
+</td></tr>
 </table>
 </td></tr>
 

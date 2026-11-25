@@ -22,6 +22,9 @@ gui
     .help = Left indent of the console text in pixels (macro console.offset)
   battery_font_adjust = -1
     .type = int
+  battery_width = 18
+    .type = int
+    .help = "Width in pixels of the data/parameter battery next to the cell"
   ppi_font_adjust_amount = -2
     .type = int
   internal_scale = 2
@@ -188,6 +191,9 @@ gui
       .type = bool
     size_factor = 1.0
       .type = float
+    scale = 1.0
+      .type = float
+      .help = "Enlarges the whole GUI: 1.0, 1.25, 1.5, 1.75 or 2.0 (gui/theme/scale.py)"
     clearcolor = 8404992
       .type = int
     icon_size = 30
@@ -323,6 +329,9 @@ gui
       .type = str
     font_size = 12
       .type = int
+    text_nudge = 0
+      .type = float
+      .help = "Screen pixels up for all centred text in the panel images; set per GUI scale (gui/theme/scale.py)"
     adval = 13
       .type = int
     info_size_scale = 4
@@ -349,7 +358,7 @@ gui
         .type = int
       top = 1
         .type = int
-      left = 5
+      left = 8
         .type = int
       bg_colour_L = 1.4
         .type = float
@@ -418,7 +427,7 @@ gui
         .type = colour
       height = 30
         .type = int
-      corner_rad = 3
+      corner_rad = 8
         .type = int
       grad_step = 0.3
         .type = float
@@ -438,10 +447,13 @@ gui
         .type = int
       left = 6
         .type = int
-      rounded = 1100
+      rounded = 0100
         .type = str
       arrows = "bar:top:4"
         .type = str
+      bar_hover_L = 1.15
+        .type = float
+        .help = "The top bar under the mouse: its resting colour times this (tabs and split buttons)"
       gap = 0
         .type = int
         .help = "Pixels of panel colour to the right of each tab image, so neighbours do not run together (dark skins)"
@@ -473,7 +485,7 @@ gui
         .type = colour
       height = 24
         .type = int
-      corner_rad = 2
+      corner_rad = 6
         .type = int
       bg_colour_L = 1.8
         .type = float
@@ -487,7 +499,7 @@ gui
         .type = int
       top = 3
         .type = int
-      left = 4
+      left = 7
         .type = int
       rounded = 0101
         .type = str
@@ -521,7 +533,10 @@ gui
       arrow_disc = True
         .type = bool
         .help = "Fill only the disc behind the open/close arrow with the state colour; the rest of the arrow box shows the button background. False: solid square as before."
-      outline = 0.3
+      style = tab
+        .type = str
+        .help = "arrows: open/close mark on the right part; tab: drawn like the Home/Work tabs (bar on top, their rounded corner); the click areas stay the same"
+      outline = 0
         .type = float
         .help = "The button outline, 1 screen pixel: the button colour mixed this far towards the font colour (0 = no outline)."
       shadow = False
@@ -651,6 +666,9 @@ gui
       font_name = DefaultFont
         .type = str
         .help = "Font of the HOS images, kept apart from the All images font of the theme"
+      gap = 4
+        .type = int
+        .help = "Pixels between the HOS boxes, across and down"
     }
 
     h1{
@@ -674,7 +692,7 @@ gui
         .type = int
       top = 1
         .type = int
-      left = 8
+      left = 11
         .type = int
       bg_colour_L = 1.3
         .type = float
@@ -734,7 +752,7 @@ gui
         .type = int
       top = 1
         .type = int
-      left = 6
+      left = 9
         .type = int
       arrows = "bar:left:4"
         .type = str

@@ -6,7 +6,8 @@ from olexFunctions import OV
 
 def BGColorForValue(value):
   if value == '' or value == '?':
-    return "#FFDCDC"
+    from htmlTools import missing_input_colour
+    return missing_input_colour()
   return OV.GetParam('gui.html.input_bg_colour')
 
 

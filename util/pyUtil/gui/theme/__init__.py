@@ -20,6 +20,8 @@ from . import icons
 from . import snumtitle
 from . import fontfiles
 from . import glcolours
+from . import scale
+from . import themes
 
 # theme font files usable by the console, 3D labels and panel text; before the
 # first skin load sets those fonts
@@ -58,3 +60,7 @@ OV.registerFunction(designer, False, 'gui.theme')
 OV.registerFunction(has_designer, False, 'gui.theme')
 OV.registerFunction(glcolours.text_colours_probe, False, 'gui.theme')
 OV.registerFunction(glcolours.text_colours_update, False, 'gui.theme')
+OV.registerFunction(scale.scale_probe, False, 'gui.theme')
+OV.registerFunction(scale.click_probe, False, 'gui.theme')
+OV.registerFunction(scale.page_profile, False, 'gui.theme')
+themes.register()  # spy.gui.theme.use / look / size / theme_items / has_look

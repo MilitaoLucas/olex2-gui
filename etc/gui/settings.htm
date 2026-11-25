@@ -4,6 +4,46 @@
 
 <!-- #include snippet-quick-bond-properties gui\snippets\snippet-quick-bond-properties.htm;scope=settings;1 -->
 
+<!-- The look of Olex2 (gui/theme/themes.py): a theme with a light and/or a
+dark look, and the size of the whole GUI for this screen.  Works without the
+ThemeBuilder plugin. -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_THEME';help_ext=GUI_Theme;1 -->
+  <td width='23%'>
+    <b>Theme:</b>
+  </td>
+  <td width='37%'>$+
+    html.Snippet("gui/snippets/input-combo", "name=SETTINGS_THEME",
+     "items=spy.gui.theme.theme_items()", "value=spy.gui.theme.current_name()",
+     "onchange=spy.gui.theme.use(html.GetValue('~name~'))>>html.Update")
+   $-</td>
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Light",
+      "onclick=spy.gui.theme.look(light)>>html.Update",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Dark",
+      "onclick=spy.gui.theme.look(dark)>>html.Update",
+    )$-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIZE';help_ext=GUI_Size;1 -->
+  <td width='23%'>
+    <b>Size:</b>
+  </td>
+    $+
+    html.Snippet(GetVar(default_link), "value=1x", "onclick=spy.gui.theme.size(1.0)")$-
+    $+
+    html.Snippet(GetVar(default_link), "value=1.25x", "onclick=spy.gui.theme.size(1.25)")$-
+    $+
+    html.Snippet(GetVar(default_link), "value=1.5x", "onclick=spy.gui.theme.size(1.5)")$-
+    $+
+    html.Snippet(GetVar(default_link), "value=1.75x", "onclick=spy.gui.theme.size(1.75)")$-
+    $+
+    html.Snippet(GetVar(default_link), "value=2x", "onclick=spy.gui.theme.size(2.0)")$-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=Background;1 -->
 
   <td width='23%'>

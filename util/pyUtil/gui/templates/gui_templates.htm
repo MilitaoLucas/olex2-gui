@@ -95,63 +95,54 @@ t:R_factor_display_report{
 }
 
 t:R_factor_display{
-  <table border="0" cellpadding="1" cellspacing="1" align='left' width='100%%'>
+  <!-- inputs: a width in per cent is of the whole panel, not of the cell, so the
+       buttons are sized to their text (fit); the table is only as wide as
+       label and value, so the label sits next to its value -->
+  <table border="0" cellpadding="1" cellspacing="0" align='right'>
   <tr>
-    <td align='left' width="20%%">
+    <td align='left' valign='middle'>
       <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'>
-        <b><i>R</i><sub>1&nbsp;</sub></b>
+        <b><i>R</i><sub>1</sub></b>
       </font>
     </td>
-    <td align='left' width="80%%">
+    <td align='right' valign='middle'>
       <font size='%(font_size_R1)s' color='%(font_colour_R1)s'>
         <b>
         <input
           type='button'
-          align='right'
           bgcolor="GetVar('HtmlTableBgColour')"
           name='R1_GUI'
-          weight='bold'
-          height='26'
-          width='100%%'
+          fit='true'
           flat="#flat"
           value='%(R1)s&thinsp;%%'
           onclick='spy.make_reflection_graph(gui_fobs_fcalc)'
-          border='#ffffff
-          custom="GetVar(R1_button)"
         >
         </b>
       </font>
     </td>
   </tr>
-
   <tr>
-    <td align='left'  width="30%%">
+    <td align='left' valign='middle'>
       <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'>
         <b><i>wR</i><sub>2</sub></b>
       </font>
     </td>
-    <td align='left' width="75%%">
+    <td align='right' valign='middle'>
       <font size='%(font_size_wR2)s' color='%(font_colour_R1)s'>
         <b>
         <input
           type='button'
-          align='right'
           bgcolor="GetVar('HtmlTableBgColour')"
           name='wR2_GUI'
-          weight='bold'
-          height='26'
-          width='100%%'
+          fit='true'
           flat="#flat"
           value='%(wR2)s'
           onclick='spy.make_reflection_graph(gui_fobs_fcalc)'
-          border='#ffffff
-          custom="GetVar(R1_button)"
         >
         </b>
       </font>
     </td>
   </tr>
- 
 </table>
 }
 
@@ -590,35 +581,35 @@ t:snum_cell_display{
   <table border="0" cellpadding="2" cellspacing="2" align='left' width='100%%' >
     <tr bgcolor=$GetVar(HtmlTableGroupBgColour)>
       <td width='33%%'>
-         <b>a </b>= %(a)s
+         <b>a</b>&nbsp;=&nbsp;%(a)s
       </td>
       <td width='33%%'>
-         <b>&alpha; </b>=%(alpha)s&deg;
+         <b>&alpha;</b>&nbsp;=&nbsp;%(alpha)s&deg;
       </td>
       <td width='33%%'>
-         <b>Z </b>= %(Z)s
+         <b>Z</b>&nbsp;=&nbsp;%(Z)s
       </td>
     </tr>
     <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
       <td width='33%%'>
-         <b>b </b>= %(b)s
+         <b>b</b>&nbsp;=&nbsp;%(b)s
       </td>
       <td width='33%%'>
-         <b>&beta; </b>= %(beta)s&deg;
+         <b>&beta;</b>&nbsp;=&nbsp;%(beta)s&deg;
       </td>
       <td width='33%%'>
-         <b>Z' </b>= %(Zprime)s
+         <b>Z'</b>&nbsp;=&nbsp;%(Zprime)s
       </td>
     </tr>
     <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
       <td>
-         <b>c </b>= %(c)s
+         <b>c</b>&nbsp;=&nbsp;%(c)s
       </td>
       <td>
-         <b>&gamma; </b>= %(gamma)s&deg;
+         <b>&gamma;</b>&nbsp;=&nbsp;%(gamma)s&deg;
       </td>
       <td>
-         <b>V </b>= %(volume)s
+         <b>V</b>&nbsp;=&nbsp;%(volume)s
       </td>
     </tr>
  </table> 
@@ -653,7 +644,6 @@ t:battery_gui{
                 name="DPR"
                 value="%(dpr)s"
                 valign="bottom"
-                width="100%%"
                 fit="true"
                 halign="middle"
               >
@@ -668,7 +658,6 @@ t:battery_gui{
                 type="label"
                 value="%(data)s"
                 valign="bottom"
-                width="100%%"
                 fit="true"
                 halign="middle"
               >
@@ -682,7 +671,6 @@ t:battery_gui{
                 type="label"
                 value="%(parameters)s"
                 valign="bottom"
-                width="100%%"
                 fit="true"
                 halign="middle"
               >

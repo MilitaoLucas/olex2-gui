@@ -2550,6 +2550,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #  font_colour = OV.GetParam('gui.html.highlight_colour')
 
     bg_colour = IT.adjust_colour(base_colour, luminosity = pams.bg_colour_L)
+    rest_bg = bg_colour
     if state == "highlight":
       bg_colour = self.params.html.highlight_colour.rgb
 
@@ -2557,6 +2558,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       grad_colour = IT.adjust_colour(base_colour, luminosity = pams.grad_colour_L)
     else:
       grad_colour = grad_colour.rgb
+    # the colours before a state changes them, both as rgb (cbtn style 'tab'
+    # draws its 'highlight' state with them)
+    rest_colours = (grad_colour, rest_bg)
     if font_colour is None:
       font_colour = IT.adjust_colour(base_colour, luminosity = pams.font_colour_L)
     else:
@@ -2588,6 +2592,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       corner_rad = pams.corner_rad
     except:
       corner_rad = 0
+    rounded = None  # gui.timage.<type>.rounded unless a style says otherwise
+    light_kind = item_type  # whose off_L/on_L/hover_L colour the bar
 
     if state == "highlight":
       grad_colour = self.params.html.highlight_colour.rgb
@@ -2701,6 +2707,24 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       arrow_scale = 0.7 * self.scale
       arrow_scale = self.scale
       bg_colour = '#229922'
+      # gui.timage.cbtn.style 'tab': the tabs' bar on top (highlight colour
+      # when the settings are open) and their rounded corner, the open/close
+      # mark of the split button kept on the right part.  The click areas are
+      # cut where they were (make_cbtn_items), so the sizes stay.
+      if OV.GetParam('gui.timage.cbtn.style', 'arrows') == 'tab':
+        marks = ','.join(a for a in (arrows or '').split(',') if not a.startswith('bar:'))
+        arrows = 'bar:top:%i' % (self.top_bar_px(OV.GetParam('gui.timage.tab.arrows')) or 4)
+        if marks:
+          arrows += ',' + marks
+        # the bar stays at rest when the settings are open (the mark shows
+        # that); 'highlight' (a run in progress, gui.theme.runmark) lights
+        # only the bar, not the whole button
+        arrows += ',onrest'
+        if state == 'highlight':
+          grad_colour, bg_colour = rest_colours
+        rounded = OV.GetParam('gui.timage.tab.rounded')
+        corner_rad = OV.GetParam('gui.timage.tab.corner_rad') or corner_rad
+        light_kind = 'tab'
 
     self.font_colour = font_colour
     # gap: the button is drawn this much narrower and the panel colour fills
@@ -2743,7 +2767,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       #filefullinfo_colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      info_top = self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
+      info_top = self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=(OV.GetParam('gui.timage.snumtitle.left') or 5) * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
       
@@ -2765,15 +2789,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image = self.make_buttonmarks(state, width, buttonmark, image, height, base_colour)
 
     if arrows:
-      off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
+      off_L = OV.GetParam('gui.timage.%s.off_L' %light_kind)
 
       if off_L is None:
         off_L = 1.0
-      on_L = OV.GetParam('gui.timage.%s.on_L' %item_type)
+      on_L = OV.GetParam('gui.timage.%s.on_L' %light_kind)
 
       if on_L is None:
         on_L = 1.0
-      hover_L = OV.GetParam('gui.timage.%s.hover_L' %item_type)
+      hover_L = OV.GetParam('gui.timage.%s.hover_L' %light_kind)
 
       if hover_L is None:
         hover_L = 1.0
@@ -2784,7 +2808,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image = self.make_timage_border(image, fill= border_colour, weight = border)
 
     if corner_rad:
-      rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
+      if rounded is None:
+        rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
       if rounded is None: rounded = '1111'
       image = self.make_corners(rounded, image, corner_rad, underground)
 
@@ -3017,6 +3042,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         img = img.resize(nSize, Image.LANCZOS)
         image.paste(img,(0,0))
 
+    # a bar on top (tabs, cbtn style 'tab'): at rest the colour hover used to
+    # have, hover a little lighter (gui.timage.tab.bar_hover_L), the highlight
+    # colour for the chosen tab and while a run is in progress ('highlight');
+    # 'onrest': an open state keeps the resting bar (split buttons)
+    bar_fill = fill
+    if 'bar:top' in arrows:
+      rest = IT.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=hover_L)
+      lighter = IT.adjust_colour(rest, luminosity=OV.GetParam('gui.timage.tab.bar_hover_L', 1.15) or 1.15)
+      onrest = 'onrest' in arrows
+      if state == 'off' or (state == 'on' and onrest):
+        bar_fill = rest
+      elif state == 'hover' or (state == 'hoveron' and onrest):
+        bar_fill = lighter
+      elif state == 'highlight':
+        bar_fill = OV.GetParam('gui.html.highlight_colour').rgb
+
     # cbtn arrows: the state colour only fills the disc behind the ring/arrow
     # mark; outside it the button background shows (gui.timage.cbtn.arrow_disc)
     disc_colour = None
@@ -3031,13 +3072,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       except:
         weight = 2
       #weight = int(round(weight * self.size_factor,0))
-      if side == 'right':
-        sidefill = fill
-      else:
-        sidefill = fill
+      sidefill = bar_fill
       if 'arrow' in arrows and OV.GetParam('gui.timage.cbtn.arrow_disc', False):
-        disc_colour = sidefill
-      else:
+        disc_colour = fill
+      # a bar on top (cbtn style 'tab') is drawn as well as the disc
+      if disc_colour is None or side == 'top':
         image = IT.add_whitespace(image=image, side=side, weight=weight * self.scale, colour = sidefill, overwrite=True)
 
     if 'arrow' in arrows:
@@ -3068,7 +3107,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           fill = IT.adjust_colour(fill,luminosity = 1.6)
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
-      image = IT.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale=scale, disc_colour=disc_colour)
+      top_bar = self.top_bar_px(arrows) * self.scale if 'bar:top' in arrows else 0
+      image = IT.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale=scale, disc_colour=disc_colour, top_bar=top_bar)
 
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)

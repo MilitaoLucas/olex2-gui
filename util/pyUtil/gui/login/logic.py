@@ -146,6 +146,39 @@ def operator_changes(user_id, user_name, operator, contact_name):
   return changes
 
 
+def person_email(conn, person_id):
+  """The person's email as stored for matching ('' if none or no such person)."""
+  if is_empty(person_id):
+    return ''
+  try:
+    row = conn.execute("SELECT email FROM person WHERE id = ?", (int(person_id),)).fetchone()
+  except ValueError:  # not a number
+    return ''
+  return normalise_email(row[0]) if row else ''
+
+
+def resolve_person(conn, person_id, email):
+  """A structure's operator or submitter is kept as a person id (row ids
+  differ between databases) plus that person's email.  Returns (id or None,
+  status):
+    'ok'        the id is that person here
+    'moved'     the id is someone else (or nobody) here; the email found
+                the person under another id, which is returned
+    'missing'   nobody here has the email: None
+    'unchecked' no email kept (set before emails were kept, or the person
+                has none): the id is returned as it is"""
+  email = normalise_email(email)
+  pid = None if is_empty(person_id) else str(person_id).strip()
+  if not email:
+    return pid, 'unchecked'
+  if pid is not None and person_email(conn, pid) == email:
+    return pid, 'ok'
+  found, status = find_user(conn, email)
+  if status == 'found':
+    return str(found), 'moved'
+  return None, 'missing'
+
+
 # <StrDir>/<name>.no_auto_operator: the operator of structure <name> is not
 # filled in automatically (a CIF from elsewhere, or the operator was removed)
 NO_AUTO_MARK = '.no_auto_operator'

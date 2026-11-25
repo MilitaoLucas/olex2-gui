@@ -993,8 +993,14 @@ routines requiring structure refinement
       .type = str
     operator = None
       .type = str
+    operator_email = None
+      .type = str
+      .help = "Email of the operator when set: checks that operator (a person id) means the same person in the people database in use"
     submitter = None
       .type = str
+    submitter_email = None
+      .type = str
+      .help = "Email of the submitter when set, as for operator_email"
     diffractometer = None
       .type = str
     diffractometer_image = ""
@@ -1439,6 +1445,22 @@ programs
 user
   .short_caption = User Specific
   {
+  theme
+    .help = "The look of this Olex2: a theme (etc/themes, Olex2Data/themes), its light or dark look and the size; gui/theme/themes.py"
+  {
+    name = None
+      .type = str
+      .help = "The theme in use, None for the skin alone (as before themes)"
+    look = *light dark
+      .type = choice
+      .help = "The theme's light or dark look"
+    scale = 1.0
+      .type = float
+      .help = "Size of the whole GUI: 1.0, 1.25, 1.5, 1.75 or 2.0; for this screen, not part of a theme"
+    server = None
+      .type = str
+      .help = "Where themes are downloaded from: a folder on the web with olex2-themes.json and the theme zips; None = the OlexSys theme server"
+  }
   icon_set = *classic flat
     .type = choice
     .help = Toolbar and button icons: the original hand-drawn set or the new flat set painted in the skin colours (etc/gui/images/src/icons).
@@ -1561,6 +1583,9 @@ user
     .expert_level = 1
   start_where = home
     .type = str
+  language = None
+    .type = str
+    .help = "GUI language, a column of dictionary.txt (None: as Olex2 starts)"
   remember_last = True
     .type = bool
   report_style = styles/default.css

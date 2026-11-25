@@ -122,6 +122,30 @@ class LoginTest(unittest.TestCase):
                      ['abc', 'abc_sq'])
     self.assertEqual(logic.external_cif_names(['abc', None], ['abc.cif']), ['abc'])
 
+  # people 1: horst@olexsys.org, 2 and 3: twin@x.org, 4: no email
+  def test_person_kept_with_matching_email(self):
+    self.assertEqual(logic.resolve_person(self.conn, '1', 'HORST@olexsys.org'), ('1', 'ok'))
+
+  def test_id_from_another_database_is_followed_by_email(self):
+    # stored as 4 elsewhere, here person 4 is someone else; the email finds 1
+    self.assertEqual(logic.resolve_person(self.conn, '4', 'horst@olexsys.org'), ('1', 'moved'))
+    self.assertEqual(logic.resolve_person(self.conn, '99', 'horst@olexsys.org'), ('1', 'moved'))
+
+  def test_person_not_in_this_database(self):
+    self.assertEqual(logic.resolve_person(self.conn, '1', 'gone@x.org'), (None, 'missing'))
+    # an email shared by several people picks nobody
+    self.assertEqual(logic.resolve_person(self.conn, '9', 'twin@x.org'), (None, 'missing'))
+
+  def test_without_email_the_id_stays(self):
+    self.assertEqual(logic.resolve_person(self.conn, '4', None), ('4', 'unchecked'))
+    self.assertEqual(logic.resolve_person(self.conn, '?', ''), (None, 'unchecked'))
+
+  def test_person_email(self):
+    self.assertEqual(logic.person_email(self.conn, 1), 'horst@olexsys.org')
+    self.assertEqual(logic.person_email(self.conn, 4), '')
+    self.assertEqual(logic.person_email(self.conn, 'x'), '')
+    self.assertEqual(logic.person_email(self.conn, None), '')
+
   def test_cif_with_model_is_not_external(self):
     self.assertEqual(logic.external_cif_names(['abc', 'blk'], ['abc.cif', 'ABC.RES']), [])
     self.assertEqual(logic.external_cif_names(['abc', 'blk'], ['abc.cif', 'blk.ins']), [])

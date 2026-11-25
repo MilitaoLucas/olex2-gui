@@ -208,6 +208,19 @@ def rebuild_stale_gui_images(skin):
   if OlexVFS.read_from_olex('gui_image_key.txt') != gui_image_key.encode():
     skin.change_skin(OV.GetParam('gui.skin.name', 'default'), internal_change=True)
 
+def store_gui_image_key():
+  # The images in global.odb are now drawn from the current skin, scale and
+  # width: record that, not the key worked out at start-up, or the next start
+  # compares against what the images were BEFORE this change (gui/theme/scale.py)
+  global gui_image_key
+  if gui_image_key is None or not OV.HasGUI():
+    return
+  from gui.tools import _timage_key
+  IT.get_available_width()
+  gui_image_key = _timage_key('global.odb', '%s %s' % (IT.skin_width, IT.skin_width_table)) or ''
+  if gui_image_key:
+    OlexVFS.write_to_olex('gui_image_key.txt', gui_image_key, 2)
+
 def check_for_first_run():
   import olexex
   first_run = not os.path.exists("%s/global.odb" % OV.DataDir())
@@ -250,8 +263,9 @@ def deal_with_gui_phil(action):
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
-    from gui.theme import overlay
+    from gui.theme import overlay, scale
     skin_phils.append(overlay.phil_for(skin_name))
+    skin_phils = scale.with_scaled(olx.gui_phil_handler, skin_name, skin_phils)
     olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     gui_phil_path = "%s/gui.phil" % (OV.DataDir())
@@ -373,6 +387,10 @@ class Skin():
     # normal start does not go through change_skin, so re-read them here too
     from gui.theme import live
     live.skin_loaded()
+    # Solve/Refine show a run in progress on their top bar (cbtn style 'tab');
+    # registered here, late, so gui.theme does not pull RunPrg in at import
+    from gui.theme import runmark
+    runmark.register()
     # a normal start does not run SetMaterials either; the theme's console and
     # label fonts (theme font files are registered by now, gui.theme import)
     set_gl_fonts()
@@ -483,6 +501,7 @@ class Skin():
 
     export_parameters(load_phil=False)
     deal_with_gui_phil('save')
+    store_gui_image_key()
 
     if olx.IsFileLoaded() =='true':
       olex.m("spy.make_HOS()")

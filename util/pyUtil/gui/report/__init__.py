@@ -21,7 +21,8 @@ affiliation_box_created = False
 
 def BGColorForValue(value):
   if value == '' or value == '?':
-    return "#FFDCDC"
+    from htmlTools import missing_input_colour
+    return missing_input_colour()
   return OV.GetParam('gui.html.input_bg_colour')
 
 
@@ -38,11 +39,11 @@ class publication:
       role = param.rsplit('.', 1)[-1] if param else None
       person = userdb.db.Manage(clear_label="Remove %s" % role if role else None)
       new=True
+    from gui import login
     if person == userdb.db.CLEAR:
       OV.SetControlValue(box, '?')
-      OV.SetParam(param, None)
+      login.remember_person(param, None)  # the id and its email
       if param == 'snum.report.operator':
-        from gui import login
         login.stop_auto_operator()
       return None
     if person:
@@ -50,7 +51,9 @@ class publication:
       if new:
         OV.SetControlValue(box, rv)
       if param:
-        OV.SetParam(param, person.id)
+        # with the person's email: the id alone means someone else in
+        # another people database
+        login.remember_person(param, person.id)
       return rv
     return None
 
