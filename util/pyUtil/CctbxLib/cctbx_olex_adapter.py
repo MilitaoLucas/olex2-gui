@@ -366,6 +366,17 @@ class OlexCctbxAdapter(object):
         resonant_table = "custom"
       self._xray_structure.set_custom_inelastic_form_factors(
         custom_fp_fdps, source=resonant_table)
+      # no table goes past U, so f'/f'' beyond it are extrapolated unless DISP gives them
+      from cctbx.eltbx import tiny_pse
+      user_disp = set(k[0].upper() + k[1:].lower() for k in (sfac or {}))
+      beyond_u = set()
+      for t in custom_fp_fdps:
+        el = ''.join(c for c in t if c.isalpha())
+        if null_disp or el in user_disp: continue
+        try:
+          if tiny_pse.table(el).atomic_number() > 92: beyond_u.add(el)
+        except Exception: pass
+      OV.SetVar('olex2.disp_beyond_u', ', '.join(sorted(beyond_u)))
       if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
         if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
           custom_gaussians = {}
@@ -3343,8 +3354,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         return None
     return None
 
-# ponytail: the renderer's cartoon_auto_residues default, which Python cannot
-# read; a user who changes that option does not move this gate
+# ponytail: fixed size gate for the FFT mask f_calc in 'auto', not tied to any
+# renderer option; tune it if small proteins prove faster with fft
 mask_fft_min_residues = 30
 
 

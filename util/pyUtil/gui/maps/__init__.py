@@ -121,6 +121,7 @@ class MapUtil:
       OV.SetVar('olex2.map_type', 'eden')
 
       NoSpherA2 = OV.IsNoSpherA2()
+      OV.SetVar('olex2.map_cctbx', False)
       # override for ED refinement, people still can use kinematic maps from the GUI
       if OV.IsEDData():
         map_source = "cctbx"
@@ -132,14 +133,19 @@ class MapUtil:
           print("NoSpherA2 maps only possible with .fcf or cctbx")
           print("WARNING: Switching to cctbx maps!")
           OV.SetParam("snum.map.source", "cctbx")
+          OV.SetVar('olex2.map_cctbx', True)
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
         else:
           olex.m(cf_cmd)
       else:
         if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
+          OV.SetVar('olex2.map_cctbx', True)
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
         else:
           olex.m(cf_cmd)
+      if OV.GetVar('olex2.map_cctbx') and OV.GetVar('olex2.disp_beyond_u', ''):
+        print("WARNING: no DISP (f', f'') for %s, the cctbx map is unreliable there"
+              % OV.GetVar('olex2.disp_beyond_u'))
 
     self.SetXgridView(True)
 
@@ -294,6 +300,18 @@ class MapUtil:
     OV.SetParam('snum.xgrid.scale', _)
     olx.SetVar('snum.xgrid.scale', _)
     olx.SetVar('map_value', map_value)
+
+def disp_warning():
+  """red row under the HOS while a cctbx map of a structure past U is shown"""
+  els = OV.GetVar('olex2.disp_beyond_u', '')
+  if not els or not OV.GetVar('olex2.map_cctbx', False) or olx.xgrid.Visible() != 'true' \
+     or OV.GetVar('olex2.map_type') != 'eden':
+    return ""
+  return ("<tr><td bgcolor='%s' align='center'><font color='#ffffff' size='+1'><b>"
+          "DISP (f', f'') could not be calculated for %s</b></font><br><font color='#ffffff'>"
+          "no table goes beyond U, so this cctbx map is unreliable around these atoms</font>"
+          "</td></tr>" % (OV.GetVar('gui.red', '#ff0000'), els))
+OV.registerFunction(disp_warning, False, "gui.maps")
 
 if OV.HasGUI():
   mu = MapUtil()
