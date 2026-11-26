@@ -294,8 +294,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
         if _ == "Platon":
           olex.m("spy.OlexPlaton(q,.ins)")
-          self.f_mask = self.load_mask()
+          # Platon writes <name>_sq.fab; move it to <name>.fab BEFORE loading,
+          # otherwise load_mask reads the previous mask (or an Olex2 one)
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
+          self.f_mask = self.load_mask()
           if not self.f_mask:
             self.failure = True
             return

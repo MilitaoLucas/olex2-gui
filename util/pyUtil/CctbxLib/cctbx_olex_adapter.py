@@ -772,6 +772,8 @@ class OlexCctbxAdapter(object):
     indices = []
     data = []
     fab_path = f"{_}.fab"
+    # put prg's kept mask in place if the active .fab is the other program's
+    gui.tools.GetMaskInfo.select_fab(prg)
     if os.path.exists(fab_path):
       OV.SetVar('masking_dte', time.ctime(os.path.getmtime(fab_path)))
       OV.SetVar('masking_src', os.path.basename(fab_path))
@@ -977,6 +979,9 @@ def write_fab(f_mask, fab_path=None, f_calc_kind=None, held_out=None):
   held_out: held_out_fingerprint() of the reflections left out of the mask's Fo. """
   if not fab_path:
     fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+    # the active .fab may hold the other program's mask: keep it (GetMaskInfo)
+    import gui
+    gui.tools.GetMaskInfo.keep_active_fab()
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)

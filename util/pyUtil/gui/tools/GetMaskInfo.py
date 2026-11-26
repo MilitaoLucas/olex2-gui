@@ -885,32 +885,78 @@ def escape_param_names(name):
   return name
 
 
-def get_hkl_base(path):
-  # strip the extension and any PLATON suffix (_sq / _sqd)
-  base, ext = os.path.splitext(path)
-  return re.sub(r"_sqd?$", "", base)
+## The active mask is always <HKLSrc base>.fab: load_mask reads it, write_fab
+## writes it and Platon's <base>_sq.fab is moved there. Olex2 and Platon share
+## that one file, so each program's last mask is also kept as
+## <base>_olex2.fab / <base>_platon.fab and swapped back in when the program is
+## chosen again - otherwise switching with "recompute" off overwrote the other
+## program's mask and the next switch had to recompute it.
+## The base is the HKLSrc name as it is: never strip a trailing _sq. When the
+## data file itself is X_sq.hkl (e.g. extracted from a CIF), X_sq.fab is the
+## active mask and X_sq.hkl the data, and Platon's output is X_sq_sq.*.
+
+def _fab_paths():
+  base = os.path.splitext(OV.HKLSrc())[0]
+  return base + ".fab", {"Olex2": base + "_olex2.fab", "Platon": base + "_platon.fab"}
+
+
+def _fab_origin(path):
+  """ 'Platon', 'Olex2', or None when there is no such file """
+  if not os.path.exists(path):
+    return None
+  with open(path) as f:
+    return "Platon" if "_platon_squeeze" in f.read() else "Olex2"
+
+
+def keep_active_fab():
+  """ Copy the active .fab to its program's kept copy; call before overwriting it. """
+  active, kept = _fab_paths()
+  origin = _fab_origin(active)
+  if origin:
+    shutil.copy2(active, kept[origin])
+
+
+def select_fab(prg):
+  """ Make the active .fab prg's mask, from its kept copy if need be. The active
+  one is kept first, so nothing is lost. True when the active .fab is now prg's. """
+  active, kept = _fab_paths()
+  origin = _fab_origin(active)
+  if origin == prg:
+    return True
+  if origin:
+    shutil.copy2(active, kept[origin])
+  if os.path.exists(kept.get(prg, "")):
+    shutil.copy2(kept[prg], active)
+    if debug:
+      print(f"-- {os.path.basename(kept[prg])} -> {os.path.basename(active)}")
+    return True
+  return False
 
 
 def change_hklsrc_according_to_mask_prg(prg, where='internal'):
   OV.SetParam('snum.refinement.recompute_mask_before_refinement_prg', prg)
-  target = ""
   OV.SetVar('current_mask_sqf', "")
-  hkl_base = get_hkl_base(OV.HKLSrc())
-  dst = hkl_base + ".fab"
+  hkl_src = OV.HKLSrc()
+  hkl_base = os.path.splitext(hkl_src)[0]
+  active, kept = _fab_paths()
   if prg == "Platon":
     src = hkl_base + "_sq.fab"
     if os.path.exists(src):
-      shutil.move(src, dst)
-      tidy_l = ["_sqd.hkl", "_sq.hkl"] #,  "_sqd.ins", "_sq.ins", "_pl.spf"]
-      for f in tidy_l:
-        if os.path.exists(hkl_base + f):
-          os.remove(hkl_base + f)
-    else:
-      if where == "internal":
-        import olexex
-        print("There is no masking file. Has the masking routine failed?")
-        olexex.SetMasking(False)
-        return
+      # a fresh Platon run
+      keep_active_fab()
+      shutil.move(src, active)
+      for f in ("_sqd.hkl", "_sq.hkl"):
+        p = hkl_base + f
+        same = os.path.normcase(os.path.abspath(p)) == os.path.normcase(os.path.abspath(hkl_src))
+        if os.path.exists(p) and not same:
+          os.remove(p)
+  have_mask = select_fab(prg)
+  if prg == "Platon" and not have_mask and where == "internal":
+    # only called internally right after Platon has run
+    import olexex
+    print("There is no masking file. Has the masking routine failed?")
+    olexex.SetMasking(False)
+    return
   get_mask_info()
   OV.UpdateHtml(force=True)
 
