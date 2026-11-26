@@ -407,6 +407,17 @@ class initpy_funcs():
     sys.stdout = StreamRedirection(sys.stdout, self.basedir, self.datadir, True)
     sys.stderr = StreamRedirection(sys.stderr, self.basedir, self.datadir,
       'OLEX_DBG_NO_STDERR_REDIRECTION' not in os.environ)
+    # Python warnings as Olex2 warning lines instead of a file:line + source
+    # dump on stderr; cctbx's (dropped restraints, atoms a table does not
+    # cover) every time, not once per session
+    import warnings
+    warnings.filterwarnings("always", module=r"(cctbx|smtbx|iotbx)\.")
+    def show_warning(message, category, filename, lineno, file=None, line=None):
+      try:
+        self.olx.Echo("%s: %s" % (category.__name__, message), m="warning")
+      except Exception:
+        print("%s: %s" % (category.__name__, message))
+    warnings.showwarning = show_warning
 
   def import_gui(self):
     self.olx.stopwatch.exec("from gui.tools import *")
