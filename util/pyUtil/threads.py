@@ -19,9 +19,11 @@ class ThreadRegistry:
   def joinAll(self):
     for th in ThreadRegistry.threads:
       try:
-        if th.instance: th.instance.join(1)
+        # registered threads may never have been started
         if th.instance and th.instance.is_alive():
-          th.instance.force_exit()
+          th.instance.join(1)
+          if th.instance.is_alive():
+            th.instance.force_exit()
       except Exception as e:
         print(e)
         pass
