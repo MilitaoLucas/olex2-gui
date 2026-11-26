@@ -734,14 +734,24 @@ class FontInstances(ArgumentParser):
     srcs = entry.get("font_src") or (font_name,)
     for src in srcs:
       try:
-        fontInstance = ImageFont.truetype(self.find_font(src) or src, font_size,
-                                          encoding=encoding)
+        fontInstance = _truetype(self.find_font(src) or src, font_size, encoding)
         break
       except (IOError, OSError, ValueError):
         continue  # not installed or not readable: try the next one
     if fontInstance is None:
       self.report_missing_font(font_name)
       failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
-      fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
+      fontInstance = _truetype(failsafe, font_size, encoding)
     instances[font_size] = fontInstance
     return fontInstance
+
+
+def _truetype(path, font_size, encoding):
+  """ImageFont.truetype; Pillow before 10.1 (dev Python 3.8 has 7.1.2) takes
+  whole-number sizes only, so a size such as 10 * 1.5 is rounded there."""
+  try:
+    return ImageFont.truetype(path, font_size, encoding=encoding)
+  except TypeError:
+    if isinstance(font_size, int):
+      raise
+    return ImageFont.truetype(path, int(round(font_size)), encoding=encoding)

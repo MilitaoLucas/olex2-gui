@@ -1228,15 +1228,18 @@ class ImageTools(FontInstances):
     if not font_size: font_size = self.font_size
     self.top_adjust = 0
     self.rel_adjust = 0
+    font = None
     try:
-      font = self.fonts[font_name]["fontInstance"].get(font_size, None)
+      font = self.fonts.get(font_name, {}).get("fontInstance", {}).get(font_size, None)
       if not font:
         font = self.registerFontInstance(font_name, font_size)
       if self.font_peculiarities.get(font_name):
         self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust', 0) + system_top_adjust
         self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust', 0) + system_top_adjust
-    except:
-      pass
+    except Exception as err:
+      print("Font %s at size %s could not be loaded: %s" % (font_name, font_size, err))
+      if hasattr(sys, '_wing_debugger'):
+        raise
     self.font = font
     return font
 
