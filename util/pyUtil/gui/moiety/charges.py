@@ -318,6 +318,12 @@ ELEMENT_CHARGES: dict[str, list[int]] = {
     'Sm':  [+3, +2],
     'Yb':  [+3, +2],
     'Tb':  [+3, +4],
+    # Actinides
+    'Th':  [+4],
+    'U':   [+6, +4],
+    'Np':  [+5, +6, +4],
+    'Pu':  [+4, +6, +3],
+    'Am':  [+3],
 }
 
 # Formulae that are definitely neutral but not solvents
@@ -444,7 +450,8 @@ _METALS = {
     'Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg',      # 5d transition
     'La','Ce','Pr','Nd','Pm','Sm','Eu','Gd',          # lanthanides
     'Tb','Dy','Ho','Er','Tm','Yb','Lu',
-    'Th','U',                                          # actinides
+    'Ac','Th','Pa','U','Np','Pu','Am','Cm',          # actinides
+    'Bk','Cf',
 }
 
 # Known ionic species (single elements or simple formulae always charged)
