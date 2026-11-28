@@ -1432,6 +1432,28 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     rv.append(float(cif_block['_diffrn_radiation_wavelength']))
     return rv
 
+  def FindPhil(self, name):
+    def full_name(obj):
+      path = [obj.name]
+      p = obj.primary_parent_scope
+      while p and p.name:
+        path.append(p.name)
+        p = p.primary_parent_scope
+      path.reverse()
+      return '.'.join(path)
+    def rec_find(scope, name):
+      for o in scope.objects:
+        if name in o.name.lower():
+          print(full_name(o))
+        if hasattr(o, "objects"):
+          rec_find(o, name)
+    try:
+      rec_find(olx.phil_handler.master_phil, name.lower())
+      rec_find(olx.gui_phil_handler.master_phil, name.lower())
+    except:
+      print("Failed to avaluate root entry")
+    pass
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
@@ -1541,3 +1563,4 @@ OV.registerFunction(OV.GetHeaderParamBool)
 OV.registerFunction(OV.SetHeaderParam)
 OV.registerFunction(OV.get_sNum_and_path)
 OV.registerFunction(OV.ListParts)
+OV.registerFunction(OV.FindPhil)
